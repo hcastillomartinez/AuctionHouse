@@ -11,6 +11,11 @@ public class Item{
         this.price=price;
     }
 
+    @Override
+    public String toString(){
+        return "item: "+itemName+" Price: "+price+"\n";
+    }
+
     public String getItemName(){
         return itemName;
     }

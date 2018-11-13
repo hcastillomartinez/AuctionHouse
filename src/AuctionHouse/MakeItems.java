@@ -11,21 +11,23 @@ public class MakeItems {
     private List<Furniture> furnitureList= Arrays.asList(Furniture.values());
     private String[] colors={"black","red","blue","orange"};
 
-    private MakeItems(){
+    public MakeItems(){
         items=new ArrayList<>();
     }
 
-    public List<Item> getItems(){
-        makeList();
+    public List<Item> getFurnitureItems(){
+        makeFurnitureList();
         return items;
     }
-    private void makeList(){
+
+    private void makeFurnitureList(){
         for(Furniture furniture:furnitureList){
             for(String c:colors){
-                items.add(new Item(furniture.toString()+" "+c, randPrice()));
+                items.add(new Item(c+" "+furniture.toString(), randPrice()));
             }
         }
     }
+
     private int randPrice(){
         Random rand =new Random();
         return rand.nextInt((200-50)+1)+50;
