@@ -28,15 +28,15 @@ terminates and closes the account when no bidding action is in progress
     will have to
  */
 
-    private int id, accountBalance, pendingBalance;
-    private long key, accountNumber;
+    private int id, key, accountBalance, pendingBalance;
+    private long accountNumber;
 
     /**
      * Constructor for the Agent.
      * @param id Unique id for the agent.
      * @param key Unique key from the bank used for making bids.
      */
-    public Agent(int id, int accountBalance, long key, long accountNumber) {
+    public Agent(int id, int accountBalance, int key, long accountNumber) {
         this.id = id;
         this.accountBalance = accountBalance;
         this.key = key;
@@ -50,6 +50,8 @@ terminates and closes the account when no bidding action is in progress
     public void run() {
 
     }
+
+    //TODO
 
     /**
      * Making a bid to an auction house.
