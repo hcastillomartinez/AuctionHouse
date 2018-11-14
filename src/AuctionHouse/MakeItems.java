@@ -16,9 +16,12 @@ public class MakeItems {
     }
 
     /**
-     *Returns list
-     * @param typeID
-     * @return
+     *Returns a list based on the parameter. One
+     * of three type of item list are created with
+     * each call. 1 for furniture,2 for tech, and anything
+     * else for cars.
+     * @param typeID An int
+     * @return A List
      */
     public List<Item> getItems(int typeID){
         if(typeID==1){
@@ -35,10 +38,17 @@ public class MakeItems {
         }
     }
 
+    /**
+     * Gets the type of item in the List.
+     * @return A String
+     */
     public String getListType(){
         return items.get(0).getType();
     }
 
+    /**
+     * Makes a List with car items.
+     */
     private void makeCarList(){
         List<Car> carList=Arrays.asList(Car.values());
         for(Car car: carList){
@@ -47,6 +57,10 @@ public class MakeItems {
             }
         }
     }
+
+    /**
+     * Makes a List with furniture items.
+     */
     private void makeFurnitureList(){
         List<Furniture> furnitureList= Arrays.asList(Furniture.values());
         for(Furniture furniture:furnitureList){
@@ -56,6 +70,9 @@ public class MakeItems {
         }
     }
 
+    /**
+     * Makes a List with tech items.
+     */
     private void makeTechList(){
         List<Tech> techList=Arrays.asList(Tech.values());
         for(Tech tech:techList){
@@ -65,6 +82,13 @@ public class MakeItems {
         }
     }
 
+    /**
+     * Makes a random price based on the parameters
+     * then returns it.
+     * @param max An int
+     * @param min An int
+     * @return An int
+     */
     private int randPrice(int max,int min){
         Random rand =new Random();
         return rand.nextInt((max-min)+1)+min;
