@@ -34,6 +34,7 @@ public class Bank implements Runnable{
 
 
     we need to create the bank first
+    the bank is a server
     */
 
     public static void main(String[] args){
@@ -71,6 +72,10 @@ public class Bank implements Runnable{
     }
 
     //todo
+
+    /**
+     * Creates an account for an agent and adds it to the list of agents.
+     */
 
     /**
      * Gets list of auction houses for a agent.
