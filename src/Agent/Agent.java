@@ -1,7 +1,8 @@
 package Agent;
 
-import AuctionHouse.AuctionHouse;
-import Bank.Bank;
+import AuctionHouse.AuctionProxy;
+import Proxies.AuctionHouseProxy;
+import Proxies.BankProxy;
 
 /**
  * Agent.java is the class that bids on objects inside the auction house.
@@ -51,6 +52,8 @@ public class Agent implements Runnable {
     -------------------Design---------------------
     For the bank get the ip address of the machine running on and use that
     for the server constructor arg
+
+    Think about how protocols should be designed and implemented
     
     User commands
         - bids
@@ -73,6 +76,9 @@ public class Agent implements Runnable {
     Bank Proxy
         -> Communication Server (will hide all the socket communication and will
                                  send the message to the desired location)
+
+
+    { -> = reference to object }
      
  */
 
@@ -85,7 +91,7 @@ public class Agent implements Runnable {
      * Constructor for the Agent.
      */
     public Agent() {
-        auctionHouseProxy = new AuctionHouseProxy(2);
+        auctionHouseProxy = new AuctionHouseProxy();
         bankProxy = new BankProxy();
     }
 
@@ -111,28 +117,37 @@ public class Agent implements Runnable {
      * Making a bid to an auction house.
      */
     private void makeBid(int bidAmount) {
-//        auctionHouseProxy.placeBid();
+
     }
 
     /**
      * Set chosen auction house from the bank.
      */
     private void setAuctionHouse() {
-//        autionHouse = bankProxy.choosenHouse();
+
     }
     
     /**
      * Get Auction houses from the bank list
      */
+    private void getAuctionHouses() {
+
+    }
 
     /**
      * Get items from the auction house that can be bid on.
      */
+    private void getItems() {
+
+    }
     
 
     /**
      * Gets a key from the bank on a per auction house basis.
      */
+    private void getKey() {
+
+    }
     
     /**
      * Getting and setting the new account information from the bank.
