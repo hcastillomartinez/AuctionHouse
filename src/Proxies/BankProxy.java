@@ -1,9 +1,9 @@
-package Agent;
+package Proxies;
 
 import Bank.Bank;
 
 /**
- * BankProxy.java is the class that is the mediary between the Bank and the
+ * Proxies.BankProxy.java is the class that is the mediary between the Bank and the
  * Agent. The class provides higher level functionality to interact with the
  * bank.
  */
