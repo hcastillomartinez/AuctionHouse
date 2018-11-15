@@ -14,8 +14,10 @@ public class Bank implements Runnable{
     private ArrayList<AuctionHouse> auctionHouses; //list of auction house accounts
     private ArrayList<Account> accounts;
     private int currentAccountNumber = 0;
+    private String address;
+    private int portNumber;
 
-    /*
+    /**
     It is static and at a known address (IP address and port number)
     It hosts
         a list of agent accounts
@@ -41,16 +43,16 @@ public class Bank implements Runnable{
     */
 
     public static void main(String[] args){
-        Bank bank = new Bank();
-        Thread bankThread = new Thread(bank);
-        bankThread.run();
+        //Bank bank = new Bank();
+        //Thread bankThread = new Thread(bank);
+        //bankThread.run();
     }
 
     /**
      * Constructor for Bank
      *
      */
-    public Bank(){
+    public Bank(String address, int portNumber){
         agents = new ArrayList<Agent>();
         auctionHouses = new ArrayList<AuctionHouse>();
         accounts = new ArrayList<Account>();
