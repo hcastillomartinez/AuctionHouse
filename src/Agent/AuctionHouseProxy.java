@@ -8,14 +8,15 @@ import AuctionHouse.AuctionHouse;
  * house and the agent.
  * Danan High, 11/15/2018
  */
-public class AuctionHouseProxy {
+public class AuctionHouseProxy extends AuctionHouse {
     private AuctionHouse auctionHouse;
     
     /**
      * Constructor for the AuctionHouseProxy, builds a reference to the
      * auction house.
      */
-    public AuctionHouseProxy() {
-        this.auctionHouse = new AuctionHouse();
+    public AuctionHouseProxy(int type) {
+        super(type);
+        this.auctionHouse = new AuctionHouse(2);
     }
 }
