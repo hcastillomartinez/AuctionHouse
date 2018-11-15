@@ -1,8 +1,16 @@
 package Agent;
 
-import AuctionHouse.AuctionProxy;
+import AuctionHouse.AuctionHouse;
+import Bank.Bank;
 import Proxies.AuctionHouseProxy;
 import Proxies.BankProxy;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Scanner;
 
 /**
  * Agent.java is the class that bids on objects inside the auction house.
@@ -50,7 +58,7 @@ public class Agent implements Runnable {
     
     
     -------------------Design---------------------
-    For the bank get the ip address of the machine running on and use that
+    For the bank get the server of the machine running on and use that
     for the server constructor arg
 
     Think about how protocols should be designed and implemented
@@ -82,10 +90,13 @@ public class Agent implements Runnable {
      
  */
 
-    private int id, key, accountBalance, pendingBalance;
-    private long accountNumber;
+    private int id, key;
+//    private Account account;
     private AuctionHouseProxy auctionHouseProxy;
     private BankProxy bankProxy;
+    private Bank bank;
+    private AuctionHouse auctionHouse;
+
 
     /**
      * Constructor for the Agent.
@@ -93,6 +104,8 @@ public class Agent implements Runnable {
     public Agent() {
         auctionHouseProxy = new AuctionHouseProxy();
         bankProxy = new BankProxy();
+        bank = new Bank();
+        auctionHouse = new AuctionHouse();
     }
 
     /**
@@ -100,15 +113,13 @@ public class Agent implements Runnable {
      */
     @Override
     public void run() {
+        Scanner scanner = new Scanner(System.in);
+        String answer = "y";
 
-    }
-    
-    /**
-     * Main method to start the program for the user/agent
-     */
-    public static void main(String[] args) {
-        Agent agent = new Agent();
-        System.out.println("here");
+        while (answer.equalsIgnoreCase("y")) {
+            System.out.println("continue?");
+            answer = scanner.next();
+        }
     }
 
     //TODO
@@ -140,7 +151,6 @@ public class Agent implements Runnable {
     private void getItems() {
 
     }
-    
 
     /**
      * Gets a key from the bank on a per auction house basis.
@@ -152,6 +162,9 @@ public class Agent implements Runnable {
     /**
      * Getting and setting the new account information from the bank.
      */
+    private void openNewBankAccount() {
+        // open account and set account to self
+    }
 
     /**
      * Analyzing the replies from the auction houses, based on the bids the
@@ -162,6 +175,24 @@ public class Agent implements Runnable {
      * Overriding toString to print out the class.
      */
     @Override
-    public String toString() { return id + " has balance: " + accountBalance; }
+    public String toString() { return id + " has balance: "; }
+
+    /**
+     * Main method to start the program for the user/agent.
+     */
+    public static void main(String[] args) throws IOException {
+        Agent agent = new Agent();
+        String hostName = args[0];
+//        int portNumber = Integer.parseInt(args[1]);
+//
+//        try (Socket socket = new Socket(hostName, portNumber);
+//             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+//             BufferedReader in =
+//                     new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+//
+//        }
+
+        (new Thread(agent)).start();
+    }
 
 }
