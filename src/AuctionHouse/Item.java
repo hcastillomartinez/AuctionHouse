@@ -5,6 +5,7 @@ public class Item{
     private String itemName;
     private int price;
     private String type;
+    private int currentBid;
 
     /**
      * Takes in the name of item, price, and type it
@@ -17,6 +18,7 @@ public class Item{
         this.itemName=itemName;
         this.price=price;
         this.type=type;
+        currentBid=0;
     }
 
     @Override

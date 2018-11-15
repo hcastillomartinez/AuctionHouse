@@ -2,7 +2,7 @@ package AuctionHouse;
 
 import java.util.List;
 
-public class AuctionHouse {
+public class AuctionHouse implements Runnable{
     private int bidderTally;
     private String type;
     private List<Item> itemList;
@@ -62,5 +62,10 @@ public class AuctionHouse {
             if(t.getPrice()<min)min=t.getPrice();
         }
         return min;
+    }
+
+    @Override
+    public void run(){
+
     }
 }
