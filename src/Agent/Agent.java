@@ -1,5 +1,8 @@
 package Agent;
 
+import AuctionHouse.AuctionHouse;
+import Bank.Bank;
+
 /**
  * Agent.java is the class that bids on objects inside the auction house.
  * Danan High, 11/13/2018
@@ -30,13 +33,13 @@ terminates and closes the account when no bidding action is in progress
 
     private int id, key, accountBalance, pendingBalance;
     private long accountNumber;
+    private AuctionHouseProxy auctionHouseProxy;
+    private BankProxy bankProxy;
 
     /**
      * Constructor for the Agent.
-     * @param id Unique id for the agent.
-     * @param key Unique key from the bank used for making bids.
      */
-    public Agent(int id, int accountBalance, int key, long accountNumber) {
+    public Agent() {
         this.id = id;
         this.accountBalance = accountBalance;
         this.key = key;
@@ -49,6 +52,14 @@ terminates and closes the account when no bidding action is in progress
     @Override
     public void run() {
 
+    }
+    
+    /**
+     * Main method to start the program for the user/agent
+     */
+    public static void main(String[] args) {
+        Agent agent = new Agent();
+        System.out.println("here");
     }
 
     //TODO
@@ -73,5 +84,11 @@ terminates and closes the account when no bidding action is in progress
      * Analyzing the replies from the auction houses, based on the bids the
      * agent has made.
      */
+    
+    /**
+     * Overriding toString to print out the class.
+     */
+    @Override
+    public String toString() { return id + " has balance: " + accountBalance; }
 
 }
