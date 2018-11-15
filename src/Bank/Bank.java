@@ -12,10 +12,11 @@ import java.util.ArrayList;
 public class Bank implements Runnable{
     private ArrayList<Agent> agents; //list of agent accounts
     private ArrayList<AuctionHouse> auctionHouses; //list of auction house accounts
-
+    private ArrayList<Account> accounts;
+    private int currentAccountNumber = 0;
 
     /*
-    It is static and at a known address
+    It is static and at a known address (IP address and port number)
     It hosts
         a list of agent accounts
         a list of auction house accounts
@@ -34,10 +35,15 @@ public class Bank implements Runnable{
 
 
     we need to create the bank first
+
+    bank account protocol
+        creates an account and returns it to the agent via serialization
     */
 
     public static void main(String[] args){
-        //todo
+        Bank bank = new Bank();
+        Thread bankThread = new Thread(bank);
+        bankThread.run();
     }
 
     /**
@@ -45,41 +51,77 @@ public class Bank implements Runnable{
      *
      */
     public Bank(){
-
+        agents = new ArrayList<Agent>();
+        auctionHouses = new ArrayList<AuctionHouse>();
+        accounts = new ArrayList<Account>();
     }
 
 
     @Override
     public void run() {
-
+        while(true){
+            System.out.println("Bank is running");
+        }
     }
 
 
     /**
-     * Assigns a unique key to an agent on a per auction house basis.
-     * @return
+     * Creates and assigns an account to an agent.
      */
-    private int assignKey(){
-        return 0;
+    public Account openAccount(int balance, Agent agent){
+        Account newAccount = new Account(this.assignAccountNumber(), balance, balance, agent);
+        this.accounts.add(newAccount);
+        this.agents.add(agent);
+        return new Account(this.assignAccountNumber(), balance, balance, agent);
     }
+
+    /**
+     * Adds an auction house to the list of auction houses.
+     */
+    public void addAuctionHouse(AuctionHouse house){
+        this.auctionHouses.add(house);
+    }
+
+    /**
+     * Assigns an account number to an agent and increments the current account number
+     */
+    private int assignAccountNumber() {
+        int number = this.currentAccountNumber;
+        this.currentAccountNumber++;
+        return number;
+    }
+
+    /**
+     * Gets list of agents for a auction house.
+     */
+    public ArrayList<Agent> getAgents() {
+        return agents;
+    }
+
+    /**
+     * Gets list of auction houses for a agent.
+     */
+    public ArrayList<AuctionHouse> getAuctionHouses() {
+        return auctionHouses;
+    }
+
+
+
+
+
+
+
+
+
+
+    //TODO
 
     /**
      * Transfers funds from an Agent account to and AuctionHouse account.
      */
     private void transferFunds(AuctionHouse house, Agent agent, double amount){
-        //todo
+
     }
-
-    //todo
-
-    /**
-     * Gets list of auction houses for a agent.
-     */
-
-    /**
-     * Gets list of agents for a auction house.
-     */
-
 
     /**
      * Handles messages received from Houses and Agents.
