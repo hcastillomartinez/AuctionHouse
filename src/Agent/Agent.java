@@ -6,10 +6,7 @@ import Proxies.AuctionHouseProxy;
 import Proxies.BankProxy;
 
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -34,6 +31,9 @@ public class Agent implements Runnable {
     private BufferedReader in, stdIn;
     private PrintWriter out;
     private Socket client;
+
+    private ObjectInputStream input;
+    private ObjectOutputStream output;
 
     private static String hostName;
     private static int portNumber;
@@ -131,9 +131,9 @@ public class Agent implements Runnable {
      */
     private void closeConnection(Socket client) {
         try {
-            out.println("Client: " + client.getLocalAddress() + " has closed");
-            out.close();
-            in.close();
+            output.writeUTF("Client: " + client.getLocalAddress() + " has closed");
+            output.close();
+            input.close();
             stdIn.close();
         } catch (IOException io) {
             io.printStackTrace();
@@ -145,22 +145,29 @@ public class Agent implements Runnable {
      */
     private void connectToTestBank() {
         try {
-            in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            out = new PrintWriter(client.getOutputStream(), true);
+//            in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+//            out = new PrintWriter(client.getOutputStream(), true);
             stdIn = new BufferedReader(new InputStreamReader(System.in));
+            output = new ObjectOutputStream(client.getOutputStream());
+            output.flush();
+            input = new ObjectInputStream(client.getInputStream());
+            output.writeObject("New client");
+            String response, user;
 
-            String response = in.readLine();
-            while (response != "bye") {
-                System.out.println("Server response: " + response);
-                String user = stdIn.readLine();
-                if (user != null && user != "") {
-                    System.out.println("Client response: " + user);
-                    out.println(user);
+            do {
+                response = (String) input.readObject();
+                System.out.println(response);
+
+                user = stdIn.readLine();
+                if (user != "") {
+                    output.writeObject("client: " + user);
                 }
-                response = in.readLine();
-            }
+            } while (response != "bye");
+            closeConnection(client);
         } catch (IOException io) {
             io.printStackTrace();
+        } catch (ClassNotFoundException cnf) {
+            cnf.printStackTrace();
         } finally {
             closeConnection(client);
         }
