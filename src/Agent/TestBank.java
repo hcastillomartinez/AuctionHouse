@@ -77,7 +77,7 @@ public class TestBank {
                     if (output != "") {
                         outputStream.writeObject("server: " + output);
                     }
-                } while (input != "bye");
+                } while (input != null);
                 closeClient();
             } catch (IOException io) {
                 io.printStackTrace();

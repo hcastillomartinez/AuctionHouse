@@ -162,7 +162,7 @@ public class Agent implements Runnable {
                 if (user != "") {
                     output.writeObject("client: " + user);
                 }
-            } while (response != "bye");
+            } while (response != null);
             closeConnection(client);
         } catch (IOException io) {
             io.printStackTrace();
