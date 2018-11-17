@@ -1,9 +1,16 @@
 package Bank;
 
-import Agent.Agent;
-import AuctionHouse.AuctionHouse;
+import Agent.*;
+import AuctionHouse.*;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * @author Daniel Miller
@@ -16,6 +23,10 @@ public class Bank implements Runnable{
     private int currentAccountNumber = 0;
     private String address;
     private int portNumber;
+    // testing code -------------->
+    private Socket clientSocket;
+    private BufferedReader reader, input;
+    private PrintWriter writer;
 
     /**
     It is static and at a known address (IP address and port number)
@@ -42,7 +53,7 @@ public class Bank implements Runnable{
         creates an account and returns it to the agent via serialization
     */
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         //Bank bank = new Bank();
         //Thread bankThread = new Thread(bank);
         //bankThread.run();
@@ -58,12 +69,9 @@ public class Bank implements Runnable{
         accounts = new ArrayList<Account>();
     }
 
-
     @Override
     public void run() {
-        while(true){
-            System.out.println("Bank is running");
-        }
+
     }
 
 
