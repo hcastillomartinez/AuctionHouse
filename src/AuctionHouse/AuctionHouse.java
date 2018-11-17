@@ -1,5 +1,10 @@
 package AuctionHouse;
 
+import Agent.*;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.List;
 
 public class AuctionHouse implements Runnable{
@@ -7,6 +12,9 @@ public class AuctionHouse implements Runnable{
     private String type;
     private List<Item> itemList;
     private MakeItems makeItems;
+    private ServerSocket serverSocket;
+    private int port;
+    private String serverName;
 
     /**
      * Expects an int that represents what type
@@ -14,11 +22,27 @@ public class AuctionHouse implements Runnable{
      * and any other number for car.
      * @param type An int
      */
-    public AuctionHouse(int type){
-        bidderTally=0;
-        makeItems=new MakeItems();
-        itemList=makeItems.getItems(type);
-        this.type=makeItems.getListType();
+    public AuctionHouse(String type,String port,String serverName) {
+        try {
+            bidderTally = 0;
+            makeItems = new MakeItems();
+            itemList = makeItems.getItems(Integer.parseInt(type));
+            this.type = makeItems.getListType();
+            this.port=Integer.parseInt(port);
+            this.serverName=serverName;
+            serverSocket = new ServerSocket(this.port);
+        }catch(IOException i){
+            System.out.println(i);
+        }
+    }
+
+
+    public int getPort(){
+        return port;
+    }
+
+    public String getServerName() {
+        return serverName;
     }
 
     /**
@@ -66,6 +90,21 @@ public class AuctionHouse implements Runnable{
 
     @Override
     public void run(){
+        while(true){
+            try {
+                System.out.println("waiting for agents");
+                Socket agent = serverSocket.accept();
+                Thread t=new Thread(new Agent());
+                t.start();
+            }catch(IOException i){
+                System.out.println(i);
+            }
+        }
+    }
 
+    public static void main(String[] args){
+        AuctionHouse auctionHouse=new AuctionHouse(args[0],args[1],args[3]);
+        Thread t=new Thread(auctionHouse);
+        t.start();
     }
 }
