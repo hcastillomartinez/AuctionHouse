@@ -190,6 +190,7 @@ public class Agent implements Runnable {
             io.printStackTrace();
         }
         connectToTestBank();
+
     }
     
     /**

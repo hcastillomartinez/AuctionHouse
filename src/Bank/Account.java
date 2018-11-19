@@ -26,4 +26,6 @@ public class Account {
                 ", agent=" + agent +
                 '}';
     }
+
+    //synchronized getters and setters here
 }

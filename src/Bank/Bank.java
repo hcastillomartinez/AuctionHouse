@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
+ * Move test bank into bank.
  * @author Daniel Miller
  * @version 11-13-18
  */
@@ -22,7 +23,7 @@ public class Bank implements Runnable{
     private ArrayList<Account> accounts;
     private int currentAccountNumber = 0;
     private String address;
-    private int portNumber;
+    static private int portNumber;
     // testing code -------------->
     private Socket clientSocket;
     private BufferedReader reader, input;
@@ -48,15 +49,19 @@ public class Bank implements Runnable{
 
 
     we need to create the bank first
-
-    bank account protocol
-        creates an account and returns it to the agent via serialization
     */
 
-    public static void main(String[] args) {
-        //Bank bank = new Bank();
-        //Thread bankThread = new Thread(bank);
-        //bankThread.run();
+    public static void main(String[] args) throws Exception {
+        portNumber = Integer.parseInt(args[0]);
+
+        TestBank bankOne = new TestBank();
+        ServerSocket server = new ServerSocket(portNumber);
+
+        while (true) {
+            Socket client = server.accept();
+            ServerThread bank = new Agent.TestBank.ServerThread(client, bankOne);
+            (new Thread(bank)).start();
+        }
     }
 
     /**
@@ -71,7 +76,9 @@ public class Bank implements Runnable{
 
     @Override
     public void run() {
+        //create server sockets to listen for client connections
 
+        //while true to listen for activity
     }
 
 
@@ -107,6 +114,10 @@ public class Bank implements Runnable{
     public ArrayList<Agent> getAgents() {
         return agents;
     }
+
+    /**
+     * Creates an account for an agent and adds it to the list of agents.
+     */
 
     /**
      * Gets list of auction houses for a agent.
