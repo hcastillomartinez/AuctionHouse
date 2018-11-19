@@ -45,15 +45,13 @@ public class Bank implements Runnable{
      */
     
     public static void main(String[] args) throws Exception {
-        address = args[0];
-        portNumber = Integer.parseInt(args[1]);
+        portNumber = Integer.parseInt(args[0]);
         
-        Bank bankOne = new Bank(address,portNumber);
         ServerSocket server = new ServerSocket(portNumber);
         
         while (true) {
             Socket client = server.accept();
-            ServerThread bank = new ServerThread(client, bankOne);
+            ServerThread bank = new ServerThread(client);
             (new Thread(bank)).start();
         }
     }
@@ -138,17 +136,14 @@ public class Bank implements Runnable{
     private static class ServerThread implements Runnable {
         
         private Socket client;
-        private BufferedReader in, stdIn;
-        private PrintWriter out;
-        private Bank bank;
+        private BufferedReader stdIn;
         
         private ObjectInputStream inputStream;
         private ObjectOutputStream outputStream;
         
         // constructor
-        public ServerThread(Socket client, Bank bank) {
+        public ServerThread(Socket client) {
             this.client = client;
-            this.bank = bank;
             
             try {
                 stdIn = new BufferedReader(new InputStreamReader(System.in));
