@@ -5,7 +5,7 @@ public class Item{
     private String itemName;
     private int price;
     private String type;
-    private int currentBid;
+    private boolean inBid;
 
     /**
      * Takes in the name of item, price, and type it
@@ -18,7 +18,15 @@ public class Item{
         this.itemName=itemName;
         this.price=price;
         this.type=type;
-        currentBid=0;
+        inBid=false;
+    }
+
+    public void setInBid(boolean inBid) {
+        this.inBid = inBid;
+    }
+
+    public boolean isInBid() {
+        return inBid;
     }
 
     @Override
