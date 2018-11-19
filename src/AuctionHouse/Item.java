@@ -21,18 +21,23 @@ public class Item{
         inBid=false;
     }
 
+    /**
+     * Sets item to be in bid state.
+     * @param inBid A boolean
+     */
     public void setInBid(boolean inBid) {
         this.inBid = inBid;
     }
 
+    /**
+     * Gets the bid state.
+     * @return A boolean
+     */
     public boolean isInBid() {
         return inBid;
     }
 
-    @Override
-    public String toString(){
-        return "item: "+itemName+" Price: "+price+"\n";
-    }
+
 
     /**
      * Gets the item name.
@@ -58,4 +63,12 @@ public class Item{
         return price;
     }
 
+    /**
+     * Way for item to be printed.
+     * @return
+     */
+    @Override
+    public String toString(){
+        return "item: "+itemName+" Price: "+price+"\n";
+    }
 }

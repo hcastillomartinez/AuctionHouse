@@ -1,10 +1,5 @@
 package AuctionHouse;
 
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.util.Duration;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Timer;
@@ -14,42 +9,66 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 public class BidCoord implements Runnable{
 
+    private final int duration;
     private BlockingQueue<Integer> bids;
     private BidProtocol bidProtocol;
+    private long winnerID;
     private long currentWinner;
     private Item item;
     private int time;
     private int winningBid;
-    private Timeline timeLine;
     private Timer t;
+    private boolean auctionActive;
 
-
+    /**
+     * Takes an item and sets auction up for the
+     * item.
+     * @param i An Item
+     */
     public BidCoord(Item i){
+        duration=30;
         item=i;
         item.setInBid(true);
         bids=new LinkedBlockingDeque<>();
         bidProtocol=new BidProtocol(item.getPrice());
         time=0;
-        currentWinner=0;
+        auctionActive=true;
         winningBid=0;
         t=new Timer();
     }
 
+    /**
+     * Begins timer and runs until 30 seconds is reached.
+     */
     private void setTime(){
         t.schedule(new TimerTask() {
             @Override
             public void run() {
-                if(time==30)t.cancel();
-                time++;
-                System.out.println(time);
+                if(time>=duration){
+                    auctionActive=false;
+                    t.cancel();
+                    placeBid(-1);
+                }
+                else {
+                    time++;
+                }
             }
-        },20,1000);
+        },0,1000);
     }
 
+
+    /**
+     * If money does not go through will reset timer.
+     * dont think will need
+     */
     private void resetTime(){
         time=0;
     }
 
+    /**
+     * Takes from queue and passes it to be
+     * analyzed.
+     */
     private void getBid(){
         try{
             analyzeBid(bids.take());
@@ -57,31 +76,50 @@ public class BidCoord implements Runnable{
             System.out.println(i);
         }
     }
-    private int analyzeBid(int bid){
-        if(time==30)return 1;
-        if(bidProtocol.processBid(bid)==0)return 0;
-        else{
+
+    /**
+     * Checks bid if is valid, returns 0 if it is,
+     * else returns 1 and sets winning bid.
+     * @param bid
+     * @return
+     */
+    private void analyzeBid(int bid){
+        if(!auctionActive){
+            System.out.println("Auction Over");
+            return;
+        }
+        System.out.println("try "+bid);
+        if(bidProtocol.processBid(bid)!=0){
             winningBid=bid;
-            return 1;
+            System.out.println("current winner "+winningBid);
+        }
+        else{
+            System.out.println("Need to beat "+winningBid+" ,you bid "+bid);
         }
     }
 
+    /**
+     * Puts bid onto queue.
+     * @param bid An int
+     */
     public void placeBid(int bid){
         try {
             bids.put(bid);
         }catch(InterruptedException i){
-            System.out.println(i);
+            System.out.println(i+" taking");
         }
     }
 
-
+    /**
+     * Waits for bids to come through.
+     */
     @Override
     public void run(){
-        while(time<=30){
+        while(auctionActive){
             getBid();
             if(time==0)setTime();
         }
-        System.out.println(winningBid);
+        System.out.println("winner: "+winningBid);
     }
 
     public static void main(String[] args)throws Exception{
@@ -89,11 +127,12 @@ public class BidCoord implements Runnable{
         BidCoord bidCoord=new BidCoord(new Item("desk",20,f.getIDType()));
         Thread t=new Thread(bidCoord);
         t.start();
-
         BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));
-        int i;
-        while((i=bf.read())!=44){
-            bidCoord.placeBid(i);
+        String i;
+        while(!(i=bf.readLine()).equals("44")){
+            System.out.println("enter "+i);
+            bidCoord.placeBid(Integer.parseInt(i));
         }
+        System.out.println("No longer taking input");
     }
 }
