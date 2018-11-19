@@ -41,6 +41,7 @@ public class Message {
         } else if (object.getClass().equals(Bid.class)) {
             bid = (Bid) object;
         }
+        
     }
 
     /**
