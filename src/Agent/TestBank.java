@@ -38,8 +38,6 @@ public class TestBank {
             this.bank = bank;
 
             try {
-//                in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-//                out = new PrintWriter(client.getOutputStream(), true);
                 stdIn = new BufferedReader(new InputStreamReader(System.in));
                 outputStream = new ObjectOutputStream(client.getOutputStream());
                 outputStream.flush();
