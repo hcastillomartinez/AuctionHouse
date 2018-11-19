@@ -11,6 +11,7 @@ public class AuctionHouse implements Runnable{
     private int bidderTally;
     private String type;
     private List<Item> itemList;
+    private List<BidCoord> auctions;
     private MakeItems makeItems;
     private ServerSocket serverSocket;
     private int port;
@@ -36,11 +37,19 @@ public class AuctionHouse implements Runnable{
         }
     }
 
-
+    /**
+     * Used to get port number that server is on.
+     * @return An int, is the port number.
+     */
     public int getPort(){
         return port;
     }
 
+    /**
+     * Used to get the name of computer that server is running
+     * on.
+     * @return Name of server,String
+     */
     public String getServerName() {
         return serverName;
     }

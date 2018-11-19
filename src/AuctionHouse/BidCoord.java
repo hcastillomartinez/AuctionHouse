@@ -20,6 +20,12 @@ public class BidCoord implements Runnable{
     private Timer t;
     private boolean auctionActive;
 
+    //todo
+    //have way to send winner
+    //relay out once  agent taken over, to release hold on pending.
+    //finalize winner, kinda have it
+    //Take in Bid obj, do same thing really
+
     /**
      * Takes an item and sets auction up for the
      * item.
@@ -62,6 +68,7 @@ public class BidCoord implements Runnable{
      * dont think will need
      */
     private void resetTime(){
+        auctionActive=true;
         time=0;
     }
 
