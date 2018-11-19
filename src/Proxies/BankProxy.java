@@ -88,7 +88,7 @@ public class BankProxy implements Runnable {
      * @return the newly opened account
      */
     public Account openAccount(int balance, Agent agent){
-        return bank.openAccount(balance, agent);
+        return bank.makeAccount(balance, agent);
     }
 
     /**

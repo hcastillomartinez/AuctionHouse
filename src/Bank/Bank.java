@@ -3,10 +3,7 @@ package Bank;
 import Agent.*;
 import AuctionHouse.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -22,7 +19,7 @@ public class Bank implements Runnable{
     private ArrayList<AuctionHouse> auctionHouses; //list of auction house accounts
     private ArrayList<Account> accounts;
     private int currentAccountNumber = 0;
-    private String address;
+    static private String address;
     static private int portNumber;
     // testing code -------------->
     private Socket clientSocket;
@@ -52,14 +49,15 @@ public class Bank implements Runnable{
     */
 
     public static void main(String[] args) throws Exception {
-        portNumber = Integer.parseInt(args[0]);
+        address = args[0];
+        portNumber = Integer.parseInt(args[1]);
 
-        TestBank bankOne = new TestBank();
+        Bank bankOne = new Bank(address,portNumber);
         ServerSocket server = new ServerSocket(portNumber);
 
         while (true) {
             Socket client = server.accept();
-            ServerThread bank = new Agent.TestBank.ServerThread(client, bankOne);
+            ServerThread bank = new ServerThread(client, bankOne);
             (new Thread(bank)).start();
         }
     }
@@ -81,15 +79,22 @@ public class Bank implements Runnable{
         //while true to listen for activity
     }
 
-
     /**
      * Creates and assigns an account to an agent.
      */
-    public Account openAccount(int balance, Agent agent){
-        Account newAccount = new Account(this.assignAccountNumber(), balance, balance, agent);
-        this.accounts.add(newAccount);
-        this.agents.add(agent);
-        return new Account(this.assignAccountNumber(), balance, balance, agent);
+    public Account makeAccount(int startingBalance, Agent agent) {
+        ArrayList<Account> accounts = this.getAccounts();
+
+        Account account = new Account(currentAccountNumber,
+                startingBalance,
+                startingBalance,
+                agent);
+
+        if (!accounts.contains(account)) {
+            accounts.add(account);
+        }
+
+        return account;
     }
 
     /**
@@ -109,15 +114,19 @@ public class Bank implements Runnable{
     }
 
     /**
+     * Gets the list of bank accounts
+     * @return
+     */
+    public ArrayList<Account> getAccounts(){
+        return accounts;
+    }
+
+    /**
      * Gets list of agents for a auction house.
      */
     public ArrayList<Agent> getAgents() {
         return agents;
     }
-
-    /**
-     * Creates an account for an agent and adds it to the list of agents.
-     */
 
     /**
      * Gets list of auction houses for a agent.
@@ -128,6 +137,70 @@ public class Bank implements Runnable{
 
 
 
+
+    // private sub class
+    private static class ServerThread implements Runnable {
+
+        private Socket client;
+        private BufferedReader in, stdIn;
+        private PrintWriter out;
+        private Bank bank;
+
+        private ObjectInputStream inputStream;
+        private ObjectOutputStream outputStream;
+
+        // constructor
+        public ServerThread(Socket client, Bank bank) {
+            this.client = client;
+            this.bank = bank;
+
+            try {
+                stdIn = new BufferedReader(new InputStreamReader(System.in));
+                outputStream = new ObjectOutputStream(client.getOutputStream());
+                outputStream.flush();
+                inputStream = new ObjectInputStream(client.getInputStream());
+                outputStream.writeObject("You have been connected!");
+            } catch (IOException io) {
+                io.printStackTrace();
+            }
+        }
+
+        /**
+         * Function to close the client from the server.
+         */
+        private void closeClient() {
+            try {
+                outputStream.writeObject("Server " + client.getLocalAddress() + " has closed.");
+                inputStream.close();
+                outputStream.close();
+                stdIn.close();
+            } catch (IOException io) {
+                io.printStackTrace();
+            }
+        }
+
+        @Override
+        public void run() {
+            String output, input = null;
+
+            try {
+                do {
+                    input = (String) inputStream.readObject();
+                    System.out.println(input);
+
+                    output = stdIn.readLine();
+                    if (output != "") {
+                        outputStream.writeObject("server: " + output);
+                    }
+                } while (input != null);
+                closeClient();
+            } catch (IOException io) {
+                io.printStackTrace();
+            } catch (ClassNotFoundException cnf) {
+                cnf.printStackTrace();
+            }
+        }
+    }
 
 
 
@@ -148,3 +221,4 @@ public class Bank implements Runnable{
      * Handles messages received from Houses and Agents.
      */
 }
+
