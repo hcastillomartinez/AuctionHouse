@@ -7,7 +7,9 @@ import Proxies.BankProxy;
 
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -24,17 +26,10 @@ public class Agent implements Runnable {
     private BankProxy bankProxy;
     private Bank bank;
     private AuctionHouse auctionHouse;
-    private PrintWriter writer;
     private ArrayList<AuctionHouse> houseList;
     private List<Item> itemList;
     private BlockingQueue<String> messages = new LinkedBlockingQueue<>();
-    private BufferedReader in, stdIn;
-    private PrintWriter out;
-    private Socket client;
-
-    private ObjectInputStream input;
-    private ObjectOutputStream output;
-
+    
     private static String hostName;
     private static int portNumber;
 
@@ -43,11 +38,8 @@ public class Agent implements Runnable {
      */
     public Agent() {
         auctionHouseProxy = new AuctionHouseProxy();
-        bankProxy = new BankProxy(bank);
+        bankProxy = new BankProxy(hostName, portNumber);
     }
-
-
-    //TODO
 
     /**
      * Making a bid to an auction house.
@@ -110,7 +102,7 @@ public class Agent implements Runnable {
      * Connecting to the bank.
      */
     private void connectToBank() {
-        bankProxy.connectToServer(hostName, portNumber);
+        bankProxy.connectToServer();
     }
 
     /**
@@ -126,52 +118,12 @@ public class Agent implements Runnable {
     /*****************************************************************/
 
     /**
-     * Function to handle the closing of the socket.
-     * @param client client to perform socket functionality on.
-     */
-    private void closeConnection(Socket client) {
-        try {
-            output.writeUTF("Client: " + client.getLocalAddress() + " has closed");
-            output.close();
-            input.close();
-            stdIn.close();
-        } catch (IOException io) {
-            io.printStackTrace();
-        }
-    }
-
-    /**
      * Connecting to the test bank
      */
     private void connectToTestBank() {
-        try {
-//            in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-//            out = new PrintWriter(client.getOutputStream(), true);
-            stdIn = new BufferedReader(new InputStreamReader(System.in));
-            output = new ObjectOutputStream(client.getOutputStream());
-            output.flush();
-            input = new ObjectInputStream(client.getInputStream());
-            output.writeObject("New client");
-            String response, user;
-
-            do {
-                response = (String) input.readObject();
-                System.out.println(response);
-
-                user = stdIn.readLine();
-                if (user != "") {
-                    output.writeObject("client: " + user);
-                }
-            } while (response != null);
-            closeConnection(client);
-        } catch (IOException io) {
-            io.printStackTrace();
-        } catch (ClassNotFoundException cnf) {
-            cnf.printStackTrace();
-        } finally {
-            closeConnection(client);
-        }
+        bankProxy.connectToServer();
     }
+    
 
     /*****************************************************************/
     /*                                                               */
@@ -185,9 +137,12 @@ public class Agent implements Runnable {
     @Override
     public void run() {
         try {
-            client = new Socket(hostName, portNumber);
-        } catch (IOException io) {
-            io.printStackTrace();
+            connectToTestBank();
+            while (true) {
+                messages.take();
+            }
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
         }
         connectToTestBank();
 
@@ -203,10 +158,9 @@ public class Agent implements Runnable {
      * Main method to start the program for the user/agent.
      */
     public static void main(String[] args) throws IOException {
-        Agent agent = new Agent();
         hostName = args[0];
         portNumber = Integer.parseInt(args[1]);
-
+        Agent agent = new Agent();
         (new Thread(agent)).start();
     }
 }

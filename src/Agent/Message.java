@@ -9,26 +9,38 @@ import AuctionHouse.AuctionHouse;
  */
 public class Message {
 
-    private AuctionHouse auctionHouse;
-    private Agent agent;
-    private TestBank testBank;
-    private String detailedMessage;
+    private AuctionHouse auctionHouse = null;
+    private Agent agent = null;
+    private TestBank testBank = null;
+    private Object detailedMessage = null;
+    private Bid bid = null;
 
     /**
      * Constructor for the message class.
-     * @param auctionHouse for the message
-     * @param agent for the message
-     * @param testBank for the message
+     * @param sender for the message
+     * @param receiver for the message
      * @param detailedMessage for the message
      */
-    public Message(AuctionHouse auctionHouse,
-                   Agent agent,
-                   TestBank testBank,
-                   String detailedMessage) {
-        this.auctionHouse = auctionHouse;
-        this.agent = agent;
-        this.testBank = testBank;
-        this.detailedMessage = detailedMessage;
+    public Message(Object sender, Object receiver, Object detailedMessage) {
+        assignClasses(sender);
+        assignClasses(receiver);
+        assignClasses(detailedMessage);
+    }
+    
+    /**
+     * Function to assign the sender and receiver to their respective classes.
+     * @param object to assign.
+     */
+    private void assignClasses(Object object) {
+        if (object.getClass().equals(AuctionHouse.class)) {
+            auctionHouse = (AuctionHouse) object;
+        } else if (object.getClass().equals(Agent.class)) {
+            agent = (Agent) object;
+        } else if (object.getClass().equals(TestBank.class)) {
+            testBank = (TestBank) object;
+        } else if (object.getClass().equals(Bid.class)) {
+            bid = (Bid) object;
+        }
     }
 
     /**
@@ -59,7 +71,7 @@ public class Message {
      * Returning the detailedMessage from the message.
      * @return detailedMessage giving directions/requests.
      */
-    public String getDetailedMessage() {
+    public Object getDetailedMessage() {
         return detailedMessage;
     }
 }

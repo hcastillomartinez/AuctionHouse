@@ -5,10 +5,7 @@ import AuctionHouse.AuctionHouse;
 import Bank.Bank;
 import Bank.Account;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -23,33 +20,46 @@ public class BankProxy implements Runnable {
     private Account accout;
     private String host;
     private int port;
-    private BufferedReader reader, input;
-    private PrintWriter writer;
-    private Socket client;
+    private BufferedReader stdIn;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
+    private Socket client = null;
     
     /**
      * Constructor for the bank proxy.
      * Builds a reference to the bank for bank functionality
      */
-    public BankProxy(Bank bank) {
-        this.bank = bank;
+    public BankProxy(String host, int port) {
+        this.host = host;
+        this.port = port;
     }
-
-    public BankProxy(Socket client) throws IOException {
-        this.client = client;
-        reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
-        input = new BufferedReader(new InputStreamReader(System.in));
-        writer = new PrintWriter(client.getOutputStream(), true);
+    
+    /**
+     * Setting up the input and output streams for the client connection.
+     */
+    private void setupInputAndOutputStreams() {
+        try {
+            if (client != null) {
+                out = new ObjectOutputStream(client.getOutputStream());
+                out.flush();
+                in = new ObjectInputStream(client.getInputStream());
+                stdIn = new BufferedReader(new InputStreamReader(System.in));
+            } else {
+                System.out.println("Client has not been connected");
+            }
+        } catch (IOException ie) {
+            ie.printStackTrace();
+        }
     }
 
     /**
-     * Agent connecting to the bank.
-     * @param host name of the host server.
-     * @param port number for the port.
+     * Agent connecting to the bank through the proxy.
      */
-    public void connectToServer(String host, int port) {
+    public void connectToServer() {
         try {
-            new Socket(host, port);
+            client = new Socket(host, port);
+            setupInputAndOutputStreams();
+            (new Thread(this)).start();
         } catch (IOException io) {
             io.printStackTrace();
         }
@@ -61,25 +71,29 @@ public class BankProxy implements Runnable {
     @Override
     public void run() {
         try {
-            String response = reader.readLine();
+            out.writeObject("New client" + client.getClass());
+            String response = null, user = null;
 
-            while (response != null) {
-                writer.println(input.readLine());
-                response = reader.readLine();
-            }
-            writer.close();
-            reader.close();
-            input.close();
+            do {
+                try {
+                    response = (String) in.readObject();
+                    System.out.println(response);
+    
+                    user = stdIn.readLine();
+                    if (user != "") {
+                        out.writeObject("client: " + user);
+                    }
+                } catch (EOFException eof) {
+                    System.out.println("Server has been closed");
+                }
+            } while (response != null);
+            out.close();
+            in.close();
+            stdIn.close();
         } catch (IOException io) {
             io.printStackTrace();
-        }
-
-        if (client != null) {
-            try {
-                client.close();
-            } catch (IOException io) {
-                io.printStackTrace();
-            }
+        } catch (ClassNotFoundException cnf) {
+            cnf.printStackTrace();
         }
     }
 
