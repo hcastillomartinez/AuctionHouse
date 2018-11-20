@@ -5,6 +5,7 @@ import Agent.Bid;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -46,6 +47,21 @@ public class AuctionHouse implements Runnable{
         }
     }
 
+
+    private class AuctionServer implements Runnable{
+        List<Socket> allClients;
+        Socket client;
+        public AuctionServer(){
+
+        }
+
+
+
+        @Override
+        public void run(){
+
+        }
+    }
     /**
      * Gets the amount of money a house has.
      * @return Amount of money the house has, double.
@@ -122,22 +138,6 @@ public class AuctionHouse implements Runnable{
         return min;
     }
 
-    private class Server implements Runnable{
-        private Socket client;
-        private BufferedReader stdIn;
-        private BufferedInputStream in;
-        private BufferedOutputStream out;
-
-
-        public Server(Socket client){
-            this.client=client;
-        }
-
-        @Override
-        public void run(){
-
-        }
-    }
 
 
     @Override
@@ -153,9 +153,17 @@ public class AuctionHouse implements Runnable{
     }
 
 
-    public static void main(String[] args){
-        AuctionHouse auctionHouse=new AuctionHouse(args[0],args[1],args[3]);
-        Thread t=new Thread(auctionHouse);
-        t.start();
+    public static void main(String[] args) throws IOException{
+        int port=Integer.parseInt(args[2]);
+        String serverName=args[3];
+        ServerSocket serverSocket=new ServerSocket(port);
+
+
+//        while(true){
+//
+//        }
+//        AuctionHouse auctionHouse=new AuctionHouse(args[0],args[1],args[3]);
+//        Thread t=new Thread(auctionHouse);
+//        t.start();
     }
 }
