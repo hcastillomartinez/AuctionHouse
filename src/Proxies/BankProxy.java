@@ -112,8 +112,8 @@ public class BankProxy implements Runnable {
      * Creates and assigns an account to an agent.
      * @return the newly opened account
      */
-    public Account openAccount(int balance, Agent agent){
-        return bank.makeAccount(balance, agent);
+    public Account openAccount(int balance){
+        return bank.makeAccount(balance);
     }
 
     /**

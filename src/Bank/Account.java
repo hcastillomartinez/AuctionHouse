@@ -7,8 +7,8 @@ import Agent.Agent;
  * @author Daniel Miller
  */
 public class Account {
-    private int id, balance, pendingBalance;
-    private Agent agent;
+    private int id;
+    private double balance, pendingBalance;
 
     /**
      * Constructor for Account.
@@ -16,13 +16,11 @@ public class Account {
      * @param id the account id
      * @param balance the account balance
      * @param pendingBalance the pending account balance
-     * @param agent a reference to the agent that owns the account
      */
-    public Account(int id, int balance, int pendingBalance, Agent agent){
+    public Account(int id, double balance, double pendingBalance){
         this.id = id;
         this.balance = balance;
         this.pendingBalance = pendingBalance;
-        this.agent = agent;
     }
 
     /**
@@ -35,7 +33,6 @@ public class Account {
                 "id=" + id +
                 ", balance=" + balance +
                 ", pendingBalance=" + pendingBalance +
-                ", agent=" + agent +
                 '}';
     }
 
@@ -43,27 +40,23 @@ public class Account {
     /*****************************************/
     /**synchronized getters and setters here**/
     /*****************************************/
-    public synchronized int getBalance() {
+    public synchronized double getBalance() {
         return balance;
     }
 
-    public synchronized void setBalance(int balance) {
+    public synchronized void setBalance(double balance) {
         this.balance = balance;
     }
 
-    public synchronized int getPendingBalance() {
+    public synchronized double getPendingBalance() {
         return pendingBalance;
     }
 
-    public synchronized void setPendingBalance(int pendingBalance) {
+    public synchronized void setPendingBalance(double pendingBalance) {
         this.pendingBalance = pendingBalance;
     }
 
     public int getId() {
         return id;
-    }
-
-    public Agent getAgent() {
-        return agent;
     }
 }

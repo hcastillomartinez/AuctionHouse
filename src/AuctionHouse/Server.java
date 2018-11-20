@@ -8,11 +8,11 @@ import java.util.List;
 public class Server implements Runnable{
     private ServerSocket serverSocket;
     private InetAddress serverName;
-    private List<AgentClient> agentClients;
+    //private List<AgentClient> agentClients;
 
     public Server(String port){
         try{
-            agentClients=new LinkedList<>();
+            //agentClients=new LinkedList<>();
             serverName=InetAddress.getLocalHost();
             serverSocket=new ServerSocket(Integer.parseInt(port));
             serverSocket.setSoTimeout(10000);

@@ -45,8 +45,14 @@ public class Bank implements Runnable{
      */
     
     public static void main(String[] args) throws Exception {
-        portNumber = Integer.parseInt(args[0]);
-        
+        if(args.length >= 1){
+            portNumber = Integer.parseInt(args[0]);
+        }
+        else{
+            System.out.println("Error: Invalid program arguments. The first argument must be the bank port number.");
+            return;
+        }
+
         ServerSocket server = new ServerSocket(portNumber);
         
         while (true) {
@@ -74,20 +80,17 @@ public class Bank implements Runnable{
     }
     
     /**
-     * Creates and assigns an account to an agent.
+     * Creates and returns an account.
      */
-    public Account makeAccount(int startingBalance, Agent agent) {
-        ArrayList<Account> accounts = this.getAccounts();
-        
-        Account account = new Account(currentAccountNumber,
+    public Account makeAccount(int startingBalance) {
+        Account account = new Account(assignAccountNumber(),
                                       startingBalance,
-                                      startingBalance,
-                                      agent);
-        
-        if (!accounts.contains(account)) {
-            accounts.add(account);
+                                      startingBalance);
+
+        if (!this.getAccounts().contains(account)) {
+            this.getAccounts().add(account);
         }
-        
+
         return account;
     }
     
@@ -133,10 +136,29 @@ public class Bank implements Runnable{
     /**
      * Transfers funds from an Agent account to an AuctionHouse account.
      */
-    private synchronized void transferFunds(int auctionHouseAccount, int agentAccount, double amount){
-        AuctionHouse house = auctionHouses.get(auctionHouseAccount);
-        Agent agent = agents.get(agentAccount);
-        //todo
+    public synchronized void transferFunds(int auctionHouseAccountNumber,
+                                            int agentAccountNumber,
+                                            double amount) throws Exception{
+
+        Account houseAccount = accounts.get(auctionHouseAccountNumber);
+        Account agentAccount = accounts.get(agentAccountNumber);
+
+        synchronized (houseAccount){
+            synchronized (agentAccount){
+
+                if(agentAccount.getPendingBalance() >= amount){
+                    //transfer funds from agent to auction house
+                    agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
+                    agentAccount.setBalance(agentAccount.getBalance() - amount);
+                    houseAccount.setBalance(houseAccount.getBalance() + amount);
+                    houseAccount.setPendingBalance(houseAccount.getPendingBalance() + amount);
+                }
+                else{
+                    throw new Exception(); //"Unable to transfer funds. The agent's pending balance is less than the specified amount."
+                }
+            }
+        }
+
     }
 
 
@@ -209,8 +231,6 @@ public class Bank implements Runnable{
             }
         }
     }
-
-
 
 
 
