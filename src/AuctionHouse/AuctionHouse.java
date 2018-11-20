@@ -12,6 +12,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class AuctionHouse implements Runnable{
     private int bidderTally;
     private String type;
+    private double houseFunds;
     private List<Item> itemList;
     private List<Auction> auctions;
     private MakeItems makeItems;
@@ -31,6 +32,7 @@ public class AuctionHouse implements Runnable{
      */
     public AuctionHouse(String type,String port,String serverName) {
         try {
+            houseFunds=0;
             bidderTally = 0;
             makeItems = new MakeItems();
             winningBids=new LinkedBlockingQueue<>();
@@ -44,7 +46,21 @@ public class AuctionHouse implements Runnable{
         }
     }
 
+    /**
+     * Gets the amount of money a house has.
+     * @return Amount of money the house has, double.
+     */
+    public double getHouseFunds() {
+        return houseFunds;
+    }
 
+    /**
+     * Used to add money to the funds of house from bank.
+     * @param houseFunds double that is funds to be added
+     */
+    public void setHouseFunds(double houseFunds) {
+        this.houseFunds+=houseFunds;
+    }
 
     /**
      * Used to get port number that server is on.
