@@ -3,7 +3,7 @@ package AuctionHouse;
 
 public class Item{
     private String itemName;
-    private int price;
+    private double price;
     private String type;
     private boolean inBid;
 
@@ -59,7 +59,7 @@ public class Item{
      * Gets the price of the item.
      * @return An int
      */
-    public int getPrice(){
+    public double getPrice(){
         return price;
     }
 
