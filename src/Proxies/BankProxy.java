@@ -1,13 +1,13 @@
 package Proxies;
 
-import Agent.Agent;
-import AuctionHouse.AuctionHouse;
-import Bank.Bank;
-import Bank.Account;
+import Agent.*;
+import AuctionHouse.*;
+import Bank.*;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Proxies.BankProxy.java is the class that is the mediary between the Bank and the
@@ -18,12 +18,15 @@ public class BankProxy implements Runnable {
 
     private Bank bank;
     private Account accout;
+    private MessageAnalyzer messageAnalyzer;
     private String host;
     private int port;
+    private boolean connected = true;
     private BufferedReader stdIn;
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private Socket client = null;
+    private LinkedBlockingQueue<Message> messageList = new LinkedBlockingQueue<>();
     
     /**
      * Constructor for the bank proxy.
@@ -59,6 +62,7 @@ public class BankProxy implements Runnable {
         try {
             client = new Socket(host, port);
             setupInputAndOutputStreams();
+            messageAnalyzer = new MessageAnalyzer();
             (new Thread(this)).start();
         } catch (IOException io) {
             io.printStackTrace();
@@ -71,29 +75,36 @@ public class BankProxy implements Runnable {
     @Override
     public void run() {
         try {
-            out.writeObject("New client" + client.getClass());
-            String response = null, user = null;
+            String user = null;
+            Message response = null, userResponse;
 
             do {
+                System.out.println(user + "-------------->");
                 try {
-                    response = (String) in.readObject();
+                    response = (Message) in.readObject();
                     System.out.println(response);
+                    System.out.println(messageAnalyzer.checkMessage(response));
     
                     user = stdIn.readLine();
-                    if (user != "") {
-                        out.writeObject("client: " + user);
+                    if (!user.equalsIgnoreCase("")) {
+                        userResponse = new Message(this,
+                                                   client.getChannel(),
+                                                   user);
+                        System.out.println(userResponse);
+                        out.writeObject(userResponse);
                     }
                 } catch (EOFException eof) {
                     System.out.println("Server has been closed");
+                    break;
+                } catch (ClassNotFoundException cnf) {
+                    cnf.printStackTrace();
                 }
-            } while (response != null);
+            } while (connected);
             out.close();
             in.close();
             stdIn.close();
         } catch (IOException io) {
             io.printStackTrace();
-        } catch (ClassNotFoundException cnf) {
-            cnf.printStackTrace();
         }
     }
 

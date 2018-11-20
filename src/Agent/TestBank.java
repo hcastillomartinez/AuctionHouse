@@ -61,23 +61,27 @@ public class TestBank {
 
             try {
                 do {
-                    input = (String) inputStream.readObject();
-                    System.out.println(input);
-
-                    if (input.equalsIgnoreCase("hello")) {
-                        outputStream.writeObject("server: hey");
-                    } else if (input.equalsIgnoreCase("hows it going")) {
-                        outputStream.writeObject("server: good");
-                    } else {
-                        outputStream.writeObject("server: I am bored with " +
-                                                     "this convo");
+                    try {
+                        input = (String) inputStream.readObject();
+                        System.out.println(input);
+    
+                        if (input.equalsIgnoreCase("hello")) {
+                            outputStream.writeObject("server: hey");
+                        } else if (input.equalsIgnoreCase("hows it going")) {
+                            outputStream.writeObject("server: good");
+                        } else {
+                            outputStream.writeObject("server: I am bored");
+                        }
+                    } catch (EOFException eof) {
+                        System.out.println("Client has been closed!");
+                        break;
+                    } catch (ClassNotFoundException cnf) {
+                        cnf.printStackTrace();
                     }
-                } while (input != "bye");
+                } while (!input.equalsIgnoreCase("bye"));
                 closeClient();
             } catch (IOException io) {
                 io.printStackTrace();
-            } catch (ClassNotFoundException cnf) {
-                cnf.printStackTrace();
             }
         }
     }

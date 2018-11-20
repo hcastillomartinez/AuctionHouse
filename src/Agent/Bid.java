@@ -2,11 +2,13 @@ package Agent;
 
 import AuctionHouse.Item;
 
+import java.io.Serializable;
+
 /**
  * Bid.java is the class that handles bids on items from agents.
  * Danan high, 11/18/2018
  */
-public class Bid {
+public class Bid implements Serializable {
     
     private Agent bidder;
     private Item item;

@@ -2,17 +2,19 @@ package Agent;
 
 import AuctionHouse.AuctionHouse;
 
+import java.io.Serializable;
+
 /**
  * Message.java contains the information to be sent between the server and the
  * client to make certain requests. The message contains a sender, receiver and
  * a message from the sender.
  */
-public class Message {
+public class Message implements Serializable {
 
     private AuctionHouse auctionHouse = null;
     private Agent agent = null;
     private TestBank testBank = null;
-    private Object detailedMessage = null;
+    private String detailedMessage = null;
     private Bid bid = null;
 
     /**
@@ -40,6 +42,8 @@ public class Message {
             testBank = (TestBank) object;
         } else if (object.getClass().equals(Bid.class)) {
             bid = (Bid) object;
+        } else if (object.getClass().equals(String.class)) {
+            this.detailedMessage = (String) object;
         }
         
     }
@@ -74,5 +78,14 @@ public class Message {
      */
     public Object getDetailedMessage() {
         return detailedMessage;
+    }
+
+    @Override
+    public String toString() {
+        return "Message{" + "auctionHouse=" + auctionHouse +
+            ", agent=" + agent +
+            ", testBank=" + testBank +
+            ", detailedMessage=" + detailedMessage +
+            ", bid=" + bid + '}';
     }
 }

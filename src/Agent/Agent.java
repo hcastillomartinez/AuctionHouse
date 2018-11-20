@@ -5,13 +5,8 @@ import Bank.*;
 import Proxies.AuctionHouseProxy;
 import Proxies.BankProxy;
 
-
 import java.io.*;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.*;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -23,12 +18,12 @@ public class Agent implements Runnable {
     private int id, key;
     private Account account;
     private AuctionHouseProxy auctionHouseProxy;
-    private BankProxy bankProxy;
-    private Bank bank;
+    private BankProxy bank;
+    private Item item = null;
     private AuctionHouse auctionHouse;
     private ArrayList<AuctionHouse> houseList;
-    private List<Item> itemList;
-    private BlockingQueue<String> messages = new LinkedBlockingQueue<>();
+    private ArrayList itemList;
+    private LinkedBlockingQueue<String> messages = new LinkedBlockingQueue<>();
     
     private static String hostName;
     private static int portNumber;
@@ -38,15 +33,17 @@ public class Agent implements Runnable {
      */
     public Agent() {
         auctionHouseProxy = new AuctionHouseProxy();
-        bankProxy = new BankProxy(hostName, portNumber);
+        bank = new BankProxy(hostName, portNumber);
     }
 
     /**
      * Making a bid to an auction house.
      * @param bidAmount amount to bid on the item.
      */
-    private void makeBid(int bidAmount) {
-
+    private void placeBid(int bidAmount) {
+        Bid bid = new Bid(item, this, bidAmount);
+        Message message = new Message(this, auctionHouse, bid);
+//        auctionHouseProxy.placeBid(message);
     }
 
     /**
@@ -61,7 +58,7 @@ public class Agent implements Runnable {
      * Get Auction houses from the bank list
      */
     private void getAuctionHouses() {
-        houseList = bankProxy.getAuctionHouses();
+        houseList = bank.getAuctionHouses();
         setAuctionHouse();
     }
 
@@ -69,7 +66,7 @@ public class Agent implements Runnable {
      * Get items from the auction house that can be bid on.
      */
     private void getItems() {
-        itemList = auctionHouseProxy.getItemList();
+        itemList = (ArrayList) auctionHouseProxy.getItemList();
     }
 
     /**
@@ -83,8 +80,8 @@ public class Agent implements Runnable {
      * Getting and setting the new account information from the bank.
      */
     private void openNewBankAccount() {
-        account = bankProxy.openAccount((new Random()).nextInt(100000),
-                                        this);
+        account = bank.openAccount((new Random()).nextInt(100000),
+                                   this);
     }
 
     /**
@@ -102,7 +99,9 @@ public class Agent implements Runnable {
      * Connecting to the bank.
      */
     private void connectToBank() {
-        bankProxy.connectToServer();
+        bank.connectToServer();
+        openNewBankAccount();
+        account.toString();
     }
 
     /**
@@ -121,7 +120,7 @@ public class Agent implements Runnable {
      * Connecting to the test bank
      */
     private void connectToTestBank() {
-        bankProxy.connectToServer();
+        bank.connectToServer();
     }
     
 
@@ -137,7 +136,7 @@ public class Agent implements Runnable {
     @Override
     public void run() {
         try {
-            connectToTestBank();
+            connectToBank();
             while (true) {
                 messages.take();
             }

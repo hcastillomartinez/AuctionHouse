@@ -137,7 +137,6 @@ public class Bank implements Runnable{
         
         private Socket client;
         private BufferedReader stdIn;
-        
         private ObjectInputStream inputStream;
         private ObjectOutputStream outputStream;
         
@@ -176,19 +175,27 @@ public class Bank implements Runnable{
             
             try {
                 do {
-                    input = (String) inputStream.readObject();
-                    System.out.println(input);
-                    
-                    output = stdIn.readLine();
-                    if (output != "") {
-                        outputStream.writeObject("server: " + output);
+                    try {
+                        input = (String) inputStream.readObject();
+                        System.out.println(input);
+                        
+                        if (input.equalsIgnoreCase("bye")) {
+                            input = null;
+                        }
+    
+                        output = stdIn.readLine();
+                        if (output != "") {
+                            outputStream.writeObject("server: " + output);
+                        }
+                    } catch (ClassNotFoundException cnf) {
+                        cnf.printStackTrace();
+                    } catch (EOFException eof) {
+                        System.out.println("Client has disconnected!");
+                        break;
                     }
                 } while (input != null);
-                closeClient();
             } catch (IOException io) {
                 io.printStackTrace();
-            } catch (ClassNotFoundException cnf) {
-                cnf.printStackTrace();
             }
         }
     }
