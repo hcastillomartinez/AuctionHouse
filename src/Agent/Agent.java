@@ -92,8 +92,7 @@ public class Agent implements Runnable {
      * Getting and setting the new account information from the bank.
      */
     private void openNewBankAccount() {
-        account = bank.openAccount((new Random()).nextInt(100000),
-                                   this);
+        account = bank.openAccount((new Random()).nextInt(100000));
     }
 
     /**

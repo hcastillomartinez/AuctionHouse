@@ -95,8 +95,7 @@ public class TestBank {
 
         Account account = new Account(accountNumber,
                                       accountSize,
-                                      accountSize,
-                                      agent);
+                                      accountSize);
         if (!accounts.contains(account)) {
             accounts.add(account);
         }
