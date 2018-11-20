@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
- * Move test bank into bank.
+ * The Bank class.
  * @author Daniel Miller
  * @version 11-13-18
  */
