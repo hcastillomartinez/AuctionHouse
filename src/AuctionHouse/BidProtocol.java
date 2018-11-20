@@ -3,9 +3,10 @@ package AuctionHouse;
 import java.util.*;
 
 public class BidProtocol {
-    private int lastBid;
-    private int price;
-    public BidProtocol(int price){
+    private double lastBid;
+    private double price;
+
+    public BidProtocol(double price){
         lastBid=0;
         this.price=price;
     }
@@ -15,7 +16,7 @@ public class BidProtocol {
      * @param bid An int
      * @return An int
      */
-    public int processBid(int bid){
+    public double processBid(double bid){
         if(lastBid>bid || bid<price) return 0;
         else{
             lastBid=bid;

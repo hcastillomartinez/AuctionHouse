@@ -12,7 +12,7 @@ public class Bid implements Serializable {
     
     private Agent bidder;
     private Item item;
-    private int amount;
+    private double amount;
     
     /**
      * Constructor for the bid object.
@@ -20,7 +20,7 @@ public class Bid implements Serializable {
      * @param bidder agent placing the bid.
      * @param amount the amount of the bid.
      */
-    public Bid(Item item, Agent bidder, int amount) {
+    public Bid(Item item, Agent bidder, double amount) {
         this.item = item;
         this.bidder = bidder;
         this.amount = amount;
@@ -46,7 +46,7 @@ public class Bid implements Serializable {
      * Getting the amount that has been placed on the bid.
      * @return amount being bid on the item.
      */
-    public int getAmount() {
+    public double getAmount() {
         return amount;
     }
 }

@@ -18,7 +18,6 @@ public class BankProxy implements Runnable {
 
     private Bank bank;
     private Account accout;
-    private MessageAnalyzer messageAnalyzer;
     private String host;
     private int port;
     private boolean connected = true;
@@ -62,7 +61,6 @@ public class BankProxy implements Runnable {
         try {
             client = new Socket(host, port);
             setupInputAndOutputStreams();
-            messageAnalyzer = new MessageAnalyzer();
             (new Thread(this)).start();
         } catch (IOException io) {
             io.printStackTrace();
@@ -76,15 +74,14 @@ public class BankProxy implements Runnable {
     public void run() {
         try {
             String user = null;
-            Message response = null, userResponse;
+            Message response, userResponse;
 
             do {
                 System.out.println(user + "-------------->");
                 try {
                     response = (Message) in.readObject();
                     System.out.println(response);
-                    System.out.println(messageAnalyzer.checkMessage(response));
-    
+
                     user = stdIn.readLine();
                     if (!user.equalsIgnoreCase("")) {
                         userResponse = new Message(this,

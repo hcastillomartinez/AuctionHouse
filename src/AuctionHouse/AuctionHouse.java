@@ -1,13 +1,18 @@
 package AuctionHouse;
 
+import Agent.Bid;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class AuctionHouse implements Runnable{
     private int bidderTally;
     private String type;
+    private double houseFunds;
     private List<Item> itemList;
     private List<Auction> auctions;
     private MakeItems makeItems;
@@ -16,6 +21,8 @@ public class AuctionHouse implements Runnable{
     private ObjectOutputStream out;
     private int port;
     private String serverName;
+    private BlockingQueue<Bid> winningBids;
+
 
     /**
      * Expects an int that represents what type
@@ -25,8 +32,10 @@ public class AuctionHouse implements Runnable{
      */
     public AuctionHouse(String type,String port,String serverName) {
         try {
+            houseFunds=0;
             bidderTally = 0;
             makeItems = new MakeItems();
+            winningBids=new LinkedBlockingQueue<>();
             itemList = makeItems.getItems(Integer.parseInt(type));
             this.type = makeItems.getListType();
             this.port=Integer.parseInt(port);
@@ -35,6 +44,22 @@ public class AuctionHouse implements Runnable{
         }catch(IOException i){
             System.out.println(i);
         }
+    }
+
+    /**
+     * Gets the amount of money a house has.
+     * @return Amount of money the house has, double.
+     */
+    public double getHouseFunds() {
+        return houseFunds;
+    }
+
+    /**
+     * Used to add money to the funds of house from bank.
+     * @param houseFunds double that is funds to be added
+     */
+    public void setHouseFunds(double houseFunds) {
+        this.houseFunds+=houseFunds;
     }
 
     /**
@@ -67,8 +92,8 @@ public class AuctionHouse implements Runnable{
      * in auction is and gets the price.
      * @return An int that is max price
      */
-    public int maxPrice(){
-        int max=0;
+    public double maxPrice(){
+        double max=0;
         for(Item t:itemList){
             if(t.getPrice()>max)max=t.getPrice();
         }
@@ -89,8 +114,8 @@ public class AuctionHouse implements Runnable{
      * and gets its price.
      * @return An int that is the lowest price.
      */
-    public int lowestPrice(){
-        int min=10000;
+    public double lowestPrice(){
+        double min=10000;
         for(Item t:itemList){
             if(t.getPrice()<min)min=t.getPrice();
         }

@@ -72,8 +72,8 @@ public class AuctionHouseProxy implements Runnable {
      * Finds the most expensive item in auction is and gets the price.
      * @return An int that is max price
      */
-    public int maxPrice() {
-        int max = 0;
+    public double maxPrice() {
+        double max = 0;
         for(Item t: auctionHouse.getItemList()){
             if(t.getPrice() > max) {
                 max = t.getPrice();
@@ -94,8 +94,8 @@ public class AuctionHouseProxy implements Runnable {
      * Finds the cheapest item in auction and gets its price.
      * @return lowest price in the auction house.
      */
-    public int lowestPrice() {
-        int min = maxPrice();
+    public double lowestPrice() {
+        double min = maxPrice();
         for(Item t: auctionHouse.getItemList()) {
             if (min > t.getPrice()) {
                 min = t.getPrice();

@@ -63,6 +63,18 @@ public class Agent implements Runnable {
     }
 
     /**
+     * Returning the id of the Agent.
+     * @return id of the agent.
+     */
+    public int getId() { return id; }
+
+    /**
+     * Returning the key of the Agent.
+     * @return key of the agent at the specific house.
+     */
+    public int getKey() { return key; }
+
+    /**
      * Get items from the auction house that can be bid on.
      */
     private void getItems() {
@@ -70,12 +82,12 @@ public class Agent implements Runnable {
     }
 
     /**
-     * Gets a key from the bank on a per auction house basis.
+     * Setting the key from the bank at a specific auction house.
      */
-    private void getKey() {
-
+    private void setKey() {
+//        key = bank.setKey();
     }
-    
+
     /**
      * Getting and setting the new account information from the bank.
      */

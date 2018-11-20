@@ -1,46 +1,58 @@
 package AuctionHouse;
 
+import Agent.Agent;
+import Agent.Bid;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Auction implements Runnable{
 
     private final int duration;
-    private BlockingQueue<Integer> bids;
+    private double bidAmount;
+    private int currentBidderID;
+    private BlockingQueue<Bid> bids;
     private BidProtocol bidProtocol;
-    private long winnerID;
-    private long currentWinner;
+    private int currentWinner;
     private Item item;
     private int time;
-    private int winningBid;
+    private double bidToBeat;
     private Timer t;
     private boolean auctionActive;
 
     //todo
     //have way to send winner
     //relay out once  agent taken over, to release hold on pending.
-    //finalize winner, kinda have it
-    //Take in Bid obj, do same thing really
 
     /**
      * Takes an item and sets auction up for the
      * item.
-     * @param i An Item
+     * @param b An Item
      */
-    public Auction(Item i){
+    public Auction(Bid b){
         duration=30;
-        item=i;
-        item.setInBid(true);
-        bids=new LinkedBlockingDeque<>();
-        bidProtocol=new BidProtocol(item.getPrice());
         time=0;
+        breakDownBid(b);
+        item.setInBid(true);
+        bids=new LinkedBlockingQueue<>();
+        bidProtocol=new BidProtocol(item.getPrice());
         auctionActive=true;
-        winningBid=0;
+        bidToBeat=item.getPrice();
         t=new Timer();
+    }
+
+    /**
+     * Deconstructs the bid and gets the necessary component of a bid.
+     */
+    private void breakDownBid(Bid b){
+        item=b.getItem();
+        bidAmount=b.getAmount();
+        currentBidderID=b.getBidder().getId();
     }
 
     /**
@@ -53,7 +65,7 @@ public class Auction implements Runnable{
                 if(time>=duration){
                     auctionActive=false;
                     t.cancel();
-                    placeBid(-1);
+                    placeBid(new Bid(null,null,0));
                 }
                 else {
                     time++;
@@ -78,7 +90,7 @@ public class Auction implements Runnable{
      */
     private void getBid(){
         try{
-            analyzeBid(bids.take());
+            analyzeBid(bids.take().getAmount());
         }catch(InterruptedException i){
             System.out.println(i);
         }
@@ -90,30 +102,32 @@ public class Auction implements Runnable{
      * @param bid
      * @return
      */
-    private void analyzeBid(int bid){
+    private void analyzeBid(double bid){
         if(!auctionActive){
             System.out.println("Auction Over");
             return;
         }
-        System.out.println("try "+bid);
+        System.out.println(currentBidderID+" tries "+bid);
         if(bidProtocol.processBid(bid)!=0){
-            winningBid=bid;
-            System.out.println("current winner "+winningBid);
+            currentWinner=currentBidderID;
+            bidToBeat=bid;
+            System.out.println("current winner "+currentWinner);
         }
         else{
-            System.out.println("Need to beat "+winningBid+" ,you bid "+bid);
+            System.out.println(currentBidderID+" need to beat "+bidToBeat+" ,you bid "+bid);
         }
     }
 
     /**
      * Puts bid onto queue.
-     * @param bid An int
+     * @param b An int
      */
-    public void placeBid(int bid){
+    public void placeBid(Bid b){
         try {
-            bids.put(bid);
+            if(b.getItem()!=null) breakDownBid(b);
+            bids.put(b);
         }catch(InterruptedException i){
-            System.out.println(i+" taking");
+            System.out.println(i);
         }
     }
 
@@ -126,20 +140,20 @@ public class Auction implements Runnable{
             getBid();
             if(time==0)setTime();
         }
-        System.out.println("winner: "+winningBid);
+        System.out.println("winner: "+currentWinner);
     }
 
-    public static void main(String[] args)throws Exception{
-        Furniture f=Furniture.desk;
-        Auction bidCoord=new Auction(new Item("desk",20,f.getIDType()));
-        Thread t=new Thread(bidCoord);
-        t.start();
-        BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));
-        String i;
-        while(!(i=bf.readLine()).equals("44")){
-            System.out.println("enter "+i);
-            bidCoord.placeBid(Integer.parseInt(i));
-        }
-        System.out.println("No longer taking input");
+    public static void main(String[] args)throws Exception {
+//        Furniture f = Furniture.desk;
+//        Auction bidCoord=new Auction(new Bid(new Item("desk",20,f.getIDType()),new Agent(1),20));
+//        Thread t=new Thread(bidCoord);
+//        t.start();
+//        BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));
+//        String i;
+//        while(!(i=bf.readLine()).equals("44")){
+//            System.out.println("enter "+i);
+//            bidCoord.placeBid(new Bid(new Item("desk",20,f.getIDType()),new Agent(Integer.parseInt(i)),Double.parseDouble(i)));
+//        }
+//        System.out.println("No longer taking input");
     }
 }
