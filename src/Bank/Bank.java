@@ -128,22 +128,32 @@ public class Bank implements Runnable{
     public ArrayList<AuctionHouse> getAuctionHouses() {
         return auctionHouses;
     }
-    
-    
-    
-    
+
+
+    /**
+     * Transfers funds from an Agent account to an AuctionHouse account.
+     */
+    private synchronized void transferFunds(int auctionHouseAccount, int agentAccount, double amount){
+        AuctionHouse house = auctionHouses.get(auctionHouseAccount);
+        Agent agent = agents.get(agentAccount);
+        //todo
+    }
+
+
+
+
     // private sub class
     private static class ServerThread implements Runnable {
-        
+
         private Socket client;
         private BufferedReader stdIn;
         private ObjectInputStream inputStream;
         private ObjectOutputStream outputStream;
-        
+
         // constructor
         public ServerThread(Socket client) {
             this.client = client;
-            
+
             try {
                 stdIn = new BufferedReader(new InputStreamReader(System.in));
                 outputStream = new ObjectOutputStream(client.getOutputStream());
@@ -154,7 +164,7 @@ public class Bank implements Runnable{
                 io.printStackTrace();
             }
         }
-        
+
         /**
          * Function to close the client from the server.
          */
@@ -168,21 +178,21 @@ public class Bank implements Runnable{
                 io.printStackTrace();
             }
         }
-        
+
         @Override
         public void run() {
             String output, input = null;
-            
+
             try {
                 do {
                     try {
                         input = (String) inputStream.readObject();
                         System.out.println(input);
-                        
+
                         if (input.equalsIgnoreCase("bye")) {
                             input = null;
                         }
-    
+
                         output = stdIn.readLine();
                         if (output != "") {
                             outputStream.writeObject("server: " + output);
@@ -199,22 +209,16 @@ public class Bank implements Runnable{
             }
         }
     }
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
     //TODO
-    
-    /**
-     * Transfers funds from an Agent account to and AuctionHouse account.
-     */
-    private void transferFunds(AuctionHouse house, Agent agent, double amount){
-    
-    }
-    
+
+
     /**
      * Handles messages received from Houses and Agents.
      */

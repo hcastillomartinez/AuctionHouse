@@ -144,7 +144,6 @@ public class Agent implements Runnable {
             ie.printStackTrace();
         }
         connectToTestBank();
-
     }
     
     /**
