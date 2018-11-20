@@ -53,13 +53,9 @@ public class Bank implements Runnable{
             return;
         }
 
-        ServerSocket server = new ServerSocket(portNumber);
-        
-        while (true) {
-            Socket client = server.accept();
-            ServerThread bank = new ServerThread(client);
-            (new Thread(bank)).start();
-        }
+        Bank bank = new Bank(address, portNumber);
+
+        (new Thread(bank)).start();
     }
     
     /**
@@ -73,10 +69,20 @@ public class Bank implements Runnable{
     }
     
     @Override
-    public void run() {
-        //create server sockets to listen for client connections
-        
-        //while true to listen for activity
+    public void run(){
+
+        try{
+            ServerSocket server = new ServerSocket(portNumber);
+
+            while (true) {
+                Socket client = server.accept();
+                ServerThread bank = new ServerThread(client);
+                (new Thread(bank)).start();
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
     }
     
     /**
