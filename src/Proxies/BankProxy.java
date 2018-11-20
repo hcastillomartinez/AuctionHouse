@@ -68,6 +68,19 @@ public class BankProxy implements Runnable {
     }
 
     /**
+     * Adding a message to the banks input stream.
+     */
+    public void sendMessage(Object sender, String inMessage) {
+        try {
+            messageList.put(new Message(sender,
+                                        this,
+                                        inMessage));
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
+    }
+
+    /**
      * Overriding the run method to perform specialized tasks.
      */
     @Override
@@ -77,7 +90,6 @@ public class BankProxy implements Runnable {
             Message response, userResponse;
 
             do {
-                System.out.println(user + "-------------->");
                 try {
                     response = (Message) in.readObject();
                     System.out.println(response);

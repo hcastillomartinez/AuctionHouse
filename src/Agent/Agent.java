@@ -23,7 +23,7 @@ public class Agent implements Runnable {
     private AuctionHouse auctionHouse;
     private ArrayList<AuctionHouse> houseList;
     private ArrayList itemList;
-    private LinkedBlockingQueue<String> messages = new LinkedBlockingQueue<>();
+    private LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
     
     private static String hostName;
     private static int portNumber;
@@ -147,12 +147,25 @@ public class Agent implements Runnable {
     @Override
     public void run() {
         try {
+            BufferedReader userIn =
+                    new BufferedReader(new InputStreamReader(System.in));
+            String out = null;
             connectToBank();
             while (true) {
-                messages.take();
+                if (messages.size() > 0) {
+                    Message message = messages.take();
+                }
+
+                out = userIn.readLine();
+                if (out != null) {
+                    bank.sendMessage(this, out);
+                    out = null;
+                }
             }
         } catch (InterruptedException ie) {
             ie.printStackTrace();
+        } catch (IOException io) {
+            io.printStackTrace();
         }
         connectToTestBank();
     }
