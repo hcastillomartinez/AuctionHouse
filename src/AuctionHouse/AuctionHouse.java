@@ -1,8 +1,6 @@
 package AuctionHouse;
 
-import Agent.*;
-
-import java.io.IOException;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -11,9 +9,11 @@ public class AuctionHouse implements Runnable{
     private int bidderTally;
     private String type;
     private List<Item> itemList;
-    private List<BidCoord> auctions;
+    private List<Auction> auctions;
     private MakeItems makeItems;
     private ServerSocket serverSocket;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
     private int port;
     private String serverName;
 
@@ -87,15 +87,33 @@ public class AuctionHouse implements Runnable{
     /**
      * Finds the cheapest item in auction
      * and gets its price.
-     * @return
+     * @return An int that is the lowest price.
      */
     public int lowestPrice(){
-        int min=1000;
+        int min=10000;
         for(Item t:itemList){
             if(t.getPrice()<min)min=t.getPrice();
         }
         return min;
     }
+
+    private class Server implements Runnable{
+        private Socket client;
+        private BufferedReader stdIn;
+        private BufferedInputStream in;
+        private BufferedOutputStream out;
+
+
+        public Server(Socket client){
+            this.client=client;
+        }
+
+        @Override
+        public void run(){
+
+        }
+    }
+
 
     @Override
     public void run(){
@@ -103,13 +121,12 @@ public class AuctionHouse implements Runnable{
             try {
                 System.out.println("waiting for agents");
                 Socket agent = serverSocket.accept();
-                Thread t=new Thread(new Agent());
-                t.start();
             }catch(IOException i){
                 System.out.println(i);
             }
         }
     }
+
 
     public static void main(String[] args){
         AuctionHouse auctionHouse=new AuctionHouse(args[0],args[1],args[3]);

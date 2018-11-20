@@ -7,7 +7,7 @@ import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
-public class BidCoord implements Runnable{
+public class Auction implements Runnable{
 
     private final int duration;
     private BlockingQueue<Integer> bids;
@@ -31,7 +31,7 @@ public class BidCoord implements Runnable{
      * item.
      * @param i An Item
      */
-    public BidCoord(Item i){
+    public Auction(Item i){
         duration=30;
         item=i;
         item.setInBid(true);
@@ -131,7 +131,7 @@ public class BidCoord implements Runnable{
 
     public static void main(String[] args)throws Exception{
         Furniture f=Furniture.desk;
-        BidCoord bidCoord=new BidCoord(new Item("desk",20,f.getIDType()));
+        Auction bidCoord=new Auction(new Item("desk",20,f.getIDType()));
         Thread t=new Thread(bidCoord);
         t.start();
         BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));
