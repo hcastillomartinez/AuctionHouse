@@ -13,11 +13,13 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Proxies.BankProxy.java is the class that is the mediary between the Bank and the
  * Agent. The class provides higher level functionality to interact with the
  * bank.
+ * @author Danan High, 11/21/2018
  */
 public class BankProxy implements Runnable {
 
     private Bank bank;
     private Account accout;
+    private Agent agent;
     private String host;
     private int port;
     private boolean connected = true;
@@ -25,15 +27,18 @@ public class BankProxy implements Runnable {
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private Socket client = null;
-    private LinkedBlockingQueue<Message> messageList = new LinkedBlockingQueue<>();
+    
+    private LinkedBlockingQueue<TestMessage<Agent, String>> messageList =
+        new LinkedBlockingQueue<>();
     
     /**
      * Constructor for the bank proxy.
      * Builds a reference to the bank for bank functionality
      */
-    public BankProxy(String host, int port) {
+    public BankProxy(String host, int port, Agent agent) {
         this.host = host;
         this.port = port;
+        this.agent = agent;
     }
     
     /**
@@ -70,11 +75,9 @@ public class BankProxy implements Runnable {
     /**
      * Adding a message to the banks input stream.
      */
-    public void sendMessage(Object sender, String inMessage) {
+    public void sendMessage(String inMessage, Agent agent) {
         try {
-            messageList.put(new Message(sender,
-                                        this,
-                                        inMessage));
+            messageList.put(new TestMessage<>(agent, inMessage));
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
@@ -86,22 +89,19 @@ public class BankProxy implements Runnable {
     @Override
     public void run() {
         try {
-            String user = null;
-            Message response, userResponse;
+            TestMessage<Agent, String> response;
 
             do {
                 try {
-                    response = (Message) in.readObject();
-                    System.out.println(response);
-
-                    user = stdIn.readLine();
-                    if (!user.equalsIgnoreCase("")) {
-                        userResponse = new Message(this,
-                                                   client.getChannel(),
-                                                   user);
-                        System.out.println(userResponse);
-                        out.writeObject(userResponse);
+                    response = messageList.take();
+                    if (response != null) {
+                        // analyze the message will happen here
+                        // and then proper passing of the object will occur
+                        out.writeObject(response);
                     }
+                    
+                    // testing code to read from the server
+                    System.out.println(in.readObject());
                 } catch (EOFException eof) {
                     System.out.println("Server has been closed");
                     break;
@@ -109,11 +109,14 @@ public class BankProxy implements Runnable {
                     cnf.printStackTrace();
                 }
             } while (connected);
+            agent.setConnected();
             out.close();
             in.close();
             stdIn.close();
         } catch (IOException io) {
             io.printStackTrace();
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
         }
     }
 
@@ -122,14 +125,17 @@ public class BankProxy implements Runnable {
      * @return the newly opened account
      */
     public Account openAccount(int balance){
-        return bank.makeAccount(balance);
+        
+        //// -------------------------------------------------------------->
+        return new Account(8, 90, 90);
+        
     }
 
     /**
      * Adds an auction house to the list of auction houses.
      * @param house the house to add to the bank
      */
-    public void addAuctionHouse(AuctionHouse house){
+    public void addAuctionHouse(AuctionHouse house) {
         bank.getAuctionHouses().add(house);
     }
 

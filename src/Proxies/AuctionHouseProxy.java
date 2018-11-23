@@ -1,15 +1,13 @@
 package Proxies;
 
-import AuctionHouse.AuctionHouse;
+import Agent.*;
 import AuctionHouse.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Proxies.AuctionHouseProxy is the proxy for the auction house class. The proxy
@@ -21,11 +19,11 @@ public class AuctionHouseProxy implements Runnable {
 
     private LinkedList<AuctionHouse> houseList;
     private AuctionHouse auctionHouse;
-    private PrintWriter writer;
-    private BufferedReader reader, input;
     private Socket client = null;
     private String host;
     private int port;
+    private boolean connected;
+    private LinkedBlockingQueue<Message> messages;
 
     /**
      * Constructor for the Proxies.AuctionHouseProxy, builds a reference to the
@@ -33,6 +31,7 @@ public class AuctionHouseProxy implements Runnable {
      */
     public AuctionHouseProxy() {
         houseList = new LinkedList<>();
+        messages = new LinkedBlockingQueue<Message>();
     }
 
     /**
@@ -65,6 +64,7 @@ public class AuctionHouseProxy implements Runnable {
     public void connectToAuctionHouse(String host, int port) {
         this.host = host;
         this.port = port;
+        connected = true;
         run();
     }
 
@@ -103,34 +103,57 @@ public class AuctionHouseProxy implements Runnable {
         }
         return min;
     }
-
-    @Override
-    public void run() {
+    
+    /**
+     * Closing the client port.
+     */
+    private void closeClient(ObjectInputStream inputStream,
+                             ObjectOutputStream outputStream,
+                             BufferedReader input) {
         try {
-            String response = reader.readLine();
-            client = new Socket(host, port);
-            reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            input = new BufferedReader(new InputStreamReader(System.in));
-            writer = new PrintWriter(client.getOutputStream(), true);
-
-            while (response != null) {
-                writer.println(input.readLine());
-                response = reader.readLine();
-            }
-            writer.close();
-            reader.close();
+            outputStream.close();
+            inputStream.close();
             input.close();
         } catch (IOException io) {
             io.printStackTrace();
         }
+    }
 
-        if (client != null) {
-            try {
-                client.close();
-            } catch (IOException io) {
-                io.printStackTrace();
-            }
+    /**
+     * Overriding the run method to perform certain tasks.
+     */
+    @Override
+    public void run() {
+        
+        try {
+            ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
+            ObjectInputStream in = new ObjectInputStream(client.getInputStream());
+            Message message = null;
+            
+            do {
+                try {
+                    message = messages.take();
+                    if (message != null) {
+                        // this is where the message analysis should take
+                        // place when fully implemented.
+                        out.writeObject(message);
+                    }
+                    
+                    // testing code to write to the auction house
+                    System.out.println(in.readObject());
+                } catch (ClassNotFoundException cnf) {
+                    cnf.printStackTrace();
+                } catch (EOFException eof) {
+                    System.out.println("Server has disconnected!");
+                    connected = false;
+                } catch (InterruptedException ie) {
+                    ie.printStackTrace();
+                }
+            } while (connected);
+        } catch (IOException io) {
+            io.printStackTrace();
         }
+        
     }
 }
 

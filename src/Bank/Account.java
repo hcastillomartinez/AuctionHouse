@@ -2,11 +2,13 @@ package Bank;
 
 import Agent.Agent;
 
+import java.io.Serializable;
+
 /**
  * Bank Account Class
  * @author Daniel Miller
  */
-public class Account {
+public class Account implements Serializable{
     private int id;
     private double balance, pendingBalance;
 

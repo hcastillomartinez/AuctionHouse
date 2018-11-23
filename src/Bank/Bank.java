@@ -52,9 +52,9 @@ public class Bank implements Runnable{
             System.out.println("Error: Invalid program arguments. The first argument must be the bank port number.");
             return;
         }
-
+        
         Bank bank = new Bank(address, portNumber);
-
+        
         (new Thread(bank)).start();
     }
     
@@ -70,10 +70,10 @@ public class Bank implements Runnable{
     
     @Override
     public void run(){
-
+        
         try{
             ServerSocket server = new ServerSocket(portNumber);
-
+            
             while (true) {
                 Socket client = server.accept();
                 ServerThread bank = new ServerThread(client);
@@ -92,11 +92,11 @@ public class Bank implements Runnable{
         Account account = new Account(assignAccountNumber(),
                                       startingBalance,
                                       startingBalance);
-
+        
         if (!this.getAccounts().contains(account)) {
             this.getAccounts().add(account);
         }
-
+        
         return account;
     }
     
@@ -137,21 +137,21 @@ public class Bank implements Runnable{
     public ArrayList<AuctionHouse> getAuctionHouses() {
         return auctionHouses;
     }
-
-
+    
+    
     /**
      * Transfers funds from an Agent account to an AuctionHouse account.
      */
     public synchronized void transferFunds(int auctionHouseAccountNumber,
-                                            int agentAccountNumber,
-                                            double amount) throws Exception{
-
+                                           int agentAccountNumber,
+                                           double amount) throws Exception{
+        
         Account houseAccount = accounts.get(auctionHouseAccountNumber);
         Account agentAccount = accounts.get(agentAccountNumber);
-
+        
         synchronized (houseAccount){
             synchronized (agentAccount){
-
+                
                 if(agentAccount.getPendingBalance() >= amount){
                     //transfer funds from agent to auction house
                     agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
@@ -165,22 +165,22 @@ public class Bank implements Runnable{
             }
         }
     }
-
-
-
-
+    
+    
+    
+    
     // private sub class
     private static class ServerThread implements Runnable {
-
+        
         private Socket client;
         private BufferedReader stdIn;
         private ObjectInputStream inputStream;
         private ObjectOutputStream outputStream;
-
+        
         // constructor
         public ServerThread(Socket client) {
             this.client = client;
-
+            
             try {
                 stdIn = new BufferedReader(new InputStreamReader(System.in));
                 outputStream = new ObjectOutputStream(client.getOutputStream());
@@ -191,7 +191,7 @@ public class Bank implements Runnable{
                 io.printStackTrace();
             }
         }
-
+        
         /**
          * Function to close the client from the server.
          */
@@ -205,21 +205,21 @@ public class Bank implements Runnable{
                 io.printStackTrace();
             }
         }
-
+        
         @Override
         public void run() {
             String output, input = null;
-
+            
             try {
                 do {
                     try {
                         input = (String) inputStream.readObject();
                         System.out.println(input);
-
+                        
                         if (input.equalsIgnoreCase("bye")) {
                             input = null;
                         }
-
+                        
                         output = stdIn.readLine();
                         if (output != "") {
                             outputStream.writeObject("server: " + output);
@@ -236,14 +236,14 @@ public class Bank implements Runnable{
             }
         }
     }
-
-
-
-
-
+    
+    
+    
+    
+    
     //TODO
-
-
+    
+    
     /**
      * Handles messages received from Houses and Agents.
      */

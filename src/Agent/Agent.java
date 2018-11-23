@@ -13,17 +13,21 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Agent.java is the class that bids on objects inside the auction house.
  * Danan High, 11/13/2018
  */
-public class Agent implements Runnable {
+public class Agent implements Runnable, Serializable {
 
     private int id, key;
     private Account account;
     private AuctionHouseProxy auctionHouseProxy;
     private BankProxy bank;
     private Item item = null;
-    private AuctionHouse auctionHouse;
+    private AuctionHouse auctionHouse = null;
     private ArrayList<AuctionHouse> houseList;
     private ArrayList itemList;
-    private LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
+    private LinkedBlockingQueue<TestMessage<Agent, Bid>> bids = new
+        LinkedBlockingQueue<>();
+    private LinkedBlockingQueue<TestMessage<Agent, String>> stringBids = new
+        LinkedBlockingQueue<TestMessage<Agent, String>>();
+    private boolean connected = true;
     
     private static String hostName;
     private static int portNumber;
@@ -33,7 +37,7 @@ public class Agent implements Runnable {
      */
     public Agent() {
         auctionHouseProxy = new AuctionHouseProxy();
-        bank = new BankProxy(hostName, portNumber);
+        bank = new BankProxy(hostName, portNumber, this);
     }
 
     /**
@@ -42,7 +46,7 @@ public class Agent implements Runnable {
      */
     private void placeBid(int bidAmount) {
         Bid bid = new Bid(item, this, bidAmount);
-        Message message = new Message(this, auctionHouse, bid);
+        Message message = new Message("bid");
 //        auctionHouseProxy.placeBid(message);
     }
 
@@ -87,6 +91,11 @@ public class Agent implements Runnable {
     private void setKey() {
 //        key = bank.setKey();
     }
+    
+    /**
+     * Setting the connected status to not connected.
+     */
+    public void setConnected() { connected = !connected; }
 
     /**
      * Getting and setting the new account information from the bank.
@@ -114,25 +123,6 @@ public class Agent implements Runnable {
         openNewBankAccount();
         account.toString();
     }
-
-    /**
-     * Analyzing the replies from the auction houses, based on the bids the
-     * agent has made.
-     */
-
-
-    /*****************************************************************/
-    /*                                                               */
-    /*                  Tester Socket/Server Functions               */
-    /*                                                               */
-    /*****************************************************************/
-
-    /**
-     * Connecting to the test bank
-     */
-    private void connectToTestBank() {
-        bank.connectToServer();
-    }
     
 
     /*****************************************************************/
@@ -150,15 +140,17 @@ public class Agent implements Runnable {
             BufferedReader userIn =
                     new BufferedReader(new InputStreamReader(System.in));
             String out = null;
+            AuctionHouse holder;
             connectToBank();
-            while (true) {
-                if (messages.size() > 0) {
-                    Message message = messages.take();
+            while (connected) {
+                if (bids.size() > 0 || stringBids.size() > 0) {
+                    TestMessage<Agent, Bid> message = bids.take();
+                    TestMessage<Agent, String> stringMessage = stringBids.take();
                 }
 
                 out = userIn.readLine();
                 if (out != null) {
-                    bank.sendMessage(this, out);
+                    bank.sendMessage(out, this);
                     out = null;
                 }
             }
@@ -167,7 +159,6 @@ public class Agent implements Runnable {
         } catch (IOException io) {
             io.printStackTrace();
         }
-        connectToTestBank();
     }
     
     /**
