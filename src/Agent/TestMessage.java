@@ -10,6 +10,7 @@ import java.io.Serializable;
  */
 public class TestMessage<T, U> implements Serializable {
     
+    private static final long serialVersionUID = 3L;
     private transient T sender;
     private U detailedMessage;
     

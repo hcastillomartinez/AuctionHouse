@@ -9,6 +9,8 @@ import java.io.Serializable;
  * @author Daniel Miller
  */
 public class Account implements Serializable{
+    
+    private static final long serialVersionUID = 1L;
     private int id;
     private double balance, pendingBalance;
     private String name;

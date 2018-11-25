@@ -10,6 +10,7 @@ import java.io.Serializable;
  */
 public class Bid implements Serializable {
     
+    private static final long serialVersionUID = 2L;
     private Agent bidder;
     private Item item;
     private double amount;

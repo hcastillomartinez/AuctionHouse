@@ -13,7 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Agent.java is the class that bids on objects inside the auction house.
  * Danan High, 11/13/2018
  */
-public class Agent implements Runnable, Serializable {
+public class Agent implements Runnable {
 
     private int id, key;
     private Account account = null;
@@ -22,7 +22,7 @@ public class Agent implements Runnable, Serializable {
     private Item item = null;
     private AuctionHouse auctionHouse = null;
     private ArrayList<AuctionHouse> houseList;
-    private ArrayList itemList;
+    private ArrayList<Item> itemList;
     private LinkedBlockingQueue<TestMessage<Object, Object>> messages
         = new LinkedBlockingQueue<>();
     private boolean connected = true;
@@ -79,6 +79,7 @@ public class Agent implements Runnable, Serializable {
     /**
      * Get items from the auction house that can be bid on.
      */
+    @SuppressWarnings("unchecked")
     private void getItems() {
         itemList = (ArrayList) auctionHouseProxy.getItemList();
     }
@@ -145,26 +146,35 @@ public class Agent implements Runnable, Serializable {
     @SuppressWarnings("unchecked")
     private void analyzeMessages(TestMessage<Object, Object>
                                      message) {
-        Class senderClass = message.getSender().getClass();
-        Class messageClass = message.getDetailedMessage().getClass();
-        
-        if (senderClass.equals(AuctionHouseProxy.class)) {
-            if (messageClass.equals(Item.class)) {
-                itemList.add(message.getDetailedMessage());
-            } else if (messageClass.equals(String.class)) {
+        if (message.getSender()
+                   .getClass()
+                   .equals(AuctionHouseProxy.class)) {
+            if (message.getDetailedMessage()
+                       .getClass()
+                       .equals(Item.class)) {
+                itemList.add((Item) message.getDetailedMessage());
+            } else if (message.getDetailedMessage()
+                              .getClass()
+                              .equals(String.class)) {
                 String mail = (String) message.getDetailedMessage();
             }
-        } else if (senderClass.equals(BankProxy.class)) {
-            if (messageClass.equals(Account.class)) {
+        } else if (message.getSender()
+                          .getClass()
+                          .equals(BankProxy.class)) {
+            if (message.getDetailedMessage()
+                       .getClass()
+                       .equals(Account.class)) {
                 if (account != null) {
                     account = (Account) message.getDetailedMessage();
                 }
-            } else if (messageClass.equals(String.class)) {
+            } else if (message.getDetailedMessage()
+                              .getClass()
+                              .equals(String.class)) {
                 String mail = (String) message.getDetailedMessage();
                 if (mail.equalsIgnoreCase("name and amount")) {
                     bank.sendMessage(this,
-                                     new TestMessage(this,
-                                                     openNewBankAccount()));
+                                     new TestMessage<Agent, Account>(this,
+                                                                     openNewBankAccount()));
                 }
             }
         }

@@ -88,8 +88,9 @@ public class Bank implements Runnable {
     /**
      * Creates and returns an account.
      */
-    public Account makeAccount(int startingBalance) {
-        Account account = new Account(assignAccountNumber(),
+    public Account makeAccount(String name, int startingBalance) {
+        Account account = new Account(name,
+                                      assignAccountNumber(),
                                       startingBalance,
                                       startingBalance);
         

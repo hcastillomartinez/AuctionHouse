@@ -13,6 +13,7 @@ import java.io.Serializable;
  */
 public class Message implements Serializable {
 
+    private static final long serialVersionUID = 4L;
     private AuctionHouse auctionHouse = null;
     private BankProxy bankProxy = null;
     private AuctionHouseProxy auctionHouseProxy = null;

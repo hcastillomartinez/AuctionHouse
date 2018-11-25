@@ -12,28 +12,28 @@ public class MessageAnalyzer {
     }
     
     public int checkSender() {
-        Class sender = this.message.getSender().getClass();
-        
-        if (sender.equals(Agent.class)) {
+        if (message.getSender().getClass().equals(Agent.class)) {
             return 1;
-        } else if (sender.equals(AuctionHouse.class)) {
+        } else if (message.getSender().getClass().equals(AuctionHouse.class)) {
             return 2;
-        } else if (sender.equals(Bank.class)) {
+        } else if (message.getSender().getClass().equals(Bank.class)) {
             return 3;
-        } else if (sender.equals(TestBank.class)) {
+        } else if (message.getSender().getClass().equals(TestBank.class)) {
             return 4;
         }
         return 0;
     }
     
     public int checkDetailedMessage() {
-        Class detailedMessage = message.getDetailedMessage().getClass();
-        
-        if (detailedMessage.equals(Bid.class)) {
+        if (message.getDetailedMessage().getClass().equals(Bid.class)) {
             return 1;
-        } else if (detailedMessage.equals(Account.class)) {
+        } else if (message.getDetailedMessage()
+                          .getClass()
+                          .equals(Account.class)) {
             return 2;
-        } else if (detailedMessage.equals(String.class)) {
+        } else if (message.getDetailedMessage()
+                          .getClass()
+                          .equals(String.class)) {
             return 3;
         }
         return 0;

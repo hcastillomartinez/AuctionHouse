@@ -88,6 +88,7 @@ public class BankProxy implements Runnable {
      * Overriding the run method to perform specialized tasks.
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void run() {
         try {
             TestMessage<Object, Object> response;
@@ -122,27 +123,36 @@ public class BankProxy implements Runnable {
     /**
      * Function to handle the analyzing of the messages.
      */
-    private TestMessage analyzeMessages(TestMessage<Object, Object> message) {
-        Class senderClass = message.getSender().getClass();
-        Class messageClass = message.getDetailedMessage().getClass();
-        
-        if (senderClass.equals(AuctionHouseProxy.class)) {
-            if (messageClass.equals(String.class)) {
+    @SuppressWarnings("unchecked")
+    private TestMessage<Object, Object> analyzeMessages(TestMessage<Object, Object> message) {
+        if (message.getSender()
+                   .getClass()
+                   .equals(AuctionHouseProxy.class)) {
+            if (message.getDetailedMessage()
+                       .getClass()
+                       .equals(String.class)) {
                 String response = (String) message.getDetailedMessage();
                 // look back here for setting up the auction house proxy
                 // response.
                 
             }
-        } else if (senderClass.equals(Agent.class)) {
-            if (messageClass.equals(String.class)) {
+        } else if (message.getSender()
+                          .getClass()
+                          .equals(Agent.class)) {
+            if (message.getDetailedMessage()
+                       .getClass()
+                       .equals(String.class)) {
                 String mail = (String) message.getDetailedMessage();
                 
                 if (mail.contains("new account")) {
                     String sendBack = "name and amount";
-                    return new TestMessage(this, sendBack);
+                    return new TestMessage<Object, Object>(this, sendBack);
                 }
-            } else if (messageClass.equals(Account.class)) {
-                return new TestMessage(this, message.getDetailedMessage());
+            } else if (message.getDetailedMessage()
+                              .getClass()
+                              .equals(Account.class)) {
+                return new TestMessage<Object, Object>(this,
+                                                       message.getDetailedMessage());
             }
         }
         return null;
@@ -152,7 +162,7 @@ public class BankProxy implements Runnable {
      * Creates and assigns an account to an agent.
      * @return the newly opened account
      */
-    private Account openAccount(String name, double balance){
+    public Account openAccount(String name, double balance){
         return new Account(name,
                            agent.getId(),
                            balance,
