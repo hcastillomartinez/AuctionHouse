@@ -1,8 +1,7 @@
 package Agent;
 
-import Agent.*;
 import AuctionHouse.*;
-import Bank.Account;
+import Bank.*;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -12,10 +11,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The Bank class.
- * @author Daniel Miller
+ * @author Danan High
  * @version 11-13-18
  */
 public class TestBank implements Runnable {
+    
     private ArrayList<Agent> agents; //list of agent accounts
     private ArrayList<AuctionHouse> auctionHouses; //list of auction house accounts
     private ArrayList<Account> accounts;
@@ -46,10 +46,9 @@ public class TestBank implements Runnable {
      */
     
     public static void main(String[] args) throws Exception {
-        if(args.length >= 1){
+        if (args.length >= 1) {
             portNumber = Integer.parseInt(args[0]);
-        }
-        else{
+        } else {
             System.out.println("Error: Invalid program arguments. The first argument must be the bank port number.");
             return;
         }
@@ -77,7 +76,7 @@ public class TestBank implements Runnable {
             
             while (true) {
                 Socket client = server.accept();
-                ServerThread bank = new ServerThread(client);
+                ServerThread bank = new ServerThread(client, this);
                 (new Thread(bank)).start();
             }
         }
@@ -89,8 +88,9 @@ public class TestBank implements Runnable {
     /**
      * Creates and returns an account.
      */
-    public Account makeAccount(int startingBalance) {
-        Account account = new Account(assignAccountNumber(),
+    public Account makeAccount(String name, double startingBalance) {
+        Account account = new Account(name,
+                                      assignAccountNumber(),
                                       startingBalance,
                                       startingBalance);
         
@@ -177,10 +177,12 @@ public class TestBank implements Runnable {
         private BufferedReader stdIn;
         private ObjectInputStream in;
         private ObjectOutputStream out;
+        private TestBank bank;
         
         // constructor
-        public ServerThread(Socket client) {
+        public ServerThread(Socket client, TestBank bank) {
             this.client = client;
+            this.bank = bank;
             
             try {
                 stdIn = new BufferedReader(new InputStreamReader(System.in));
@@ -209,7 +211,6 @@ public class TestBank implements Runnable {
         
         @Override
         public void run() {
-            String output;
             Message input = null;
             
             try {
@@ -217,9 +218,14 @@ public class TestBank implements Runnable {
                     try {
                         out.writeObject("Server has received message");
                         
-                        @SuppressWarnings("unchecked") TestMessage<Agent, String>
-                            agentMessage = (TestMessage<Agent, String>) in.readObject();
-                        System.out.println(agentMessage.getDetailedMessage());
+                        // getting the message from the sender.
+                        @SuppressWarnings("unchecked")
+                        TestMessage<Object, Object> agentMessage
+                            = (TestMessage<Object, Object>) in.readObject();
+                        
+                        MessageAnalyzer analyzer = new MessageAnalyzer(agentMessage);
+                        
+                        
                         
                         if (input.getDetailedMessage().equalsIgnoreCase("bye")) {
                             input = null;

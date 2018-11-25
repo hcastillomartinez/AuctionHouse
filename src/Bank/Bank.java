@@ -14,7 +14,7 @@ import java.util.LinkedList;
  * @author Daniel Miller
  * @version 11-13-18
  */
-public class Bank implements Runnable{
+public class Bank implements Runnable {
     private ArrayList<Agent> agents; //list of agent accounts
     private ArrayList<AuctionHouse> auctionHouses; //list of auction house accounts
     private ArrayList<Account> accounts;

@@ -16,17 +16,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Agent implements Runnable, Serializable {
 
     private int id, key;
-    private Account account;
+    private Account account = null;
     private AuctionHouseProxy auctionHouseProxy;
     private BankProxy bank;
     private Item item = null;
     private AuctionHouse auctionHouse = null;
     private ArrayList<AuctionHouse> houseList;
     private ArrayList itemList;
-    private LinkedBlockingQueue<TestMessage<Agent, Bid>> bids = new
-        LinkedBlockingQueue<>();
-    private LinkedBlockingQueue<TestMessage<Agent, String>> stringBids = new
-        LinkedBlockingQueue<TestMessage<Agent, String>>();
+    private LinkedBlockingQueue<TestMessage<Object, Object>> messages
+        = new LinkedBlockingQueue<>();
     private boolean connected = true;
     
     private static String hostName;
@@ -100,8 +98,26 @@ public class Agent implements Runnable, Serializable {
     /**
      * Getting and setting the new account information from the bank.
      */
-    private void openNewBankAccount() {
-        account = bank.openAccount((new Random()).nextInt(100000));
+    private Account openNewBankAccount() {
+        synchronized (account) {
+            Scanner scanner = new Scanner(System.in);
+            if (account != null) {
+                if (account != null) {
+                    // getting the account name
+                    System.out.print("name: ");
+                    String name = scanner.next();
+                    System.out.println();
+        
+                    // getting the account starting amount
+                    System.out.print("staring balance: ");
+                    Double amount = scanner.nextDouble();
+                    System.out.println();
+        
+                    return bank.openAccount(name, amount);
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -120,10 +136,46 @@ public class Agent implements Runnable, Serializable {
      */
     private void connectToBank() {
         bank.connectToServer();
-        openNewBankAccount();
         account.toString();
     }
+
+    /**
+     * Function to handle the analyzing of the messages.
+     */
+    @SuppressWarnings("unchecked")
+    private void analyzeMessages(TestMessage<Object, Object>
+                                     message) {
+        Class senderClass = message.getSender().getClass();
+        Class messageClass = message.getDetailedMessage().getClass();
+        
+        if (senderClass.equals(AuctionHouseProxy.class)) {
+            if (messageClass.equals(Item.class)) {
+                itemList.add(message.getDetailedMessage());
+            } else if (messageClass.equals(String.class)) {
+                String mail = (String) message.getDetailedMessage();
+            }
+        } else if (senderClass.equals(BankProxy.class)) {
+            if (messageClass.equals(Account.class)) {
+                if (account != null) {
+                    account = (Account) message.getDetailedMessage();
+                }
+            } else if (messageClass.equals(String.class)) {
+                String mail = (String) message.getDetailedMessage();
+                if (mail.equalsIgnoreCase("name and amount")) {
+                    bank.sendMessage(this,
+                                     new TestMessage(this,
+                                                     openNewBankAccount()));
+                }
+            }
+        }
+    }
     
+    /**
+     * Function to add to the list.
+     */
+    public void addMessage(TestMessage<Object, Object> testMessage) {
+        messages.add(testMessage);
+    }
 
     /*****************************************************************/
     /*                                                               */
@@ -137,19 +189,26 @@ public class Agent implements Runnable, Serializable {
     @Override
     public void run() {
         try {
-            BufferedReader userIn =
-                    new BufferedReader(new InputStreamReader(System.in));
             String out = null;
             AuctionHouse holder;
+            BufferedReader userIn =
+                    new BufferedReader(new InputStreamReader(System.in));
+            TestMessage<Object, Object> in = null;
+            
             connectToBank();
+            
             while (connected) {
-                if (bids.size() > 0 || stringBids.size() > 0) {
-                    TestMessage<Agent, Bid> message = bids.take();
-                    TestMessage<Agent, String> stringMessage = stringBids.take();
+                if (messages.size() > 0) {
+                    in = messages.take();
+                    
+                    analyzeMessages(in);
                 }
 
                 out = userIn.readLine();
                 if (out != null) {
+                    if (out.equalsIgnoreCase("bye")) {
+                        connected = false;
+                    }
                     bank.sendMessage(out, this);
                     out = null;
                 }

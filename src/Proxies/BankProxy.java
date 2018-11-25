@@ -7,6 +7,7 @@ import Bank.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -28,7 +29,7 @@ public class BankProxy implements Runnable {
     private ObjectOutputStream out;
     private Socket client = null;
     
-    private LinkedBlockingQueue<TestMessage<Agent, String>> messageList =
+    private LinkedBlockingQueue<TestMessage<Object, Object>> messageList =
         new LinkedBlockingQueue<>();
     
     /**
@@ -75,7 +76,7 @@ public class BankProxy implements Runnable {
     /**
      * Adding a message to the banks input stream.
      */
-    public void sendMessage(String inMessage, Agent agent) {
+    public void sendMessage(Object inMessage, Object agent) {
         try {
             messageList.put(new TestMessage<>(agent, inMessage));
         } catch (InterruptedException ie) {
@@ -89,19 +90,18 @@ public class BankProxy implements Runnable {
     @Override
     public void run() {
         try {
-            TestMessage<Agent, String> response;
+            TestMessage<Object, Object> response;
 
             do {
                 try {
                     response = messageList.take();
                     if (response != null) {
-                        // analyze the message will happen here
-                        // and then proper passing of the object will occur
-                        out.writeObject(response);
+                        agent.addMessage(analyzeMessages(response));
                     }
                     
                     // testing code to read from the server
-                    System.out.println(in.readObject());
+                    @SuppressWarnings("unchecked") TestMessage<Object, Object> m
+                        = (TestMessage<Object, Object>) in.readObject();
                 } catch (EOFException eof) {
                     System.out.println("Server has been closed");
                     break;
@@ -119,16 +119,44 @@ public class BankProxy implements Runnable {
             ie.printStackTrace();
         }
     }
+    /**
+     * Function to handle the analyzing of the messages.
+     */
+    private TestMessage analyzeMessages(TestMessage<Object, Object> message) {
+        Class senderClass = message.getSender().getClass();
+        Class messageClass = message.getDetailedMessage().getClass();
+        
+        if (senderClass.equals(AuctionHouseProxy.class)) {
+            if (messageClass.equals(String.class)) {
+                String response = (String) message.getDetailedMessage();
+                // look back here for setting up the auction house proxy
+                // response.
+                
+            }
+        } else if (senderClass.equals(Agent.class)) {
+            if (messageClass.equals(String.class)) {
+                String mail = (String) message.getDetailedMessage();
+                
+                if (mail.contains("new account")) {
+                    String sendBack = "name and amount";
+                    return new TestMessage(this, sendBack);
+                }
+            } else if (messageClass.equals(Account.class)) {
+                return new TestMessage(this, message.getDetailedMessage());
+            }
+        }
+        return null;
+    }
 
     /**
      * Creates and assigns an account to an agent.
      * @return the newly opened account
      */
-    public Account openAccount(int balance){
-        
-        //// -------------------------------------------------------------->
-        return new Account(8, 90, 90);
-        
+    private Account openAccount(String name, double balance){
+        return new Account(name,
+                           agent.getId(),
+                           balance,
+                           balance);
     }
 
     /**

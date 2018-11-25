@@ -11,6 +11,7 @@ import java.io.Serializable;
 public class Account implements Serializable{
     private int id;
     private double balance, pendingBalance;
+    private String name;
 
     /**
      * Constructor for Account.
@@ -19,7 +20,8 @@ public class Account implements Serializable{
      * @param balance the account balance
      * @param pendingBalance the pending account balance
      */
-    public Account(int id, double balance, double pendingBalance){
+    public Account(String name, int id, double balance, double pendingBalance){
+        this.name = name;
         this.id = id;
         this.balance = balance;
         this.pendingBalance = pendingBalance;

@@ -2,9 +2,15 @@ package Agent;
 
 import java.io.Serializable;
 
+/**
+ * TestMessage is a class to test the message sending between classes.
+ * @author Danan High
+ * @param <T>
+ * @param <U>
+ */
 public class TestMessage<T, U> implements Serializable {
     
-    private T sender;
+    private transient T sender;
     private U detailedMessage;
     
     /**
