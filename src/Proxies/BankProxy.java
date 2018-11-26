@@ -120,6 +120,7 @@ public class BankProxy implements Runnable {
             ie.printStackTrace();
         }
     }
+
     /**
      * Function to handle the analyzing of the messages.
      */

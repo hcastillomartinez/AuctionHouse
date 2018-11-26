@@ -2,6 +2,7 @@ package Agent;
 
 import AuctionHouse.*;
 import Bank.*;
+import Proxies.AuctionHouseProxy;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -194,7 +195,7 @@ public class TestBank implements Runnable {
                 io.printStackTrace();
             }
         }
-        
+
         /**
          * Function to close the client from the server.
          */
@@ -210,26 +211,22 @@ public class TestBank implements Runnable {
         }
         
         @Override
+        @SuppressWarnings("unchecked")
         public void run() {
-            Message input = null;
-            
+            TestMessage<Object, Object> input = null;
+            MessageAnalyzer analyzer = new MessageAnalyzer();
+
             try {
                 do {
                     try {
-                        out.writeObject("Server has received message");
-                        
-                        // getting the message from the sender.
-                        @SuppressWarnings("unchecked")
+
+                        // getting message from the sender
                         TestMessage<Object, Object> agentMessage
                             = (TestMessage<Object, Object>) in.readObject();
-                        
-                        MessageAnalyzer analyzer = new MessageAnalyzer(agentMessage);
-                        
-                        
-                        
-                        if (input.getDetailedMessage().equalsIgnoreCase("bye")) {
-                            input = null;
-                        }
+
+                        // replying to the sender
+                        out.writeObject(analyzer.analyze(agentMessage));
+
                     } catch (ClassNotFoundException cnf) {
                         cnf.printStackTrace();
                     } catch (EOFException eof) {

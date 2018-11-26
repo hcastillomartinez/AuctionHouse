@@ -23,8 +23,7 @@ public class Agent implements Runnable {
     private AuctionHouse auctionHouse = null;
     private ArrayList<AuctionHouse> houseList;
     private ArrayList<Item> itemList;
-    private LinkedBlockingQueue<TestMessage<Object, Object>> messages
-        = new LinkedBlockingQueue<>();
+    private LinkedBlockingQueue<TestMessage<Object, Object>> messages = new LinkedBlockingQueue<>();
     private boolean connected = true;
     
     private static String hostName;
@@ -137,7 +136,6 @@ public class Agent implements Runnable {
      */
     private void connectToBank() {
         bank.connectToServer();
-        account.toString();
     }
 
     /**
@@ -181,10 +179,15 @@ public class Agent implements Runnable {
     }
     
     /**
-     * Function to add to the list.
+     * Function to add to the list of messages.
      */
     public void addMessage(TestMessage<Object, Object> testMessage) {
-        messages.add(testMessage);
+        try {
+            System.out.println(messages);
+            messages.put(testMessage);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
     }
 
     /*****************************************************************/
