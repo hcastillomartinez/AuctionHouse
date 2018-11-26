@@ -24,10 +24,10 @@ public class BankProxy implements Runnable {
     private String host;
     private int port;
     private boolean connected = true;
-    private BufferedReader stdIn;
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private Socket client = null;
+    private AuctionHouse house;
     
     private LinkedBlockingQueue<TestMessage<Object, Object>> messageList =
         new LinkedBlockingQueue<>();
@@ -36,10 +36,11 @@ public class BankProxy implements Runnable {
      * Constructor for the bank proxy.
      * Builds a reference to the bank for bank functionality
      */
-    public BankProxy(String host, int port, Agent agent) {
+    public BankProxy(String host, int port, Agent agent, AuctionHouse house) {
         this.host = host;
         this.port = port;
         this.agent = agent;
+        this.house = house;
     }
     
     /**
@@ -51,7 +52,6 @@ public class BankProxy implements Runnable {
                 out = new ObjectOutputStream(client.getOutputStream());
                 out.flush();
                 in = new ObjectInputStream(client.getInputStream());
-                stdIn = new BufferedReader(new InputStreamReader(System.in));
             } else {
                 System.out.println("Client has not been connected");
             }
@@ -76,9 +76,10 @@ public class BankProxy implements Runnable {
     /**
      * Adding a message to the banks input stream.
      */
-    public void sendMessage(Object inMessage, Object agent) {
+    @SuppressWarnings("unchecked")
+    public void sendAgentMessage(Object client, Object inMessage) {
         try {
-            messageList.put(new TestMessage<>(agent, inMessage));
+            messageList.put(new TestMessage(client, inMessage));
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
@@ -95,68 +96,33 @@ public class BankProxy implements Runnable {
 
             do {
                 try {
-                    response = messageList.take();
-                    if (response != null) {
-                        agent.addMessage(analyzeMessages(response));
+                    if (messageList.size() > 0) {
+                        response = messageList.take();
+                        out.writeObject(response);
                     }
-                    
+
                     // testing code to read from the server
-                    @SuppressWarnings("unchecked") TestMessage<Object, Object> m
-                        = (TestMessage<Object, Object>) in.readObject();
+                    response = (TestMessage<Object, Object>) in.readObject();
+                    if (agent != null) {
+                        agent.addMessage(response);
+                    } else if (house != null) {
+//                        house.addMessage(response);
+                    }
                 } catch (EOFException eof) {
+                    agent.setConnected();
+                    out.close();
+                    in.close();
                     System.out.println("Server has been closed");
                     break;
                 } catch (ClassNotFoundException cnf) {
                     cnf.printStackTrace();
                 }
             } while (connected);
-            agent.setConnected();
-            out.close();
-            in.close();
-            stdIn.close();
         } catch (IOException io) {
             io.printStackTrace();
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
-    }
-
-    /**
-     * Function to handle the analyzing of the messages.
-     */
-    @SuppressWarnings("unchecked")
-    private TestMessage<Object, Object> analyzeMessages(TestMessage<Object, Object> message) {
-        if (message.getSender()
-                   .getClass()
-                   .equals(AuctionHouseProxy.class)) {
-            if (message.getDetailedMessage()
-                       .getClass()
-                       .equals(String.class)) {
-                String response = (String) message.getDetailedMessage();
-                // look back here for setting up the auction house proxy
-                // response.
-                
-            }
-        } else if (message.getSender()
-                          .getClass()
-                          .equals(Agent.class)) {
-            if (message.getDetailedMessage()
-                       .getClass()
-                       .equals(String.class)) {
-                String mail = (String) message.getDetailedMessage();
-                
-                if (mail.contains("new account")) {
-                    String sendBack = "name and amount";
-                    return new TestMessage<Object, Object>(this, sendBack);
-                }
-            } else if (message.getDetailedMessage()
-                              .getClass()
-                              .equals(Account.class)) {
-                return new TestMessage<Object, Object>(this,
-                                                       message.getDetailedMessage());
-            }
-        }
-        return null;
     }
 
     /**

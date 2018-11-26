@@ -174,23 +174,18 @@ public class TestBank implements Runnable {
     // private sub class
     private static class ServerThread implements Runnable {
         
-        private Socket client;
-        private BufferedReader stdIn;
         private ObjectInputStream in;
         private ObjectOutputStream out;
         private TestBank bank;
         
         // constructor
         public ServerThread(Socket client, TestBank bank) {
-            this.client = client;
             this.bank = bank;
             
             try {
-                stdIn = new BufferedReader(new InputStreamReader(System.in));
                 out = new ObjectOutputStream(client.getOutputStream());
                 out.flush();
                 in = new ObjectInputStream(client.getInputStream());
-                out.writeObject(new Message("connected!"));
             } catch (IOException io) {
                 io.printStackTrace();
             }
@@ -204,36 +199,56 @@ public class TestBank implements Runnable {
                 out.writeObject("Server has closed!");
                 in.close();
                 out.close();
-                stdIn.close();
             } catch (IOException io) {
                 io.printStackTrace();
             }
         }
-        
+
+        /**
+         * Function to respond after message analysis
+         */
+        private TestMessage<Object, Object> response(int analysis) {
+            if (analysis == 2) {
+                // create account
+                new TestMessage<Object, Object>(bank, "confirmed");
+            } else if (analysis == 4) {
+                // return auction house list
+            } else if (analysis == 6) {
+                // return account information as a string to the agent
+            } else if (analysis == 5) {
+                // return the auction house id for the agent
+            } else if (analysis == 8) {
+                // remove funds from the agents account
+                // message will be a string so need to parse into a double
+            } else if (analysis == 18) {
+                // remove the funds from this message agents account
+            }
+            return null;
+        }
+
         @Override
         @SuppressWarnings("unchecked")
         public void run() {
-            TestMessage<Object, Object> input = null;
             MessageAnalyzer analyzer = new MessageAnalyzer();
+            boolean connected = true;
+            TestMessage<Object, Object> message;
 
             try {
                 do {
                     try {
-
-                        // getting message from the sender
-                        TestMessage<Object, Object> agentMessage
-                            = (TestMessage<Object, Object>) in.readObject();
-
-                        // replying to the sender
-                        out.writeObject(analyzer.analyze(agentMessage));
+                        // get message from the sender, analyze and respond
+                        message = (TestMessage<Object, Object>) in.readObject();
+                        System.out.println("Message = " + message);
+                        out.writeObject(response(analyzer.analyze(message)));
 
                     } catch (ClassNotFoundException cnf) {
                         cnf.printStackTrace();
                     } catch (EOFException eof) {
+                        connected = false;
                         System.out.println("Client has disconnected!");
                         break;
                     }
-                } while (input != null);
+                } while (connected);
                 closeClient();
             } catch (IOException io) {
                 io.printStackTrace();

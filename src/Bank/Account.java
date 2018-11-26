@@ -35,8 +35,8 @@ public class Account implements Serializable{
      */
     @Override
     public synchronized String toString() {
-        return "Account{" +
-                "id=" + id +
+        return "Account{name="+ name +
+                ", id=" + id +
                 ", balance=" + balance +
                 ", pendingBalance=" + pendingBalance +
                 '}';

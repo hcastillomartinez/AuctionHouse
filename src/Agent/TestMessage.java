@@ -39,4 +39,7 @@ public class TestMessage<T, U> implements Serializable {
     public U getDetailedMessage() {
         return detailedMessage;
     }
+
+    public String toString() { return "TM = {" + getSender() + "," + getDetailedMessage() + "}"; }
+
 }

@@ -32,9 +32,15 @@ public class Agent implements Runnable {
     /**
      * Constructor for the Agent.
      */
-    public Agent() {
-        auctionHouseProxy = new AuctionHouseProxy();
-        bank = new BankProxy(hostName, portNumber, this);
+    public Agent(String hostName, int portNumber) {
+        this.hostName = hostName;
+        this.portNumber = portNumber;
+
+
+        this.bank = new BankProxy(this.hostName,
+                                  this.portNumber,
+                                  this,
+                                  null);
     }
 
     /**
@@ -44,7 +50,6 @@ public class Agent implements Runnable {
     private void placeBid(int bidAmount) {
         Bid bid = new Bid(item, this, bidAmount);
         Message message = new Message("bid");
-//        auctionHouseProxy.placeBid(message);
     }
 
     /**
@@ -89,6 +94,8 @@ public class Agent implements Runnable {
     private void setKey() {
 //        key = bank.setKey();
     }
+
+    public void setBank(BankProxy bank) { this.bank = bank; }
     
     /**
      * Setting the connected status to not connected.
@@ -98,24 +105,19 @@ public class Agent implements Runnable {
     /**
      * Getting and setting the new account information from the bank.
      */
-    private Account openNewBankAccount() {
-        synchronized (account) {
-            Scanner scanner = new Scanner(System.in);
-            if (account != null) {
-                if (account != null) {
-                    // getting the account name
-                    System.out.print("name: ");
-                    String name = scanner.next();
-                    System.out.println();
+    private synchronized Account openNewBankAccount() {
+        Scanner scanner = new Scanner(System.in);
+        if (account == null) {
+            // getting the account name
+            System.out.print("name: ");
+            String name = scanner.next();
+
+            // getting the account starting amount
+            System.out.print("staring balance: ");
+            double amount = scanner.nextDouble();
+            System.out.println();
         
-                    // getting the account starting amount
-                    System.out.print("staring balance: ");
-                    Double amount = scanner.nextDouble();
-                    System.out.println();
-        
-                    return bank.openAccount(name, amount);
-                }
-            }
+            return new Account(name, getId(), amount, amount);
         }
         return null;
     }
@@ -137,46 +139,6 @@ public class Agent implements Runnable {
     private void connectToBank() {
         bank.connectToServer();
     }
-
-    /**
-     * Function to handle the analyzing of the messages.
-     */
-    @SuppressWarnings("unchecked")
-    private void analyzeMessages(TestMessage<Object, Object>
-                                     message) {
-        if (message.getSender()
-                   .getClass()
-                   .equals(AuctionHouseProxy.class)) {
-            if (message.getDetailedMessage()
-                       .getClass()
-                       .equals(Item.class)) {
-                itemList.add((Item) message.getDetailedMessage());
-            } else if (message.getDetailedMessage()
-                              .getClass()
-                              .equals(String.class)) {
-                String mail = (String) message.getDetailedMessage();
-            }
-        } else if (message.getSender()
-                          .getClass()
-                          .equals(BankProxy.class)) {
-            if (message.getDetailedMessage()
-                       .getClass()
-                       .equals(Account.class)) {
-                if (account != null) {
-                    account = (Account) message.getDetailedMessage();
-                }
-            } else if (message.getDetailedMessage()
-                              .getClass()
-                              .equals(String.class)) {
-                String mail = (String) message.getDetailedMessage();
-                if (mail.equalsIgnoreCase("name and amount")) {
-                    bank.sendMessage(this,
-                                     new TestMessage<Agent, Account>(this,
-                                                                     openNewBankAccount()));
-                }
-            }
-        }
-    }
     
     /**
      * Function to add to the list of messages.
@@ -190,6 +152,34 @@ public class Agent implements Runnable {
         }
     }
 
+    /**
+     * Function to respond after message analysis
+     */
+    private TestMessage<Object, Object> response(int analysis) {
+        if (analysis == 14) {
+            // update the account from the bank
+        } else if (analysis == 3) {
+            // confirmation that the bank has created an account
+            System.out.println("here");
+        } else if (analysis == 15) {
+            // set the auction house id for the specific auction house int
+            // make sure to have a current auction house
+        } else if (analysis == 4) {
+            // set the list of auction houses from the bank
+        } else if (analysis == 10) {
+            // bid has been denied
+        } else if (analysis == 16) {
+            // been outbid
+        } else if (analysis == 9) {
+            // bid has been accepted
+        } else if (analysis == 17) {
+            // the bid statuse
+        } else if (analysis == 11) {
+            // setting the item won (adding to a list of items won?)
+        }
+        return null;
+    }
+
     /*****************************************************************/
     /*                                                               */
     /*                         Override Functions                    */
@@ -201,43 +191,30 @@ public class Agent implements Runnable {
      */
     @Override
     public void run() {
+        TestMessage<Object, Object> in = null;
+        MessageAnalyzer analyzer = new MessageAnalyzer();
+
         try {
-            String out = null;
-            AuctionHouse holder;
-            BufferedReader userIn =
-                    new BufferedReader(new InputStreamReader(System.in));
-            TestMessage<Object, Object> in = null;
-            
+            // look back here
+            bank.sendAgentMessage(this, openNewBankAccount());
             connectToBank();
-            
+
             while (connected) {
                 if (messages.size() > 0) {
                     in = messages.take();
-                    
-                    analyzeMessages(in);
-                }
-
-                out = userIn.readLine();
-                if (out != null) {
-                    if (out.equalsIgnoreCase("bye")) {
-                        connected = false;
-                    }
-                    bank.sendMessage(out, this);
-                    out = null;
+                    bank.sendAgentMessage(this, response(analyzer.analyze(in)));
                 }
             }
         } catch (InterruptedException ie) {
             ie.printStackTrace();
-        } catch (IOException io) {
-            io.printStackTrace();
         }
     }
     
     /**
      * Overriding toString to print out the class.
      */
-    @Override
-    public String toString() { return id + " has balance: "; }
+//    @Override
+//    public String toString() { return id + " has balance: "; }
 
     /**
      * Main method to start the program for the user/agent.
@@ -245,7 +222,7 @@ public class Agent implements Runnable {
     public static void main(String[] args) throws IOException {
         hostName = args[0];
         portNumber = Integer.parseInt(args[1]);
-        Agent agent = new Agent();
+        Agent agent = new Agent(hostName, portNumber);
         (new Thread(agent)).start();
     }
 }

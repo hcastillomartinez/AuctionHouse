@@ -101,9 +101,9 @@ public class MessageAnalyzer {
                 return BID_ACCEPTANCE;
             } else if (mail.contains("place")) {
                 return BID_STATUS;
+            } else if (mail.contains("$")) {
+                return REMOVE_FUNDS;
             }
-        } else if (messageID == 6) { // amount to remove from the bank account
-            return REMOVE_FUNDS;
         } else if (messageID == 8) { // transferring item to agent
             return ITEM_TRANSFER;
         } else if (messageID == 9) { // checking agent account balance for bid
