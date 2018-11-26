@@ -25,6 +25,11 @@ public class MessageAnalyzer {
     private final int ITEM_TRANSFER = 11;
     private final int GET_ITEMS = 12;
     private final int CHECK_BID_STATUS = 13;
+    private final int ACCOUNT_UPDATE = 14;
+    private final int AUCTION_HOUSE_ID = 15;
+    private final int OUT_BID = 16;
+    private final int BID_STATUS = 17;
+    private final int AGENT_BALANCE = 18;
 
     /**
      * Function to analyze and respond to the messages from the
@@ -63,17 +68,17 @@ public class MessageAnalyzer {
     private int bankResponse(int messageID,
                              Object message) {
         if (messageID == 2) { // account from bank
-            return CREATE_ACCOUNT;
+            return ACCOUNT_UPDATE;
         } else if (messageID == 3) { // string from bank
             String mail = (String) message;
             if (mail.contains("confirmed")) {
                 return BANK_CONFIRMATION;
             }
         } else if (messageID == 4) { // id from the bank
-            return GET_AUCTIONHOUSE_ID;
+            return AUCTION_HOUSE_ID;
         } else if (messageID == 5) { // list of the auction houses from bank
             return GET_HOUSES;
-        } else if (messageID == 6) {
+        } else if (messageID == 6) { // amount
             return ACCOUNT_BALANCE;
         }
         return 0;
@@ -86,21 +91,23 @@ public class MessageAnalyzer {
      */
     private int auctionHouseResponse(int messageID,
                                      Object message) {
-        if (messageID == 1) { // bid
-            return BID_FROM_AGENT;
-        } else if (messageID == 2) { // account from bank
-            return CREATE_ACCOUNT;
-        } else if (messageID == 3) { // string from bank
+        if (messageID == 3) { // string from bank
             String mail = (String) message;
-            if (mail.contains("confirmed")) {
-                return BANK_CONFIRMATION;
+            if (mail.contains("bid denied")) {
+                return BID_DENIAL;
+            } else if (mail.contains("out bid")) {
+                return OUT_BID;
+            } else if (mail.contains("bid accepted")) {
+                return BID_ACCEPTANCE;
+            } else if (mail.contains("place")) {
+                return BID_STATUS;
             }
-        } else if (messageID == 4) { // id from the bank
-            return GET_AUCTIONHOUSE_ID;
-        } else if (messageID == 5) { // list of the auction houses from bank
-            return GET_HOUSES;
-        } else if (messageID == 6) { // amount to remove from the bank accnt
+        } else if (messageID == 6) { // amount to remove from the bank account
             return REMOVE_FUNDS;
+        } else if (messageID == 8) { // transferring item to agent
+            return ITEM_TRANSFER;
+        } else if (messageID == 9) { // checking agent account balance for bid
+            return AGENT_BALANCE;
         }
         return 0;
     }
@@ -127,6 +134,8 @@ public class MessageAnalyzer {
             } else if (mail.contains("status")) {
                 return CHECK_BID_STATUS;
             }
+        } else if (messageID == 7) { // getting the id for the auction house
+            return GET_AUCTIONHOUSE_ID;
         }
         return 0;
     }
@@ -139,16 +148,18 @@ public class MessageAnalyzer {
     private int testBankResponse(int messageID,
                                  Object message) {
         if (messageID == 2) { // account from bank
-            return CREATE_ACCOUNT;
+            return ACCOUNT_UPDATE;
         } else if (messageID == 3) { // string from bank
             String mail = (String) message;
             if (mail.contains("confirmed")) {
                 return BANK_CONFIRMATION;
             }
         } else if (messageID == 4) { // id from the bank
-            return GET_AUCTIONHOUSE_ID;
+            return AUCTION_HOUSE_ID;
         } else if (messageID == 5) { // list of the auction houses from bank
             return GET_HOUSES;
+        } else if (messageID == 6) { // amount
+            return ACCOUNT_BALANCE;
         }
         return 0;
     }
@@ -160,19 +171,23 @@ public class MessageAnalyzer {
      */
     private int testAuctionHouse(int messageID,
                                  Object message) {
-        if (messageID == 1) { // bid
-            return BID_FROM_AGENT;
-        } else if (messageID == 2) { // account from bank
-            return CREATE_ACCOUNT;
-        } else if (messageID == 3) { // string from bank
+        if (messageID == 3) { // string from bank
             String mail = (String) message;
-            if (mail.contains("confirmed")) {
-                return BANK_CONFIRMATION;
+            if (mail.contains("bid denied")) {
+                return BID_DENIAL;
+            } else if (mail.contains("out bid")) {
+                return OUT_BID;
+            } else if (mail.contains("bid accepted")) {
+                return BID_ACCEPTANCE;
+            } else if (mail.contains("place")) {
+                return BID_STATUS;
             }
-        } else if (messageID == 4) { // id from the bank
-            return GET_AUCTIONHOUSE_ID;
-        } else if (messageID == 5) { // list of the auction houses from bank
-            return GET_HOUSES;
+        } else if (messageID == 6) { // amount to remove from the bank account
+            return REMOVE_FUNDS;
+        } else if (messageID == 8) { // transferring item to agent
+            return ITEM_TRANSFER;
+        } else if (messageID == 9) { // checking agent account balance for bid
+            return AGENT_BALANCE;
         }
         return 0;
     }
@@ -205,7 +220,9 @@ public class MessageAnalyzer {
      * @return number for the specific message type
      */
     private int checkDetailedMessage(TestMessage<Object, Object> message) {
-        if (message.getDetailedMessage().getClass().equals(Bid.class)) {
+        if (message.getDetailedMessage()
+                   .getClass()
+                   .equals(Bid.class)) {
             return 1;
         } else if (message.getDetailedMessage()
                           .getClass()
@@ -215,12 +232,30 @@ public class MessageAnalyzer {
                           .getClass()
                           .equals(String.class)) {
             return 3;
-        } else if (message.getDetailedMessage().getClass().equals(int.class)) {
+        } else if (message.getDetailedMessage()
+                          .getClass()
+                          .equals(int.class)) {
             return 4;
-        } else if (message.getDetailedMessage().getClass().equals(List.class)) {
+        } else if (message.getDetailedMessage()
+                          .getClass()
+                          .equals(List.class)) {
             return 5;
-        } else if (message.getDetailedMessage().getClass().equals(double.class)) {
+        } else if (message.getDetailedMessage()
+                          .getClass()
+                          .equals(double.class)) {
             return 6;
+        } else if (message.getDetailedMessage()
+                          .getClass()
+                          .equals(AuctionHouse.class)) {
+            return 7;
+        } else if (message.getDetailedMessage()
+                          .getClass()
+                          .equals(Item.class)) {
+            return 8;
+        } else if (message.getDetailedMessage()
+                .getClass()
+                .equals(Agent.class)) {
+            return 9;
         }
         return 0;
     }
