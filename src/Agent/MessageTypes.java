@@ -7,6 +7,9 @@ package Agent;
  */
 public enum MessageTypes {
 
+    // will continue adding more as more types are determined for message
+// sending between the types
+    
     BID("bid"),
     GET_HOUSES("get houses"),
     GET_ITEMS("get items"),
