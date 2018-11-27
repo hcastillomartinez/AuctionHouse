@@ -5,7 +5,6 @@ import Agent.Bid;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -14,6 +13,7 @@ public class AuctionHouse implements Runnable{
     private int bidderTally;
     private String type;
     private double houseFunds;
+    private int houseID;
     private List<Item> itemList;
     private List<Auction> auctions;
     private MakeItems makeItems;
@@ -39,6 +39,7 @@ public class AuctionHouse implements Runnable{
             winningBids=new LinkedBlockingQueue<>();
             itemList = makeItems.getItems(Integer.parseInt(type));
             this.type = makeItems.getListType();
+            setHouseID();
             this.port=Integer.parseInt(port);
             this.serverName=serverName;
             serverSocket = new ServerSocket(this.port);
@@ -48,26 +49,20 @@ public class AuctionHouse implements Runnable{
     }
 
 
-    private class AuctionServer implements Runnable{
-        List<Socket> allClients;
-        Socket client;
-        public AuctionServer(){
-
-        }
-
-
-
-        @Override
-        public void run(){
-
-        }
-    }
     /**
      * Gets the amount of money a house has.
      * @return Amount of money the house has, double.
      */
     public double getHouseFunds() {
         return houseFunds;
+    }
+
+    /**
+     * Gets the ID of the auction house.
+     * @return An int, is the ID
+     */
+    public int getHouseID() {
+        return houseID;
     }
 
     /**
@@ -138,14 +133,51 @@ public class AuctionHouse implements Runnable{
         return min;
     }
 
+    private void setHouseID(){
+        houseID=((int)(Math.random()*60000)+1)-((int)(Math.random()*60000)+1);
+    }
+
+    private class Server implements Runnable{
+        private Socket client;
+        private BufferedReader stdIn;
+        private BufferedInputStream in;
+        private BufferedOutputStream out;
+        private List<Socket> clients;
+
+//        public Server(Socket client){
+//            this.client=client;
+//            apendClientList(client);
+//        }
+
+        public List<Socket> getClientsConnected() {
+            return clients;
+        }
+
+        private void removeClient(Socket client){
+            clients.remove(client);
+        }
+        private void apendClientList(Socket client){
+            clients.add(client);
+        }
+        @Override
+        public void run(){
+//            try{
+////
+////            }catch()
+        }
+    }
 
 
     @Override
     public void run(){
+        Server server=new Server();
+        Thread serverThread=new Thread(server);
+        serverThread.start();
         while(true){
             try {
                 System.out.println("waiting for agents");
                 Socket agent = serverSocket.accept();
+                server.apendClientList(agent);
             }catch(IOException i){
                 System.out.println(i);
             }
@@ -153,17 +185,9 @@ public class AuctionHouse implements Runnable{
     }
 
 
-    public static void main(String[] args) throws IOException{
-        int port=Integer.parseInt(args[2]);
-        String serverName=args[3];
-        ServerSocket serverSocket=new ServerSocket(port);
-
-
-//        while(true){
-//
-//        }
-//        AuctionHouse auctionHouse=new AuctionHouse(args[0],args[1],args[3]);
-//        Thread t=new Thread(auctionHouse);
-//        t.start();
+    public static void main(String[] args){
+        AuctionHouse auctionHouse=new AuctionHouse(args[0],args[1],args[3]);
+        Thread t=new Thread(auctionHouse);
+        t.start();
     }
 }

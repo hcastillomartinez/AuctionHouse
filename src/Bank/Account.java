@@ -2,13 +2,18 @@ package Bank;
 
 import Agent.Agent;
 
+import java.io.Serializable;
+
 /**
  * Bank Account Class
  * @author Daniel Miller
  */
-public class Account {
+public class Account implements Serializable{
+    
+    private static final long serialVersionUID = 1L;
     private int id;
     private double balance, pendingBalance;
+    private String name;
 
     /**
      * Constructor for Account.
@@ -17,7 +22,8 @@ public class Account {
      * @param balance the account balance
      * @param pendingBalance the pending account balance
      */
-    public Account(int id, double balance, double pendingBalance){
+    public Account(String name, int id, double balance, double pendingBalance){
+        this.name = name;
         this.id = id;
         this.balance = balance;
         this.pendingBalance = pendingBalance;
@@ -29,8 +35,8 @@ public class Account {
      */
     @Override
     public synchronized String toString() {
-        return "Account{" +
-                "id=" + id +
+        return "Account{name="+ name +
+                ", id=" + id +
                 ", balance=" + balance +
                 ", pendingBalance=" + pendingBalance +
                 '}';

@@ -1,6 +1,8 @@
 package Agent;
 
 import AuctionHouse.AuctionHouse;
+import Proxies.AuctionHouseProxy;
+import Proxies.BankProxy;
 
 import java.io.Serializable;
 
@@ -11,7 +13,10 @@ import java.io.Serializable;
  */
 public class Message implements Serializable {
 
+    private static final long serialVersionUID = 4L;
     private AuctionHouse auctionHouse = null;
+    private BankProxy bankProxy = null;
+    private AuctionHouseProxy auctionHouseProxy = null;
     private Agent agent = null;
     private TestBank testBank = null;
     private String detailedMessage = null;
@@ -19,33 +24,10 @@ public class Message implements Serializable {
 
     /**
      * Constructor for the message class.
-     * @param sender for the message
-     * @param receiver for the message
      * @param detailedMessage for the message
      */
-    public Message(Object sender, Object receiver, Object detailedMessage) {
-        assignClasses(sender);
-        assignClasses(receiver);
-        assignClasses(detailedMessage);
-    }
-    
-    /**
-     * Function to assign the sender and receiver to their respective classes.
-     * @param object to assign.
-     */
-    private void assignClasses(Object object) {
-        if (object.getClass().equals(AuctionHouse.class)) {
-            auctionHouse = (AuctionHouse) object;
-        } else if (object.getClass().equals(Agent.class)) {
-            agent = (Agent) object;
-        } else if (object.getClass().equals(TestBank.class)) {
-            testBank = (TestBank) object;
-        } else if (object.getClass().equals(Bid.class)) {
-            bid = (Bid) object;
-        } else if (object.getClass().equals(String.class)) {
-            this.detailedMessage = (String) object;
-        }
-        
+    public Message(String detailedMessage) {
+        this.detailedMessage = detailedMessage;
     }
 
     /**
@@ -76,7 +58,7 @@ public class Message implements Serializable {
      * Returning the detailedMessage from the message.
      * @return detailedMessage giving directions/requests.
      */
-    public Object getDetailedMessage() {
+    public String getDetailedMessage() {
         return detailedMessage;
     }
 

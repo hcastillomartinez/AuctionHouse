@@ -6,8 +6,8 @@ public class TestBankMethods {
 
     public static void main(String args[]){
         Bank bank = new Bank(null, 4444);
-        Account auctionAccount = bank.makeAccount(500);
-        Account agentAccount = bank.makeAccount(1000);
+        Account auctionAccount = bank.makeAccount("phil",500);
+        Account agentAccount = bank.makeAccount("phil",1000);
         bank.getAccounts().add(auctionAccount);
         bank.getAccounts().add(agentAccount);
 

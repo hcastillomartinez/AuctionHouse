@@ -1,42 +1,191 @@
 package Agent;
 
-import AuctionHouse.AuctionHouse;
-import Bank.Account;
+import AuctionHouse.*;
+import Bank.*;
+import Proxies.AuctionHouseProxy;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
-public class TestBank {
-
-    private ArrayList<Account> userAccounts;
-    private ArrayList<AuctionHouse> auctionHouses;
-    private int accountNumber = 0;
-
-    private static int portNumber;
-
-    public TestBank() {
-        userAccounts = new ArrayList<>();
-        auctionHouses = new ArrayList<>();
+/**
+ * The Bank class.
+ * @author Danan High
+ * @version 11-13-18
+ */
+public class TestBank implements Runnable {
+    
+    private ArrayList<Agent> agents; //list of agent accounts
+    private ArrayList<AuctionHouse> auctionHouses; //list of auction house accounts
+    private ArrayList<Account> accounts;
+    private int currentAccountNumber = 0;
+    static private String address;
+    static private int portNumber;
+    
+    /**
+     It is static and at a known address (IP address and port number)
+     It hosts
+     a list of agent accounts
+     a list of auction house accounts
+     It shares the list of auction houses with agents having bank accounts
+     It provides agents with secret keys for use in the bidding process
+     It transfers funds from agent to auction accounts, under agent control
+     It blocks and unblocks funds in agent accounts, at the request of action houses
+     
+     
+     Will have a proxy
+     
+     Some sort of pending balance:
+     every time you make a bid on a new item
+     subtract that amount from pending balance
+     
+     
+     
+     we need to create the bank first
+     */
+    
+    public static void main(String[] args) throws Exception {
+        if (args.length >= 1) {
+            portNumber = Integer.parseInt(args[0]);
+        } else {
+            System.out.println("Error: Invalid program arguments. The first argument must be the bank port number.");
+            return;
+        }
+        
+        TestBank bank = new TestBank(address, portNumber);
+        
+        (new Thread(bank)).start();
     }
-
+    
+    /**
+     * Constructor for Bank
+     *
+     */
+    public TestBank(String address, int portNumber){
+        agents = new ArrayList<Agent>();
+        auctionHouses = new ArrayList<AuctionHouse>();
+        accounts = new ArrayList<Account>();
+    }
+    
+    @Override
+    public void run(){
+        
+        try{
+            ServerSocket server = new ServerSocket(portNumber);
+            
+            while (true) {
+                Socket client = server.accept();
+                ServerThread bank = new ServerThread(client, this);
+                (new Thread(bank)).start();
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Creates and returns an account.
+     */
+    public Account makeAccount(String name, double startingBalance) {
+        Account account = new Account(name,
+                                      assignAccountNumber(),
+                                      startingBalance,
+                                      startingBalance);
+        
+        if (!this.getAccounts().contains(account)) {
+            this.getAccounts().add(account);
+        }
+        
+        return account;
+    }
+    
+    /**
+     * Adds an auction house to the list of auction houses.
+     */
+    public void addAuctionHouse(AuctionHouse house){
+        this.auctionHouses.add(house);
+    }
+    
+    /**
+     * Assigns an account number to an agent and increments the current account number
+     */
+    private int assignAccountNumber() {
+        int number = this.currentAccountNumber;
+        this.currentAccountNumber++;
+        return number;
+    }
+    
+    /**
+     * Gets the list of bank accounts
+     * @return
+     */
+    public ArrayList<Account> getAccounts(){
+        return accounts;
+    }
+    
+    /**
+     * Gets list of agents for a auction house.
+     */
+    public ArrayList<Agent> getAgents() {
+        return agents;
+    }
+    
+    /**
+     * Gets list of auction houses for a agent.
+     */
+    public ArrayList<AuctionHouse> getAuctionHouses() {
+        return auctionHouses;
+    }
+    
+    
+    /**
+     * Transfers funds from an Agent account to an AuctionHouse account.
+     */
+    public synchronized void transferFunds(int auctionHouseAccountNumber,
+                                           int agentAccountNumber,
+                                           double amount) throws Exception {
+        
+        Account houseAccount = accounts.get(auctionHouseAccountNumber);
+        Account agentAccount = accounts.get(agentAccountNumber);
+        
+        synchronized (houseAccount){
+            synchronized (agentAccount){
+                
+                if(agentAccount.getPendingBalance() >= amount){
+                    //transfer funds from agent to auction house
+                    agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
+                    agentAccount.setBalance(agentAccount.getBalance() - amount);
+                    houseAccount.setBalance(houseAccount.getBalance() + amount);
+                    houseAccount.setPendingBalance(houseAccount.getPendingBalance() + amount);
+                }
+                else{
+                    throw new Exception(); //"Unable to transfer funds. The agent's pending balance is less than the specified amount."
+                }
+            }
+        }
+    }
+    
+    
+    
+    
     // private sub class
     private static class ServerThread implements Runnable {
-
-        private Socket client;
-        private ObjectInputStream inputStream;
-        private ObjectOutputStream outputStream;
-
+        
+        private ObjectInputStream in;
+        private ObjectOutputStream out;
+        private TestBank bank;
+        
         // constructor
-        public ServerThread(Socket client) {
-            this.client = client;
-
+        public ServerThread(Socket client, TestBank bank) {
+            this.bank = bank;
+            
             try {
-                outputStream = new ObjectOutputStream(client.getOutputStream());
-                outputStream.flush();
-                inputStream = new ObjectInputStream(client.getInputStream());
-                outputStream.writeObject("You have been connected!");
+                out = new ObjectOutputStream(client.getOutputStream());
+                out.flush();
+                in = new ObjectInputStream(client.getInputStream());
             } catch (IOException io) {
                 io.printStackTrace();
             }
@@ -47,69 +196,74 @@ public class TestBank {
          */
         private void closeClient() {
             try {
-                outputStream.writeObject("Server " + client.getLocalAddress() + " has closed.");
-                inputStream.close();
-                outputStream.close();
+                out.writeObject("Server has closed!");
+                in.close();
+                out.close();
             } catch (IOException io) {
                 io.printStackTrace();
             }
         }
 
+        /**
+         * Function to respond after message analysis
+         */
+        private TestMessage<Object, Object> response(int analysis) {
+            if (analysis == 2) {
+                // create account
+                new TestMessage<Object, Object>(bank, "confirmed");
+            } else if (analysis == 4) {
+                // return auction house list
+            } else if (analysis == 6) {
+                // return account information as a string to the agent
+            } else if (analysis == 5) {
+                // return the auction house id for the agent
+            } else if (analysis == 8) {
+                // remove funds from the agents account
+                // message will be a string so need to parse into a double
+            } else if (analysis == 18) {
+                // remove the funds from this message agents account
+            }
+            return null;
+        }
+
         @Override
+        @SuppressWarnings("unchecked")
         public void run() {
-            String output, input = null;
+            MessageAnalyzer analyzer = new MessageAnalyzer();
+            boolean connected = true;
+            TestMessage<Object, Object> message;
 
             try {
                 do {
                     try {
-                        input = (String) inputStream.readObject();
-                        System.out.println(input);
-    
-                        if (input.equalsIgnoreCase("hello")) {
-                            outputStream.writeObject("server: hey");
-                        } else if (input.equalsIgnoreCase("hows it going")) {
-                            outputStream.writeObject("server: good");
-                        } else {
-                            outputStream.writeObject("server: I am bored");
-                        }
-                    } catch (EOFException eof) {
-                        System.out.println("Client has been closed!");
-                        break;
+                        // get message from the sender, analyze and respond
+                        message = (TestMessage<Object, Object>) in.readObject();
+                        System.out.println("Message = " + message);
+                        out.writeObject(response(analyzer.analyze(message)));
+
                     } catch (ClassNotFoundException cnf) {
                         cnf.printStackTrace();
+                    } catch (EOFException eof) {
+                        connected = false;
+                        System.out.println("Client has disconnected!");
+                        break;
                     }
-                } while (!input.equalsIgnoreCase("bye"));
+                } while (connected);
                 closeClient();
             } catch (IOException io) {
                 io.printStackTrace();
             }
         }
     }
-
-    // getting the user accounts
-    private ArrayList<Account> getUserAccounts() { return userAccounts; }
-
-    // testing making a new account for the user
-    private void makeAccount(int accountSize, Agent agent, TestBank bank) {
-        ArrayList<Account> accounts = bank.getUserAccounts();
-
-        Account account = new Account(accountNumber,
-                                      accountSize,
-                                      accountSize);
-        if (!accounts.contains(account)) {
-            accounts.add(account);
-        }
-    }
-
-    public static void main(String[] args) throws IOException {
-        portNumber = Integer.parseInt(args[0]);
-
-        ServerSocket server = new ServerSocket(portNumber);
-
-        while (true) {
-            Socket client = server.accept();
-            ServerThread bank = new ServerThread(client);
-            (new Thread(bank)).start();
-        }
-    }
+    
+    
+    
+    
+    
+    //TODO
+    
+    
+    /**
+     * Handles messages received from Houses and Agents.
+     */
 }

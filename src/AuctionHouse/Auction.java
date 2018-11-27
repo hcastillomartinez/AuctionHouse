@@ -114,7 +114,8 @@ public class Auction implements Runnable{
             System.out.println("current winner "+currentWinner);
         }
         else{
-            System.out.println(currentBidderID+" need to beat "+bidToBeat+" ,you bid "+bid);
+            System.out.println(currentBidderID+" need to beat "+bidToBeat
+                    +" ,you bid "+bid);
         }
     }
 

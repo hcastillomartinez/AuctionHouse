@@ -7,20 +7,20 @@ package Agent;
  */
 public enum MessageTypes {
 
-    OPEN_ACCOUNT("open account"),
+    BID("bid"),
     GET_HOUSES("get houses"),
     GET_ITEMS("get items"),
-    TRANSFER_FUNDS("transfer funds"),
     GET_USERS("get users"),
-    BID(Bid.class);
+    OPEN_ACCOUNT("open account"),
+    TRANSFER_FUNDS("transfer funds");
 
-    private final Object message;
+    private final String message;
 
     /**
      * Constructor for the MessageType.
      * @param message message for the constructor.
      */
-    MessageTypes(Object message) {
+    MessageTypes(String message) {
         this.message = message;
     }
 
@@ -29,29 +29,15 @@ public enum MessageTypes {
      * message.
      * @return response to the message.
      */
-    public int analyze(MessageTypes type) {
+    public int analyze(String inMessage) {
         int response = 0;
 
-        switch (type) {
-            case OPEN_ACCOUNT:
-                response = 1;
-                break;
-            case GET_ITEMS:
-                response = 2;
-                break;
-            case GET_USERS:
-                response = 3;
-                break;
-            case GET_HOUSES:
-                response = 4;
-                break;
-            case TRANSFER_FUNDS:
-                response = 5;
-                break;
-            case BID:
-                response = 6;
-                break;
+        for (int i = 1; i < values().length; i++) {
+            if (values()[i].message.equalsIgnoreCase(inMessage)) {
+                return i;
+            }
         }
+
         return response;
     }
 }

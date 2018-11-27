@@ -14,7 +14,7 @@ import java.util.LinkedList;
  * @author Daniel Miller
  * @version 11-13-18
  */
-public class Bank implements Runnable{
+public class Bank implements Runnable {
     private ArrayList<Agent> agents; //list of agent accounts
     private ArrayList<AuctionHouse> auctionHouses; //list of auction house accounts
     private ArrayList<Account> accounts;
@@ -39,8 +39,6 @@ public class Bank implements Runnable{
      every time you make a bid on a new item
      subtract that amount from pending balance
      
-     
-     
      we need to create the bank first
      */
     
@@ -52,9 +50,9 @@ public class Bank implements Runnable{
             System.out.println("Error: Invalid program arguments. The first argument must be the bank port number.");
             return;
         }
-
+        
         Bank bank = new Bank(address, portNumber);
-
+        
         (new Thread(bank)).start();
     }
     
@@ -67,13 +65,24 @@ public class Bank implements Runnable{
         auctionHouses = new ArrayList<AuctionHouse>();
         accounts = new ArrayList<Account>();
     }
-    
+
+    /**
+     * Pseudocode
+     * while(true)
+     *      message = messageQueue.take()
+     *      analyze message
+     *      carry out action specified by message
+     */
     @Override
     public void run(){
 
+        //todo is this correct?
+        //Shouldn't this code just be in the main method.
+        //Message handling code should be in the run method.
+        //Why are we creating multiple bank threads? Do they share the same resources?
         try{
             ServerSocket server = new ServerSocket(portNumber);
-
+            
             while (true) {
                 Socket client = server.accept();
                 ServerThread bank = new ServerThread(client);
@@ -88,15 +97,16 @@ public class Bank implements Runnable{
     /**
      * Creates and returns an account.
      */
-    public Account makeAccount(int startingBalance) {
-        Account account = new Account(assignAccountNumber(),
+    public Account makeAccount(String name, int startingBalance) {
+        Account account = new Account(name,
+                                      assignAccountNumber(),
                                       startingBalance,
                                       startingBalance);
-
+        
         if (!this.getAccounts().contains(account)) {
             this.getAccounts().add(account);
         }
-
+        
         return account;
     }
     
@@ -137,21 +147,21 @@ public class Bank implements Runnable{
     public ArrayList<AuctionHouse> getAuctionHouses() {
         return auctionHouses;
     }
-
-
+    
+    
     /**
      * Transfers funds from an Agent account to an AuctionHouse account.
      */
     public synchronized void transferFunds(int auctionHouseAccountNumber,
-                                            int agentAccountNumber,
-                                            double amount) throws Exception{
-
+                                           int agentAccountNumber,
+                                           double amount) throws Exception{
+        
         Account houseAccount = accounts.get(auctionHouseAccountNumber);
         Account agentAccount = accounts.get(agentAccountNumber);
-
+        
         synchronized (houseAccount){
             synchronized (agentAccount){
-
+                
                 if(agentAccount.getPendingBalance() >= amount){
                     //transfer funds from agent to auction house
                     agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
@@ -165,22 +175,22 @@ public class Bank implements Runnable{
             }
         }
     }
-
-
-
-
+    
+    
+    
+    
     // private sub class
     private static class ServerThread implements Runnable {
-
+        
         private Socket client;
         private BufferedReader stdIn;
         private ObjectInputStream inputStream;
         private ObjectOutputStream outputStream;
-
+        
         // constructor
         public ServerThread(Socket client) {
             this.client = client;
-
+            
             try {
                 stdIn = new BufferedReader(new InputStreamReader(System.in));
                 outputStream = new ObjectOutputStream(client.getOutputStream());
@@ -191,7 +201,7 @@ public class Bank implements Runnable{
                 io.printStackTrace();
             }
         }
-
+        
         /**
          * Function to close the client from the server.
          */
@@ -205,21 +215,21 @@ public class Bank implements Runnable{
                 io.printStackTrace();
             }
         }
-
+        
         @Override
         public void run() {
             String output, input = null;
-
+            
             try {
                 do {
                     try {
                         input = (String) inputStream.readObject();
                         System.out.println(input);
-
+                        
                         if (input.equalsIgnoreCase("bye")) {
                             input = null;
                         }
-
+                        
                         output = stdIn.readLine();
                         if (output != "") {
                             outputStream.writeObject("server: " + output);
@@ -236,14 +246,14 @@ public class Bank implements Runnable{
             }
         }
     }
-
-
-
-
-
+    
+    
+    
+    
+    
     //TODO
-
-
+    
+    
     /**
      * Handles messages received from Houses and Agents.
      */

@@ -16,14 +16,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Agent implements Runnable {
 
     private int id, key;
-    private Account account;
+    private Account account = null;
     private AuctionHouseProxy auctionHouseProxy;
     private BankProxy bank;
     private Item item = null;
-    private AuctionHouse auctionHouse;
+    private AuctionHouse auctionHouse = null;
     private ArrayList<AuctionHouse> houseList;
-    private ArrayList itemList;
-    private LinkedBlockingQueue<String> messages = new LinkedBlockingQueue<>();
+    private ArrayList<Item> itemList;
+    private LinkedBlockingQueue<TestMessage<Object, Object>> messages = new LinkedBlockingQueue<>();
+    private boolean connected = true;
     
     private static String hostName;
     private static int portNumber;
@@ -31,9 +32,15 @@ public class Agent implements Runnable {
     /**
      * Constructor for the Agent.
      */
-    public Agent() {
-        auctionHouseProxy = new AuctionHouseProxy();
-        bank = new BankProxy(hostName, portNumber);
+    public Agent(String hostName, int portNumber) {
+        this.hostName = hostName;
+        this.portNumber = portNumber;
+
+
+        this.bank = new BankProxy(this.hostName,
+                                  this.portNumber,
+                                  this,
+                                  null);
     }
 
     /**
@@ -42,8 +49,7 @@ public class Agent implements Runnable {
      */
     private void placeBid(int bidAmount) {
         Bid bid = new Bid(item, this, bidAmount);
-        Message message = new Message(this, auctionHouse, bid);
-//        auctionHouseProxy.placeBid(message);
+        Message message = new Message("bid");
     }
 
     /**
@@ -77,6 +83,7 @@ public class Agent implements Runnable {
     /**
      * Get items from the auction house that can be bid on.
      */
+    @SuppressWarnings("unchecked")
     private void getItems() {
         itemList = (ArrayList) auctionHouseProxy.getItemList();
     }
@@ -88,11 +95,31 @@ public class Agent implements Runnable {
 //        key = bank.setKey();
     }
 
+    public void setBank(BankProxy bank) { this.bank = bank; }
+    
+    /**
+     * Setting the connected status to not connected.
+     */
+    public void setConnected() { connected = !connected; }
+
     /**
      * Getting and setting the new account information from the bank.
      */
-    private void openNewBankAccount() {
-        account = bank.openAccount((new Random()).nextInt(100000));
+    private synchronized Account openNewBankAccount() {
+        Scanner scanner = new Scanner(System.in);
+        if (account == null) {
+            // getting the account name
+            System.out.print("name: ");
+            String name = scanner.next();
+
+            // getting the account starting amount
+            System.out.print("staring balance: ");
+            double amount = scanner.nextDouble();
+            System.out.println();
+        
+            return new Account(name, getId(), amount, amount);
+        }
+        return null;
     }
 
     /**
@@ -111,29 +138,47 @@ public class Agent implements Runnable {
      */
     private void connectToBank() {
         bank.connectToServer();
-        openNewBankAccount();
-        account.toString();
-    }
-
-    /**
-     * Analyzing the replies from the auction houses, based on the bids the
-     * agent has made.
-     */
-
-
-    /*****************************************************************/
-    /*                                                               */
-    /*                  Tester Socket/Server Functions               */
-    /*                                                               */
-    /*****************************************************************/
-
-    /**
-     * Connecting to the test bank
-     */
-    private void connectToTestBank() {
-        bank.connectToServer();
     }
     
+    /**
+     * Function to add to the list of messages.
+     */
+    public void addMessage(TestMessage<Object, Object> testMessage) {
+        try {
+            System.out.println(messages);
+            messages.put(testMessage);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
+    }
+
+    /**
+     * Function to respond after message analysis
+     */
+    private TestMessage<Object, Object> response(int analysis) {
+        if (analysis == 14) {
+            // update the account from the bank
+        } else if (analysis == 3) {
+            // confirmation that the bank has created an account
+            System.out.println("here");
+        } else if (analysis == 15) {
+            // set the auction house id for the specific auction house int
+            // make sure to have a current auction house
+        } else if (analysis == 4) {
+            // set the list of auction houses from the bank
+        } else if (analysis == 10) {
+            // bid has been denied
+        } else if (analysis == 16) {
+            // been outbid
+        } else if (analysis == 9) {
+            // bid has been accepted
+        } else if (analysis == 17) {
+            // the bid statuse
+        } else if (analysis == 11) {
+            // setting the item won (adding to a list of items won?)
+        }
+        return null;
+    }
 
     /*****************************************************************/
     /*                                                               */
@@ -146,22 +191,30 @@ public class Agent implements Runnable {
      */
     @Override
     public void run() {
+        TestMessage<Object, Object> in = null;
+        MessageAnalyzer analyzer = new MessageAnalyzer();
+
         try {
+            // look back here
+            bank.sendAgentMessage(this, openNewBankAccount());
             connectToBank();
-            while (true) {
-                messages.take();
+
+            while (connected) {
+                if (messages.size() > 0) {
+                    in = messages.take();
+                    bank.sendAgentMessage(this, response(analyzer.analyze(in)));
+                }
             }
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
-        connectToTestBank();
     }
     
     /**
      * Overriding toString to print out the class.
      */
-    @Override
-    public String toString() { return id + " has balance: "; }
+//    @Override
+//    public String toString() { return id + " has balance: "; }
 
     /**
      * Main method to start the program for the user/agent.
@@ -169,7 +222,7 @@ public class Agent implements Runnable {
     public static void main(String[] args) throws IOException {
         hostName = args[0];
         portNumber = Integer.parseInt(args[1]);
-        Agent agent = new Agent();
+        Agent agent = new Agent(hostName, portNumber);
         (new Thread(agent)).start();
     }
 }
