@@ -52,8 +52,19 @@ public class Bank implements Runnable {
         }
         
         Bank bank = new Bank(address, portNumber);
-        
-        (new Thread(bank)).start();
+
+        try{
+            ServerSocket server = new ServerSocket(portNumber);
+
+            while (true) {
+                Socket client = server.accept();
+                ServerThread bankServer = new ServerThread(client);
+                (new Thread(bankServer)).start();
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
     }
     
     /**
@@ -76,22 +87,7 @@ public class Bank implements Runnable {
     @Override
     public void run(){
 
-        //todo is this correct?
-        //Shouldn't this code just be in the main method.
-        //Message handling code should be in the run method.
-        //Why are we creating multiple bank threads? Do they share the same resources?
-        try{
-            ServerSocket server = new ServerSocket(portNumber);
-            
-            while (true) {
-                Socket client = server.accept();
-                ServerThread bank = new ServerThread(client);
-                (new Thread(bank)).start();
-            }
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
+
     }
     
     /**
@@ -231,7 +227,7 @@ public class Bank implements Runnable {
                         }
                         
                         output = stdIn.readLine();
-                        if (output != "") {
+                        if (!output.equals("")) {
                             outputStream.writeObject("server: " + output);
                         }
                     } catch (ClassNotFoundException cnf) {
