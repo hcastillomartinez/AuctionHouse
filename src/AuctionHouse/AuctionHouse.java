@@ -13,6 +13,7 @@ public class AuctionHouse implements Runnable{
     private int bidderTally;
     private String type;
     private double houseFunds;
+    private int houseID;
     private List<Item> itemList;
     private List<Auction> auctions;
     private MakeItems makeItems;
@@ -38,6 +39,7 @@ public class AuctionHouse implements Runnable{
             winningBids=new LinkedBlockingQueue<>();
             itemList = makeItems.getItems(Integer.parseInt(type));
             this.type = makeItems.getListType();
+            setHouseID();
             this.port=Integer.parseInt(port);
             this.serverName=serverName;
             serverSocket = new ServerSocket(this.port);
@@ -46,12 +48,21 @@ public class AuctionHouse implements Runnable{
         }
     }
 
+
     /**
      * Gets the amount of money a house has.
      * @return Amount of money the house has, double.
      */
     public double getHouseFunds() {
         return houseFunds;
+    }
+
+    /**
+     * Gets the ID of the auction house.
+     * @return An int, is the ID
+     */
+    public int getHouseID() {
+        return houseID;
     }
 
     /**
@@ -122,30 +133,51 @@ public class AuctionHouse implements Runnable{
         return min;
     }
 
+    private void setHouseID(){
+        houseID=((int)(Math.random()*60000)+1)-((int)(Math.random()*60000)+1);
+    }
+
     private class Server implements Runnable{
         private Socket client;
         private BufferedReader stdIn;
         private BufferedInputStream in;
         private BufferedOutputStream out;
+        private List<Socket> clients;
 
+//        public Server(Socket client){
+//            this.client=client;
+//            apendClientList(client);
+//        }
 
-        public Server(Socket client){
-            this.client=client;
+        public List<Socket> getClientsConnected() {
+            return clients;
         }
 
+        private void removeClient(Socket client){
+            clients.remove(client);
+        }
+        private void apendClientList(Socket client){
+            clients.add(client);
+        }
         @Override
         public void run(){
-
+//            try{
+////
+////            }catch()
         }
     }
 
 
     @Override
     public void run(){
+        Server server=new Server();
+        Thread serverThread=new Thread(server);
+        serverThread.start();
         while(true){
             try {
                 System.out.println("waiting for agents");
                 Socket agent = serverSocket.accept();
+                server.apendClientList(agent);
             }catch(IOException i){
                 System.out.println(i);
             }
