@@ -210,7 +210,9 @@ public class TestBank implements Runnable {
         private TestMessage response(int analysis) {
             if (analysis == 2) {
                 // create account
-                new TestMessage("confirmed");
+                new Message("bank",
+                            MessageTypes.CONFIRMATION,
+                            "confirmed");
             } else if (analysis == 4) {
                 // return auction house list
             } else if (analysis == 6) {
@@ -231,16 +233,15 @@ public class TestBank implements Runnable {
         public void run() {
             MessageAnalyzer analyzer = new MessageAnalyzer();
             boolean connected = true;
-            TestMessage message = null;
+            Message message = null;
 
             try {
                 do {
                     try {
                         // get message from the sender, analyze and respond
-                        message = (TestMessage) in.readObject();
+                        message = (Message) in.readObject();
                         if (message != null) {
-                            out.writeObject(response(analyzer.analyze(this,
-                                                                      message)));
+                            out.writeObject(response(analyzer.analyze(message)));
                         }
 
                     } catch (ClassNotFoundException cnf) {

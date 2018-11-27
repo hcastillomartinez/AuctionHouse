@@ -3,6 +3,7 @@ package Agent;
 import AuctionHouse.*;
 import Bank.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,28 +38,29 @@ public class MessageAnalyzer {
      * @param message message from the server or socket
      * @return response based on the sender of the message
      */
-    public int analyze(Object sender, TestMessage message) {
-        System.out.println("message in analyzer = " + message);
+    public int analyze(Message message) {
+    
+        ArrayList<Object> list = message.getMessageList();
         
-        int senderID = checkSender(sender);
-        int messageID = checkDetailedMessage(message);
-
-        if (senderID == 1) { // agent sender
-            return agentResponse(messageID,
-                                 message.getDetailedMessage());
-        } else if (senderID == 2) { // auction house sender
-            return auctionHouseResponse(messageID,
-                                        message.getDetailedMessage());
-        } else if (senderID == 3) { // bank sender
-            return bankResponse(messageID,
-                                message.getDetailedMessage());
-        } else if (senderID == 4){ // test bank
-            return testBankResponse(messageID,
-                                    message.getDetailedMessage());
-        } else if (senderID == 5) { // test auction house
-            return testAuctionHouse(messageID,
-                                    message.getDetailedMessage());
-        }
+        int senderID = checkSender((String) list.get(0));
+//        int messageID = checkDetailedMessage(message);
+//
+//        if (senderID == 1) { // agent sender
+//            return agentResponse(messageID,
+//                                 message.getDetailedMessage());
+//        } else if (senderID == 2) { // auction house sender
+//            return auctionHouseResponse(messageID,
+//                                        message.getDetailedMessage());
+//        } else if (senderID == 3) { // bank sender
+//            return bankResponse(messageID,
+//                                message.getDetailedMessage());
+//        } else if (senderID == 4){ // test bank
+//            return testBankResponse(messageID,
+//                                    message.getDetailedMessage());
+//        } else if (senderID == 5) { // test auction house
+//            return testAuctionHouse(messageID,
+//                                    message.getDetailedMessage());
+//        }
         return 0;
     }
 
@@ -196,38 +198,22 @@ public class MessageAnalyzer {
 
     /**
      * Getting the sender of the message.
-     * @param message from the sender
+     * @param sender from the sender
      * @return number for the specific sender type
      */
-    private int checkSender(Object message) {
+    private int checkSender(String sender) {
     
-        System.out.println(message.getClass() + " class for");
-        if (message.getClass().equals(Agent.class)) {
-            System.out.println("1");
+        if (sender.equalsIgnoreCase("agent")) {
             return 1;
+        } else if (sender.equalsIgnoreCase("auction house")) {
+            return 2;
+        } else if (sender.equalsIgnoreCase("bank")) {
+            return 3;
+        } else if (sender.equalsIgnoreCase("test bank")) {
+            return 4;
+        } else if (sender.equalsIgnoreCase("test auction house")){
+            return 5;
         }
-//        else if (message.getSender()
-//                          .getClass()
-//                          .equals(AuctionHouse.class)) {
-//            System.out.println("2");
-//            return 2;
-//        } else if (message.getSender()
-//                          .getClass()
-//                          .equals(Bank.class)) {
-//            System.out.println("3");
-//            return 3;
-//        } else if (message.getSender()
-//                          .getClass()
-//                          .equals(TestBank.class)) {
-//            System.out.println("4");
-//            return 4;
-//        } else if (message.getSender()
-//                          .getClass()
-//                          .equals(TestAuctionHouse.class)){
-//            System.out.println("5");
-//            return 5;
-//        }
-//        System.out.println("0");
         return 0;
     }
 

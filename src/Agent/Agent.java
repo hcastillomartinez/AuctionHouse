@@ -15,6 +15,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Danan High, 11/13/2018
  */
 public class Agent implements Runnable {
+    
+    private final String NAME = "agent";
  
     private int id, key;
     private Account account = null;
@@ -24,7 +26,7 @@ public class Agent implements Runnable {
     private AuctionHouse auctionHouse = null;
     private ArrayList<AuctionHouse> houseList;
     private ArrayList<Item> itemList;
-    private BlockingQueue<TestMessage> messages = new LinkedBlockingQueue<>();
+    private BlockingQueue<Message> messageQueue = new LinkedBlockingQueue<>();
     private boolean connected = true;
     
     private static String hostName;
@@ -45,8 +47,8 @@ public class Agent implements Runnable {
      * @param bidAmount amount to bid on the item.
      */
     private void placeBid(int bidAmount) {
-        Bid bid = new Bid(item, this, bidAmount);
-        Message message = new Message("bid");
+        Bid bid = new Bid(item, id, bidAmount);
+        Message message = new Message("Agent", MessageTypes.BID, bid);
     }
 
     /**
@@ -129,20 +131,13 @@ public class Agent implements Runnable {
         auctionHouseProxy.connectToAuctionHouse(auctionHouseHostName,
                                                 auctionHousePortNumber);
     }
-
-    /**
-     * Connecting to the bank.
-     */
-//    private void connectToBank() {
-//        bank.connectToServer();
-//    }
     
     /**
-     * Function to add to the list of messages.
+     * Function to add to the list of messageQueue.
      */
-    public void addMessage(TestMessage testMessage) {
+    public void addMessage(Message message) {
         try {
-            messages.put(testMessage);
+            messageQueue.put(message);
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
@@ -151,7 +146,7 @@ public class Agent implements Runnable {
     /**
      * Function to respond after message analysis
      */
-    private TestMessage response(int analysis) {
+    private Message response(int analysis) {
         if (analysis == 14) {
             // update the account from the bank
         } else if (analysis == 3) {
@@ -187,7 +182,7 @@ public class Agent implements Runnable {
      */
     @Override
     public void run() {
-        TestMessage in = null;
+        Message in = null;
         MessageAnalyzer analyzer = new MessageAnalyzer();
 
         try {
@@ -195,14 +190,16 @@ public class Agent implements Runnable {
                 if (account == null) {
                     // look back here
                     account = openNewBankAccount();
-                    bank.sendAgentMessage(this,
-                                          account);
+    
+                    Bid bid = new Bid(item, id, 87);
+                    bank.sendAgentMessage(new Message(NAME,
+                                                      MessageTypes.BID,
+                                                      bid));
                 }
                 
-                if (messages.size() > 0) {
-                    in = messages.take();
-                    bank.sendAgentMessage(this,// fix here
-                                          response(analyzer.analyze(this, in)));
+                if (messageQueue.size() > 0) {
+                    in = messageQueue.take();
+                    bank.sendAgentMessage(response(analyzer.analyze(in)));
                 }
             }
         } catch (InterruptedException ie) {
@@ -282,8 +279,8 @@ public class Agent implements Runnable {
             - need port number
             - need host name
         -> Notification Server (has own thread, will block on reads)
-            - will store the messages and wait for the auction house proxy to
-              obtain messages
+            - will store the messageQueue and wait for the auction house proxy to
+              obtain messageQueue
         -> Communication Server
     Bank Proxy
         -> Communication Server (will hide all the socket communication and will

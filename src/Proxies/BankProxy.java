@@ -7,7 +7,7 @@ import Bank.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -28,9 +28,7 @@ public class BankProxy implements Runnable {
     private ObjectOutputStream out;
     private Socket client = null;
     private AuctionHouse house;
-    
-    private LinkedBlockingQueue<TestMessage> messageList =
-        new LinkedBlockingQueue<>();
+    private BlockingQueue<Message> messageQueue = new LinkedBlockingQueue<>();
     
     /**
      * Constructor for the bank proxy.
@@ -78,9 +76,9 @@ public class BankProxy implements Runnable {
      * Adding a message to the banks input stream.
      */
     @SuppressWarnings("unchecked")
-    public void sendAgentMessage(Object client, Object inMessage) {
+    public void sendAgentMessage(Message inMessage) {
         try {
-            messageList.put(new TestMessage(inMessage));
+            messageQueue.put(inMessage);
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
@@ -93,18 +91,18 @@ public class BankProxy implements Runnable {
     @SuppressWarnings("unchecked")
     public void run() {
         try {
-            TestMessage response = null, messageInput = null;
+            Message response = null, messageInput = null;
 
             do {
                 try {
-                    messageInput = messageList.take();
+                    messageInput = messageQueue.take();
                     if (messageInput != null) {
                         out.writeObject(messageInput);
                         messageInput = null;
                     }
     
                     // testing code to read from the server
-                    response = (TestMessage) in.readObject();
+                    response = (Message) in.readObject();
                     System.out.println("Response = " + response);
                     if (agent != null) {
                         if (response != null) {
