@@ -8,6 +8,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * The Bank class.
@@ -18,6 +20,7 @@ public class Bank implements Runnable {
     private ArrayList<Agent> agents; //list of agent accounts
     private ArrayList<AuctionHouse> auctionHouses; //list of auction house accounts
     private ArrayList<Account> accounts;
+    private ArrayList<ServerThread> clients;
     private int currentAccountNumber = 0;
     static private String address;
     static private int portNumber;
@@ -179,9 +182,12 @@ public class Bank implements Runnable {
     private static class ServerThread implements Runnable {
         
         private Socket client;
+        private int clientNumber = 0;
         private BufferedReader stdIn;
         private ObjectInputStream inputStream;
         private ObjectOutputStream outputStream;
+        private BlockingDeque<TestMessage> messages = new LinkedBlockingDeque<TestMessage>();
+
         
         // constructor
         public ServerThread(Socket client) {
