@@ -5,41 +5,29 @@ import java.io.Serializable;
 /**
  * TestMessage is a class to test the message sending between classes.
  * @author Danan High
- * @param <T>
- * @param <U>
  */
-public class TestMessage<T, U> implements Serializable {
+public class TestMessage implements Serializable {
     
     private static final long serialVersionUID = 3L;
-    private transient T sender;
-    private U detailedMessage;
+    
+    private Object detailedMessage;
     
     /**
      * Test constructor to test using generics.
-     * @param sender sender of the message.
      * @param detailedMessage message from the sender.
      */
-    public TestMessage(T sender, U detailedMessage) {
-        this.sender = sender;
+    public TestMessage(Object detailedMessage) {
         this.detailedMessage = detailedMessage;
-    }
-
-    /**
-     * Returning the sender of the message.
-     * @return T sender of the message.
-     */
-    public T getSender() {
-        return sender;
     }
 
     /**
      * Returning the detailed message from the sender.
      * @return U detailed message.
      */
-    public U getDetailedMessage() {
+    public Object getDetailedMessage() {
         return detailedMessage;
     }
 
-    public String toString() { return "TM = {" + getSender() + "," + getDetailedMessage() + "}"; }
+    public String toString() { return "TM = {" + getDetailedMessage() + "}"; }
 
 }
