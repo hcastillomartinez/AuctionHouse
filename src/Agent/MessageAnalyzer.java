@@ -40,7 +40,7 @@ public class MessageAnalyzer {
     public int analyze(Object sender, TestMessage message) {
         System.out.println("message in analyzer = " + message);
         
-        int senderID = checkSender(message.getSender());
+        int senderID = checkSender(sender);
         int messageID = checkDetailedMessage(message);
 
         if (senderID == 1) { // agent sender

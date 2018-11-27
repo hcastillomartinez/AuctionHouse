@@ -201,8 +201,8 @@ public class Agent implements Runnable {
                 
                 if (messages.size() > 0) {
                     in = messages.take();
-                    bank.sendAgentMessage(this,
-                                          response(analyzer.analyze(in)));
+                    bank.sendAgentMessage(this,// fix here
+                                          response(analyzer.analyze(this, in)));
                 }
             }
         } catch (InterruptedException ie) {

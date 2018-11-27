@@ -80,7 +80,7 @@ public class BankProxy implements Runnable {
     @SuppressWarnings("unchecked")
     public void sendAgentMessage(Object client, Object inMessage) {
         try {
-            messageList.put(new TestMessage(client, inMessage));
+            messageList.put(new TestMessage(inMessage));
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
