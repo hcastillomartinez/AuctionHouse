@@ -37,8 +37,10 @@ public class MessageAnalyzer {
      * @param message message from the server or socket
      * @return response based on the sender of the message
      */
-    public int analyze(TestMessage<Object, Object> message) {
-        int senderID = checkSender(message);
+    public int analyze(Object sender, TestMessage message) {
+        System.out.println("message in analyzer = " + message);
+        
+        int senderID = checkSender(message.getSender());
         int messageID = checkDetailedMessage(message);
 
         if (senderID == 1) { // agent sender
@@ -197,20 +199,35 @@ public class MessageAnalyzer {
      * @param message from the sender
      * @return number for the specific sender type
      */
-    private int checkSender(TestMessage<Object, Object> message) {
-        if (message.getSender().getClass().equals(Agent.class)) {
+    private int checkSender(Object message) {
+    
+        System.out.println(message.getClass() + " class for");
+        if (message.getClass().equals(Agent.class)) {
+            System.out.println("1");
             return 1;
-        } else if (message.getSender().getClass().equals(AuctionHouse.class)) {
-            return 2;
-        } else if (message.getSender().getClass().equals(Bank.class)) {
-            return 3;
-        } else if (message.getSender().getClass().equals(TestBank.class)) {
-            return 4;
-        } else if (message.getSender()
-                          .getClass()
-                          .equals(TestAuctionHouse.class)){
-            return 5;
         }
+//        else if (message.getSender()
+//                          .getClass()
+//                          .equals(AuctionHouse.class)) {
+//            System.out.println("2");
+//            return 2;
+//        } else if (message.getSender()
+//                          .getClass()
+//                          .equals(Bank.class)) {
+//            System.out.println("3");
+//            return 3;
+//        } else if (message.getSender()
+//                          .getClass()
+//                          .equals(TestBank.class)) {
+//            System.out.println("4");
+//            return 4;
+//        } else if (message.getSender()
+//                          .getClass()
+//                          .equals(TestAuctionHouse.class)){
+//            System.out.println("5");
+//            return 5;
+//        }
+//        System.out.println("0");
         return 0;
     }
 
@@ -219,7 +236,7 @@ public class MessageAnalyzer {
      * @param message from the sender
      * @return number for the specific message type
      */
-    private int checkDetailedMessage(TestMessage<Object, Object> message) {
+    private int checkDetailedMessage(TestMessage message) {
         if (message.getDetailedMessage()
                    .getClass()
                    .equals(Bid.class)) {

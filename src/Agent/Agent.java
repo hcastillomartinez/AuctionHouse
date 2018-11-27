@@ -7,6 +7,7 @@ import Proxies.BankProxy;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -14,7 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Danan High, 11/13/2018
  */
 public class Agent implements Runnable {
-
+ 
     private int id, key;
     private Account account = null;
     private AuctionHouseProxy auctionHouseProxy;
@@ -23,7 +24,7 @@ public class Agent implements Runnable {
     private AuctionHouse auctionHouse = null;
     private ArrayList<AuctionHouse> houseList;
     private ArrayList<Item> itemList;
-    private LinkedBlockingQueue<TestMessage<Object, Object>> messages = new LinkedBlockingQueue<>();
+    private BlockingQueue<TestMessage> messages = new LinkedBlockingQueue<>();
     private boolean connected = true;
     
     private static String hostName;
@@ -33,12 +34,8 @@ public class Agent implements Runnable {
      * Constructor for the Agent.
      */
     public Agent(String hostName, int portNumber) {
-        this.hostName = hostName;
-        this.portNumber = portNumber;
-
-
-        this.bank = new BankProxy(this.hostName,
-                                  this.portNumber,
+        this.bank = new BankProxy(hostName,
+                                  portNumber,
                                   this,
                                   null);
     }
@@ -116,7 +113,7 @@ public class Agent implements Runnable {
             System.out.print("staring balance: ");
             double amount = scanner.nextDouble();
             System.out.println();
-        
+            
             return new Account(name, getId(), amount, amount);
         }
         return null;
@@ -136,16 +133,15 @@ public class Agent implements Runnable {
     /**
      * Connecting to the bank.
      */
-    private void connectToBank() {
-        bank.connectToServer();
-    }
+//    private void connectToBank() {
+//        bank.connectToServer();
+//    }
     
     /**
      * Function to add to the list of messages.
      */
-    public void addMessage(TestMessage<Object, Object> testMessage) {
+    public void addMessage(TestMessage testMessage) {
         try {
-            System.out.println(messages);
             messages.put(testMessage);
         } catch (InterruptedException ie) {
             ie.printStackTrace();
@@ -155,7 +151,7 @@ public class Agent implements Runnable {
     /**
      * Function to respond after message analysis
      */
-    private TestMessage<Object, Object> response(int analysis) {
+    private TestMessage response(int analysis) {
         if (analysis == 14) {
             // update the account from the bank
         } else if (analysis == 3) {
@@ -191,30 +187,28 @@ public class Agent implements Runnable {
      */
     @Override
     public void run() {
-        TestMessage<Object, Object> in = null;
+        TestMessage in = null;
         MessageAnalyzer analyzer = new MessageAnalyzer();
 
         try {
-            // look back here
-            bank.sendAgentMessage(this, openNewBankAccount());
-            connectToBank();
-
             while (connected) {
+                if (account == null) {
+                    // look back here
+                    account = openNewBankAccount();
+                    bank.sendAgentMessage(this,
+                                          account);
+                }
+                
                 if (messages.size() > 0) {
                     in = messages.take();
-                    bank.sendAgentMessage(this, response(analyzer.analyze(in)));
+                    bank.sendAgentMessage(this,
+                                          response(analyzer.analyze(in)));
                 }
             }
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
     }
-    
-    /**
-     * Overriding toString to print out the class.
-     */
-//    @Override
-//    public String toString() { return id + " has balance: "; }
 
     /**
      * Main method to start the program for the user/agent.
