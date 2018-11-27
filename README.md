@@ -35,6 +35,6 @@ If you have tests, then explain how they work and how to use them.
 
 
 ## Daniel's Todo's
-Ask Danan why address and port number are static. Does every instance of Bank need to share the port and address?
-Should we have references to the agent in the bank account? Shouln't it be a reference to the local agent proxy the bank is going through?
+Talk with group about bank run method
 Why does the bank proxy have a run method? It isn't a thread in roman's design.
+Does bank need a messageQueue?

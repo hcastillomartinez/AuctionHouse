@@ -39,8 +39,6 @@ public class Bank implements Runnable {
      every time you make a bid on a new item
      subtract that amount from pending balance
      
-     
-     
      we need to create the bank first
      */
     
@@ -67,10 +65,21 @@ public class Bank implements Runnable {
         auctionHouses = new ArrayList<AuctionHouse>();
         accounts = new ArrayList<Account>();
     }
-    
+
+    /**
+     * Pseudocode
+     * while(true)
+     *      message = messageQueue.take()
+     *      analyze message
+     *      carry out action specified by message
+     */
     @Override
     public void run(){
-        
+
+        //todo is this correct?
+        //Shouldn't this code just be in the main method.
+        //Message handling code should be in the run method.
+        //Why are we creating multiple bank threads? Do they share the same resources?
         try{
             ServerSocket server = new ServerSocket(portNumber);
             
