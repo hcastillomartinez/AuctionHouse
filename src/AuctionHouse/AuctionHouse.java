@@ -133,8 +133,12 @@ public class AuctionHouse implements Runnable{
         return min;
     }
 
+    /**
+     * Sets house ID, very likely to be unique
+     */
     private void setHouseID(){
-        houseID=((int)(Math.random()*60000)+1)-((int)(Math.random()*60000)+1);
+        houseID=
+                ((int)(Math.random()*60000)+30000)-((int)(Math.random()*30000)+1);
     }
 
     private class Server implements Runnable{
@@ -144,21 +148,42 @@ public class AuctionHouse implements Runnable{
         private BufferedOutputStream out;
         private List<Socket> clients;
 
-//        public Server(Socket client){
-//            this.client=client;
-//            apendClientList(client);
-//        }
-
+        /**
+         * Gets the list of current open connections.
+         * @return A list, current clients
+         */
         public List<Socket> getClientsConnected() {
             return clients;
         }
 
-        private void removeClient(Socket client){
+        /**
+         * Goes through clients and closes connections.
+         * @throws IOException
+         */
+        public void closeClients() throws IOException{
+            for(Socket s:clients){
+                s.close();
+            }
+        }
+
+        /**
+         * Removes a specific client and closes its connection.
+         * @param client, Socket
+         * @throws IOException, Since we close sockets.
+         */
+        private void removeClient(Socket client) throws IOException{
+            client.close();
             clients.remove(client);
         }
+
+        /**
+         * Adds clients to list once connection has been established.
+         * @param client
+         */
         private void apendClientList(Socket client){
             clients.add(client);
         }
+
         @Override
         public void run(){
 //            try{
