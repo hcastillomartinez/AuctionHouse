@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Timer;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The Bank class.
@@ -18,6 +20,7 @@ import java.util.Timer;
  */
 public class Bank implements Runnable {
     //todo change these lists to maps
+    private LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
     private ArrayList<Agent> agents; //list of agent accounts
     private ArrayList<AuctionHouse> auctionHouses; //list of auction house accounts
     private ArrayList<Account> accounts;
