@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
@@ -15,9 +16,11 @@ import java.util.LinkedList;
  * @version 11-13-18
  */
 public class Bank implements Runnable {
+    //todo change these lists to maps
     private ArrayList<Agent> agents; //list of agent accounts
     private ArrayList<AuctionHouse> auctionHouses; //list of auction house accounts
     private ArrayList<Account> accounts;
+    private HashMap<Integer,ServerThread> serverThreads;
     private int currentAccountNumber = 0;
     static private String address;
     static private int portNumber;
@@ -64,6 +67,7 @@ public class Bank implements Runnable {
         agents = new ArrayList<Agent>();
         auctionHouses = new ArrayList<AuctionHouse>();
         accounts = new ArrayList<Account>();
+        serverThreads = new HashMap<>();
     }
 
     /**
