@@ -52,7 +52,7 @@ public class Auction implements Runnable{
     private void breakDownBid(Bid b){
         item=b.getItem();
         bidAmount=b.getAmount();
-        currentBidderID=b.getBidder().getId();
+        currentBidderID=b.getBidder();
     }
 
     /**
@@ -65,7 +65,7 @@ public class Auction implements Runnable{
                 if(time>=duration){
                     auctionActive=false;
                     t.cancel();
-                    placeBid(new Bid(null,null,0));
+                    placeBid(new Bid(null,9,0));
                 }
                 else {
                     time++;

@@ -7,12 +7,27 @@ package Agent;
  */
 public enum MessageTypes {
 
+    // will continue adding more as more types are determined for message
+// sending between the types
+    
     BID("bid"),
     GET_HOUSES("get houses"),
     GET_ITEMS("get items"),
     GET_USERS("get users"),
-    OPEN_ACCOUNT("open account"),
-    TRANSFER_FUNDS("transfer funds");
+    CREATE_ACCOUNT("open account"),
+    TRANSFER_FUNDS("transfer funds"),
+    CONFIRMATION("confirmation"),
+    REMOVE_FUNDS("remove funds"),
+    BID_ACCEPTED("bid accepted"),
+    BID_REJECTED("bid rejected"),
+    TRANSFER_ITEM("transfer item"),
+    GET_ID_FROM_AGENT("id number"),
+    BALANCE("get balance"),
+    ACCOUNT_INFO("account information"),
+    BID_STATUS("get bid status"),
+    GET_AGENT_ID_FOR_HOUSE("get id for house"),
+    ACCOUNT_EXISTS("account already exists"),
+    THANKS("thanks");
 
     private final String message;
 
@@ -40,4 +55,27 @@ public enum MessageTypes {
 
         return response;
     }
+
+    /**
+     * Getting the specific message associated with the type.
+     * @return message for the type
+     */
+    public String getMessage() {
+        return message;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

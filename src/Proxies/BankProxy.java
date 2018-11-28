@@ -7,7 +7,7 @@ import Bank.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -28,9 +28,7 @@ public class BankProxy implements Runnable {
     private ObjectOutputStream out;
     private Socket client = null;
     private AuctionHouse house;
-    
-    private LinkedBlockingQueue<TestMessage<Object, Object>> messageList =
-        new LinkedBlockingQueue<>();
+    private BlockingQueue<Message> messageQueue = new LinkedBlockingQueue<>();
     
     /**
      * Constructor for the bank proxy.
@@ -41,6 +39,7 @@ public class BankProxy implements Runnable {
         this.port = port;
         this.agent = agent;
         this.house = house;
+        connectToServer();
     }
     
     /**
@@ -63,7 +62,7 @@ public class BankProxy implements Runnable {
     /**
      * Agent connecting to the bank through the proxy.
      */
-    public void connectToServer() {
+    private void connectToServer() {
         try {
             client = new Socket(host, port);
             setupInputAndOutputStreams();
@@ -77,9 +76,9 @@ public class BankProxy implements Runnable {
      * Adding a message to the banks input stream.
      */
     @SuppressWarnings("unchecked")
-    public void sendAgentMessage(Object client, Object inMessage) {
+    public void sendAgentMessage(Message inMessage) {
         try {
-            messageList.put(new TestMessage(client, inMessage));
+            messageQueue.put(inMessage);
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
@@ -92,19 +91,23 @@ public class BankProxy implements Runnable {
     @SuppressWarnings("unchecked")
     public void run() {
         try {
-            TestMessage<Object, Object> response;
+            Message response = null, messageInput = null;
 
             do {
                 try {
-                    if (messageList.size() > 0) {
-                        response = messageList.take();
-                        out.writeObject(response);
+                    messageInput = messageQueue.take();
+                    if (messageInput != null) {
+                        out.writeObject(messageInput);
+                        messageInput = null;
                     }
-
+    
                     // testing code to read from the server
-                    response = (TestMessage<Object, Object>) in.readObject();
+                    response = (Message) in.readObject();
                     if (agent != null) {
-                        agent.addMessage(response);
+                        if (response != null) {
+                            agent.addMessage(response);
+                            response = null;
+                        }
                     } else if (house != null) {
 //                        house.addMessage(response);
                     }
@@ -116,12 +119,12 @@ public class BankProxy implements Runnable {
                     break;
                 } catch (ClassNotFoundException cnf) {
                     cnf.printStackTrace();
+                } catch (InterruptedException ie) {
+                    ie.printStackTrace();
                 }
             } while (connected);
         } catch (IOException io) {
             io.printStackTrace();
-        } catch (InterruptedException ie) {
-            ie.printStackTrace();
         }
     }
 

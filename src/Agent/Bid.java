@@ -11,7 +11,8 @@ import java.io.Serializable;
 public class Bid implements Serializable {
     
     private static final long serialVersionUID = 2L;
-    private Agent bidder;
+    
+    private int bidder;
     private Item item;
     private double amount;
     
@@ -21,7 +22,7 @@ public class Bid implements Serializable {
      * @param bidder agent placing the bid.
      * @param amount the amount of the bid.
      */
-    public Bid(Item item, Agent bidder, double amount) {
+    public Bid(Item item, int bidder, double amount) {
         this.item = item;
         this.bidder = bidder;
         this.amount = amount;
@@ -39,7 +40,7 @@ public class Bid implements Serializable {
      * Getting the agent that has placed the bid.
      * @return bidder making the bid.
      */
-    public Agent getBidder() {
+    public int getBidder() {
         return bidder;
     }
     

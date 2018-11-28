@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -20,6 +21,7 @@ public class TestBank implements Runnable {
     private ArrayList<Agent> agents; //list of agent accounts
     private ArrayList<AuctionHouse> auctionHouses; //list of auction house accounts
     private ArrayList<Account> accounts;
+    private HashMap<Integer, Account> userAccounts;
     private int currentAccountNumber = 0;
     static private String address;
     static private int portNumber;
@@ -67,6 +69,7 @@ public class TestBank implements Runnable {
         agents = new ArrayList<Agent>();
         auctionHouses = new ArrayList<AuctionHouse>();
         accounts = new ArrayList<Account>();
+        userAccounts = new HashMap<>();
     }
     
     @Override
@@ -173,7 +176,9 @@ public class TestBank implements Runnable {
     
     // private sub class
     private static class ServerThread implements Runnable {
-        
+    
+        private final String NAME = "test bank";
+    
         private ObjectInputStream in;
         private ObjectOutputStream out;
         private TestBank bank;
@@ -207,23 +212,59 @@ public class TestBank implements Runnable {
         /**
          * Function to respond after message analysis
          */
-        private TestMessage<Object, Object> response(int analysis) {
-            if (analysis == 2) {
-                // create account
-                new TestMessage<Object, Object>(bank, "confirmed");
-            } else if (analysis == 4) {
-                // return auction house list
-            } else if (analysis == 6) {
-                // return account information as a string to the agent
-            } else if (analysis == 5) {
-                // return the auction house id for the agent
-            } else if (analysis == 8) {
-                // remove funds from the agents account
-                // message will be a string so need to parse into a double
-            } else if (analysis == 18) {
-                // remove the funds from this message agents account
+        private Message response(Message message, MessageTypes type) {
+
+            Message response = null;
+            ArrayList<Object> list = message.getMessageList();
+            
+            switch (type) {
+                case THANKS:
+                    break;
+                case GET_HOUSES:
+                    response = new Message(NAME,
+                                           MessageTypes.GET_HOUSES,
+                                           bank.auctionHouses);
+                    break;
+                case ACCOUNT_INFO:
+                    response = new Message(NAME,
+                                           MessageTypes.ACCOUNT_INFO,
+                                           new Account("test",
+                                                       1,
+                                                       98,
+                                                       98));
+                    break;
+                case GET_AGENT_ID_FOR_HOUSE:
+                    response = new Message(NAME,
+                                           MessageTypes.GET_AGENT_ID_FOR_HOUSE,
+                                           9);
+                    break;
+                case REMOVE_FUNDS:
+                    int accountID = (int) list.get(2);
+                    double withdraw = (double) list.get(3);
+                    
+                    for (Integer i: bank.userAccounts.keySet()) {
+                        if (accountID == i) {
+                            Account account = bank.userAccounts.get(i);
+                            account.setBalance(account.getBalance() - withdraw);
+                        }
+                    }
+                    response = new Message(NAME,
+                                           MessageTypes.CONFIRMATION);
+                    break;
+                case CREATE_ACCOUNT:
+                    int agentID = (int) list.get(2);
+                    if (!bank.userAccounts.containsKey(agentID)) {
+                        bank.userAccounts.put(agentID, (Account) list.get(3));
+                        response = new Message(NAME,
+                                               MessageTypes.CONFIRMATION);
+                    } else {
+                        response = new Message(NAME,
+                                               MessageTypes.ACCOUNT_EXISTS);
+                    }
+                    
+                    break;
             }
-            return null;
+            return response;
         }
 
         @Override
@@ -231,15 +272,19 @@ public class TestBank implements Runnable {
         public void run() {
             MessageAnalyzer analyzer = new MessageAnalyzer();
             boolean connected = true;
-            TestMessage<Object, Object> message;
+            Message message = null;
 
             try {
                 do {
                     try {
                         // get message from the sender, analyze and respond
-                        message = (TestMessage<Object, Object>) in.readObject();
-                        System.out.println("Message = " + message);
-                        out.writeObject(response(analyzer.analyze(message)));
+                        message = (Message) in.readObject();
+                        if (message != null) {
+                            int analysis = analyzer.analyze(message);
+                            out.writeObject(response(message,
+                                                     (MessageTypes) message.getMessageList()
+                                                                           .get(1)));
+                        }
 
                     } catch (ClassNotFoundException cnf) {
                         cnf.printStackTrace();

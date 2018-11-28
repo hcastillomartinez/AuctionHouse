@@ -7,6 +7,7 @@ import Proxies.BankProxy;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -14,7 +15,9 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Danan High, 11/13/2018
  */
 public class Agent implements Runnable {
-
+    
+    private final String NAME = "agent";
+ 
     private int id, key;
     private Account account = null;
     private AuctionHouseProxy auctionHouseProxy;
@@ -23,9 +26,11 @@ public class Agent implements Runnable {
     private AuctionHouse auctionHouse = null;
     private ArrayList<AuctionHouse> houseList;
     private ArrayList<Item> itemList;
-    private LinkedBlockingQueue<TestMessage<Object, Object>> messages = new LinkedBlockingQueue<>();
+    private BlockingQueue<Message> messageQueue = new LinkedBlockingQueue<>();
     private boolean connected = true;
-    
+    private Scanner scanner = new Scanner(System.in);
+
+
     private static String hostName;
     private static int portNumber;
 
@@ -33,14 +38,14 @@ public class Agent implements Runnable {
      * Constructor for the Agent.
      */
     public Agent(String hostName, int portNumber) {
-        this.hostName = hostName;
-        this.portNumber = portNumber;
-
-
-        this.bank = new BankProxy(this.hostName,
-                                  this.portNumber,
+        this.bank = new BankProxy(hostName,
+                                  portNumber,
                                   this,
                                   null);
+        this.auctionHouseProxy = new AuctionHouseProxy(hostName,
+                                                       portNumber,
+                                                       this,
+                                                       null);
     }
 
     /**
@@ -48,8 +53,8 @@ public class Agent implements Runnable {
      * @param bidAmount amount to bid on the item.
      */
     private void placeBid(int bidAmount) {
-        Bid bid = new Bid(item, this, bidAmount);
-        Message message = new Message("bid");
+        Bid bid = new Bid(item, id, bidAmount);
+        Message message = new Message("Agent", MessageTypes.BID, bid);
     }
 
     /**
@@ -85,7 +90,7 @@ public class Agent implements Runnable {
      */
     @SuppressWarnings("unchecked")
     private void getItems() {
-        itemList = (ArrayList) auctionHouseProxy.getItemList();
+//        itemList = (ArrayList) auctionHouseProxy.getItemList();
     }
 
     /**
@@ -95,19 +100,22 @@ public class Agent implements Runnable {
 //        key = bank.setKey();
     }
 
-    public void setBank(BankProxy bank) { this.bank = bank; }
-    
     /**
      * Setting the connected status to not connected.
      */
     public void setConnected() { connected = !connected; }
 
+    /*****************************************************************/
+    /*                                                               */
+    /*          Analyzing Feedback and User Input Functions          */
+    /*                                                               */
+    /*****************************************************************/
+
     /**
      * Getting and setting the new account information from the bank.
      */
     private synchronized Account openNewBankAccount() {
-        Scanner scanner = new Scanner(System.in);
-        if (account == null) {
+//        if (account == null) {
             // getting the account name
             System.out.print("name: ");
             String name = scanner.next();
@@ -116,68 +124,168 @@ public class Agent implements Runnable {
             System.out.print("staring balance: ");
             double amount = scanner.nextDouble();
             System.out.println();
-        
+            
             return new Account(name, getId(), amount, amount);
-        }
-        return null;
-    }
-
-    /**
-     * Connecting to an auction house.
-     */
-    private void connectToAuctionHouse() {
-        String auctionHouseHostName = auctionHouse.getServerName();
-        int auctionHousePortNumber = auctionHouse.getPort();
-
-        auctionHouseProxy.connectToAuctionHouse(auctionHouseHostName,
-                                                auctionHousePortNumber);
-    }
-
-    /**
-     * Connecting to the bank.
-     */
-    private void connectToBank() {
-        bank.connectToServer();
+//        } else {
+//            System.out.println("Account is already created");
+//        }
+//        return null;
     }
     
     /**
-     * Function to add to the list of messages.
+     * Getting the user input for making a bid.
+     * @return bid from the user
      */
-    public void addMessage(TestMessage<Object, Object> testMessage) {
+    private Bid makeBid() {
+        System.out.println("amount to bid");
+        double amount = scanner.nextDouble();
+        System.out.println();
+        
+        return new Bid(item, getId(), amount);
+    }
+    
+    /**
+     * Function to add to the list of messageQueue.
+     */
+    public void addMessage(Message message) {
         try {
-            System.out.println(messages);
-            messages.put(testMessage);
+            messageQueue.put(message);
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
     }
+    
+    /**
+     * Function to pass along messages to the appropriate proxy.
+     */
+    private void passMessage(AuctionHouseProxy ahp,
+                             BankProxy bp,
+                             Message m) {
+        if (ahp != null) {
+            ahp.sendMessage(m);
+        } else if (bp != null) {
+            bp.sendAgentMessage(m);
+        }
+    }
+
+    /*****************************************************************/
+    /*                                                               */
+    /*          Analyzing Feedback and User Input Functions          */
+    /*                                                               */
+    /*****************************************************************/
 
     /**
      * Function to respond after message analysis
      */
-    private TestMessage<Object, Object> response(int analysis) {
-        if (analysis == 14) {
-            // update the account from the bank
-        } else if (analysis == 3) {
-            // confirmation that the bank has created an account
-            System.out.println("here");
-        } else if (analysis == 15) {
-            // set the auction house id for the specific auction house int
-            // make sure to have a current auction house
-        } else if (analysis == 4) {
-            // set the list of auction houses from the bank
-        } else if (analysis == 10) {
-            // bid has been denied
-        } else if (analysis == 16) {
-            // been outbid
-        } else if (analysis == 9) {
-            // bid has been accepted
-        } else if (analysis == 17) {
-            // the bid statuse
-        } else if (analysis == 11) {
-            // setting the item won (adding to a list of items won?)
+    private synchronized Message response(Message message,
+                                          MessageTypes type,
+                                          int sender) {
+//        else if (analysis == 15) {
+//            // set the auction house id for the specific auction house int
+//            // make sure to have a current auction house
+//        } else if (analysis == 4) {
+//            // get the list of auction houses from the bank
+//        } else if (analysis == 10) {
+//            // bid has been denied
+//        } else if (analysis == 16) {
+//            // been outbid
+//        } else if (analysis == 9) {
+//            // bid has been accepted
+//        } else if (analysis == 17) {
+//            // the bid statuse
+//        } else if (analysis == 11) {
+//            // setting the item won (adding to a list of items won?)
+//        }
+        
+        Message response = null;
+        ArrayList<Object> list = message.getMessageList();
+        
+        switch (type) {
+            case CONFIRMATION:
+                response = new Message(NAME, MessageTypes.THANKS);
+                bank.sendAgentMessage(response);
+                break;
+            case ACCOUNT_EXISTS:
+                response = new Message(NAME, MessageTypes.THANKS);
+                bank.sendAgentMessage(response);
+                break;
+            case TRANSFER_ITEM:
+                Bid bid = (Bid) message.getMessageList().get(2);
+                response = new Message(NAME,
+                                       MessageTypes.REMOVE_FUNDS,
+                                       getId(),
+                                       bid.getAmount());
+                bank.sendAgentMessage(response);
+                break;
+//            case :
+//                break;
+//            case:
+//                break;
+//            case:
+//                break;
+//            case:
+//                break;
+//            case:
+//                break;
+//            case:
+//                break;
         }
+        
         return null;
+    }
+    
+    /**
+     * Displaying the user options for the menu.
+     */
+    private synchronized int displayUserOptions() {
+        System.out.print("1. Create Account\n" +
+                         "2. Get Auction Houses\n" +
+                         "3. Get Items from Auction House\n" +
+                         "4. Make Bid\n" +
+                         "5. Get Account Information\n" +
+                         "6. Choose an Item for Bidding\n" +
+                         "7. Check Bid Status\n");
+        System.out.print("Enter Option: ");
+        return scanner.nextInt();
+    }
+    
+    /**
+     * Handling the choice of the user.
+     */
+    private synchronized void handleChoice(int choice) {
+        if (choice == 1) {
+            account = openNewBankAccount();
+            bank.sendAgentMessage(new Message(NAME,
+                                              MessageTypes.CREATE_ACCOUNT,
+                                              getId(),
+                                              account));
+        } else if (choice == 2) {
+            bank.sendAgentMessage(new Message(NAME,
+                                              MessageTypes.GET_HOUSES));
+        } else if (choice == 3 && auctionHouse != null) {
+            // for testing getting item list
+            bank.sendAgentMessage(new Message(NAME,
+                                              MessageTypes.GET_ITEMS,
+                                              auctionHouse.getType()));
+        } else if (choice == 4) {
+            if (item == null) {
+                System.out.println("Please choose an item before making a bid");
+            } else {
+                Bid bid = makeBid();
+                bank.sendAgentMessage(new Message(NAME,
+                                                  MessageTypes.BID,
+                                                  bid));
+            }
+        } else if (choice == 5) {
+            bank.sendAgentMessage(new Message(NAME,
+                                              MessageTypes.ACCOUNT_INFO));
+        } else if (choice == 6) {
+        
+        } else if (choice == 7) {
+        
+        } else {
+            System.out.println("Response not recognized!");
+        }
     }
 
     /*****************************************************************/
@@ -191,30 +299,29 @@ public class Agent implements Runnable {
      */
     @Override
     public void run() {
-        TestMessage<Object, Object> in = null;
+        Message in, respond = null;
         MessageAnalyzer analyzer = new MessageAnalyzer();
 
         try {
-            // look back here
-            bank.sendAgentMessage(this, openNewBankAccount());
-            connectToBank();
-
             while (connected) {
-                if (messages.size() > 0) {
-                    in = messages.take();
-                    bank.sendAgentMessage(this, response(analyzer.analyze(in)));
+                
+                handleChoice(displayUserOptions());
+                System.out.println();
+                
+                if (messageQueue.size() > 0) {
+                    in = messageQueue.take();
+                    respond = response(in,
+                                       (MessageTypes) in.getMessageList().get(1),
+                                       analyzer.analyze(in));
+                    if (respond != null) {
+                        bank.sendAgentMessage(respond);
+                    }
                 }
             }
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
     }
-    
-    /**
-     * Overriding toString to print out the class.
-     */
-//    @Override
-//    public String toString() { return id + " has balance: "; }
 
     /**
      * Main method to start the program for the user/agent.
@@ -226,79 +333,6 @@ public class Agent implements Runnable {
         (new Thread(agent)).start();
     }
 }
-
-/*
-    Agent is dynamically created
-
-    opens a bank account by providing a name and an initial balance
-
-    receives a unique account number
-
-    gets from the bank a list of active auctions
-
-    asks an auction house for a list of items being auctioned
-
-    gets from the bank a secret key to be used when interacting with a specific
-    auction house
-
-    Gets replies from the auction house:
-        - acceptance
-        - rejection
-        - pass (higher bid in place)
-        - winner
-
-    notifies the bank to transfer the blocked funds to the auction house when
-    winning a bid
-
-    terminates and closes the account when no bidding action is in progress
-
-    Will have proxies to bank and auction house
-        - proxy for house will communicate with specific auction houses
-        - proxy for the bank will communicate with the bank
-             - bank will contain list of all of the auction houses
-
-    Will have to check if the bank is running before trying to connect,
-    connecting the the bank is the first thing done.
-        - best way to prevent crashing
-        - once you discover the server is running then you can connect to the
-          bank.
-
-    Make sure you are not trying to reference an empty/dead auction house
-        - if the house is dead get rid of the reference
-
-
-    -------------------Design---------------------
-    For the bank get the server of the machine running on and use that
-    for the server constructor arg
-
-    Think about how protocols should be designed and implemented
-
-    User commands
-        - bids
-        - withdraws
-        - check items in the houses
-    Active bids
-    User Display
-    User Account
-        - add account
-        - create account
-    Will need to have host names passed around in the proper way
-    Auction House proxy
-        - to connect to the auction house:
-            - need port number
-            - need host name
-        -> Notification Server (has own thread, will block on reads)
-            - will store the messages and wait for the auction house proxy to
-              obtain messages
-        -> Communication Server
-    Bank Proxy
-        -> Communication Server (will hide all the socket communication and will
-                                 send the message to the desired location)
-
-
-    { -> = reference to object }
-
- */
 
 
 

@@ -1,6 +1,7 @@
 package AuctionHouse;
 
 import Agent.Bid;
+import Agent.Message;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -10,7 +11,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class AuctionHouse implements Runnable{
-    private int bidderTally;
+    private int agentCount;
     private String type;
     private double houseFunds;
     private int houseID;
@@ -18,11 +19,9 @@ public class AuctionHouse implements Runnable{
     private List<Auction> auctions;
     private MakeItems makeItems;
     private ServerSocket serverSocket;
-    private ObjectInputStream in;
-    private ObjectOutputStream out;
     private int port;
     private String serverName;
-    private BlockingQueue<Bid> winningBids;
+    private BlockingQueue<Message> messages;
 
 
     /**
@@ -31,17 +30,18 @@ public class AuctionHouse implements Runnable{
      * and any other number for car.
      * @param type An int
      */
-    public AuctionHouse(String type,String port,String serverName) {
+    public AuctionHouse(String type,String port,String serverName){
+        agentCount=0;
+        houseFunds=0;
+        houseID=((int)(Math.random()*60000)+30000)
+                -((int)(Math.random()*30000)+1);
+        makeItems = new MakeItems();
+        messages=new LinkedBlockingQueue<>();
+        itemList = makeItems.getItems(Integer.parseInt(type));
+        this.type = makeItems.getListType();
+        this.port=Integer.parseInt(port);
+        this.serverName=serverName;
         try {
-            houseFunds=0;
-            bidderTally = 0;
-            makeItems = new MakeItems();
-            winningBids=new LinkedBlockingQueue<>();
-            itemList = makeItems.getItems(Integer.parseInt(type));
-            this.type = makeItems.getListType();
-            setHouseID();
-            this.port=Integer.parseInt(port);
-            this.serverName=serverName;
             serverSocket = new ServerSocket(this.port);
         }catch(IOException i){
             System.out.println(i);
@@ -94,7 +94,7 @@ public class AuctionHouse implements Runnable{
      * Returns the items for sale in auction house.
      * @return a list.
      */
-    public List<Item> getItemList(){
+    public synchronized List<Item> getItemList(){
         return itemList;
     }
 
@@ -133,51 +133,56 @@ public class AuctionHouse implements Runnable{
         return min;
     }
 
-    private void setHouseID(){
-        houseID=((int)(Math.random()*60000)+1)-((int)(Math.random()*60000)+1);
-    }
-
-    private class Server implements Runnable{
+    private class Server implements Runnable {
         private Socket client;
+        private int ID;
+        private BlockingQueue<Message> messageLine;
         private BufferedReader stdIn;
-        private BufferedInputStream in;
-        private BufferedOutputStream out;
-        private List<Socket> clients;
+        private ObjectInputStream in;
+        private ObjectOutputStream out;
 
-//        public Server(Socket client){
-//            this.client=client;
-//            apendClientList(client);
-//        }
-
-        public List<Socket> getClientsConnected() {
-            return clients;
+        public Server(Socket client,int id,BlockingQueue<Message> messages) throws IOException {
+            this.client = client;
+            messageLine=messages;
+            this.ID=id;
+            in=new ObjectInputStream(client.getInputStream());
+            out=new ObjectOutputStream(client.getOutputStream());
+            out.writeObject("connected to "+ID);
         }
 
-        private void removeClient(Socket client){
-            clients.remove(client);
-        }
-        private void apendClientList(Socket client){
-            clients.add(client);
-        }
         @Override
-        public void run(){
-//            try{
-////
-////            }catch()
+        public void run()  {
+            while(true){
+
+            }
         }
     }
 
+    private void messageWait(){
+        Thread t=new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
+                    try {
+                        messages.take();
+                    } catch (InterruptedException i) {
+                        System.out.println(i);
+                    }
+                }
+            }
+        });
+        t.start();
+    }
 
     @Override
     public void run(){
-        Server server=new Server();
-        Thread serverThread=new Thread(server);
-        serverThread.start();
         while(true){
             try {
                 System.out.println("waiting for agents");
+                messageWait();
                 Socket agent = serverSocket.accept();
-                server.apendClientList(agent);
+                agentCount++;
+                Server server=new Server(agent,agentCount,messages);
             }catch(IOException i){
                 System.out.println(i);
             }
