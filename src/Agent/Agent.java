@@ -18,7 +18,7 @@ public class Agent implements Runnable {
     
     private final String NAME = "agent";
  
-    private int id, key;
+    private int id, key, accountNumber;
     private Account account = null;
     private AuctionHouseProxy auctionHouseProxy;
     private BankProxy bank;
@@ -26,7 +26,8 @@ public class Agent implements Runnable {
     private AuctionHouse auctionHouse = null;
     private ArrayList<AuctionHouse> houseList;
     private ArrayList<Item> itemList;
-    private BlockingQueue<Message> messageQueue = new LinkedBlockingQueue<>();
+    private BlockingQueue<Message> messageQueue;
+    private HashMap<String, Integer> auctionHouseMap;
     private boolean connected = true;
     private Scanner scanner = new Scanner(System.in);
 
@@ -38,6 +39,11 @@ public class Agent implements Runnable {
      * Constructor for the Agent.
      */
     public Agent(String hostName, int portNumber) {
+        itemList = new ArrayList<>();
+        messageQueue = new LinkedBlockingQueue<>();
+        auctionHouseMap = new HashMap<>();
+        houseList = new ArrayList<>();
+
         this.bank = new BankProxy(hostName,
                                   portNumber,
                                   this,
@@ -55,22 +61,6 @@ public class Agent implements Runnable {
     private void placeBid(int bidAmount) {
         Bid bid = new Bid(item, id, bidAmount);
         Message message = new Message("Agent", MessageTypes.BID, bid);
-    }
-
-    /**
-     * Set chosen auction house from the bank.
-     */
-    private void setAuctionHouse() {
-        // using a random house for testing
-        auctionHouse = houseList.get((new Random()).nextInt(houseList.size()));
-    }
-    
-    /**
-     * Get Auction houses from the bank list
-     */
-    private void getAuctionHouses() {
-        houseList = bank.getAuctionHouses();
-        setAuctionHouse();
     }
 
     /**
@@ -180,12 +170,7 @@ public class Agent implements Runnable {
     private synchronized Message response(Message message,
                                           MessageTypes type,
                                           int sender) {
-//        else if (analysis == 15) {
-//            // set the auction house id for the specific auction house int
-//            // make sure to have a current auction house
-//        } else if (analysis == 4) {
-//            // get the list of auction houses from the bank
-//        } else if (analysis == 10) {
+//       else if (analysis == 10) {
 //            // bid has been denied
 //        } else if (analysis == 16) {
 //            // been outbid
@@ -217,14 +202,32 @@ public class Agent implements Runnable {
                                        bid.getAmount());
                 bank.sendAgentMessage(response);
                 break;
-//            case :
-//                break;
-//            case:
-//                break;
-//            case:
-//                break;
-//            case:
-//                break;
+            case BANK_ACCOUNT:
+                accountNumber = (int) message.getMessageList().get(2);
+                break;
+            case GET_AGENT_ID_FOR_HOUSE:
+                String house = (String) message.getMessageList().get(2);
+                int houseID = (int) message.getMessageList().get(3);
+                if (auctionHouseMap.containsKey(house)) {
+                    auctionHouseMap.replace(house, houseID);
+                } else {
+                    auctionHouseMap.put(house, houseID);
+                }
+                break;
+            case GET_HOUSES:
+                houseList = (ArrayList) message.getMessageList().get(2);
+                break;
+            case BID_REJECTED:
+                MessageTypes reject
+                        = (MessageTypes) message.getMessageList().get(1);
+                System.out.println(reject.getMessage()+ ". New bid?(y/n)");
+                String answer = scanner.next();
+                if (answer.contains("y")) {
+                    auctionHouseProxy.sendMessage(new Message(NAME,
+                                                              MessageTypes.BID,
+                                                              makeBid()));
+                }
+                break;
 //            case:
 //                break;
 //            case:

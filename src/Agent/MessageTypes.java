@@ -27,7 +27,8 @@ public enum MessageTypes {
     BID_STATUS("get bid status"),
     GET_AGENT_ID_FOR_HOUSE("get id for house"),
     ACCOUNT_EXISTS("account already exists"),
-    THANKS("thanks");
+    THANKS("thanks"),
+    BANK_ACCOUNT("account number");
 
     private final String message;
 
