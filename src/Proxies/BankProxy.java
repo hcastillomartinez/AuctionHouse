@@ -103,7 +103,6 @@ public class BankProxy implements Runnable {
     
                     // testing code to read from the server
                     response = (Message) in.readObject();
-                    System.out.println("Response = " + response);
                     if (agent != null) {
                         if (response != null) {
                             agent.addMessage(response);

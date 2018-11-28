@@ -2,11 +2,13 @@ package Proxies;
 
 import Agent.*;
 import AuctionHouse.*;
+import Bank.Bank;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -17,135 +19,109 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class AuctionHouseProxy implements Runnable {
 
-    private LinkedList<AuctionHouse> houseList;
-    private AuctionHouse auctionHouse;
-    private Socket client = null;
+    private Bank bank;
+    private Agent agent;
     private String host;
     private int port;
-    private boolean connected;
-    private LinkedBlockingQueue<Message> messages;
-
+    private boolean connected = true;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
+    private Socket client = null;
+    private AuctionHouse house;
+    private BlockingQueue<Message> messageQueue = new LinkedBlockingQueue<>();
+    
     /**
-     * Constructor for the Proxies.AuctionHouseProxy, builds a reference to the
-     * auction house.
+     * Constructor for the bank proxy.
+     * Builds a reference to the bank for bank functionality
      */
-    public AuctionHouseProxy() {
-        houseList = new LinkedList<>();
-        messages = new LinkedBlockingQueue<Message>();
-    }
-
-    /**
-     * Returning the port that the auction house sits on.
-     * @return number of the port
-     */
-    public int getPort(){
-        return auctionHouse.getPort();
-    }
-
-    /**
-     * Returning the server name of the auction house.
-     * @return name of the server
-     */
-    public String getServerName() {
-        return auctionHouse.getServerName();
-    }
-
-    /**
-     * Returns the items for sale in auction house.
-     * @return a list.
-     */
-    public List<Item> getItemList(){
-        return auctionHouse.getItemList();
-    }
-
-    /**
-     * Connecting to the server.
-     */
-    public void connectToAuctionHouse(String host, int port) {
+    public AuctionHouseProxy(String host,
+                             int port,
+                             Agent agent,
+                             Bank bank) {
         this.host = host;
         this.port = port;
-        connected = true;
-        run();
-    }
-
-    /**
-     * Finds the most expensive item in auction is and gets the price.
-     * @return An int that is max price
-     */
-    public double maxPrice() {
-        double max = 0;
-        for(Item t: auctionHouse.getItemList()){
-            if(t.getPrice() > max) {
-                max = t.getPrice();
-            }
-        }
-        return max;
-    }
-
-    /**
-     * Gets the type of items sold at an auction.
-     * @return A string that is type.
-     */
-    public String getType() {
-        return auctionHouse.getType();
-    }
-
-    /**
-     * Finds the cheapest item in auction and gets its price.
-     * @return lowest price in the auction house.
-     */
-    public double lowestPrice() {
-        double min = maxPrice();
-        for(Item t: auctionHouse.getItemList()) {
-            if (min > t.getPrice()) {
-                min = t.getPrice();
-            }
-        }
-        return min;
+        this.agent = agent;
+        this.bank = bank;
+        connectToServer();
     }
     
     /**
-     * Closing the client port.
+     * Setting up the input and output streams for the client connection.
      */
-    private void closeClient(ObjectInputStream inputStream,
-                             ObjectOutputStream outputStream,
-                             BufferedReader input) {
+    private void setupInputAndOutputStreams() {
         try {
-            outputStream.close();
-            inputStream.close();
-            input.close();
+            if (client != null) {
+                out = new ObjectOutputStream(client.getOutputStream());
+                out.flush();
+                in = new ObjectInputStream(client.getInputStream());
+            } else {
+                System.out.println("Client has not been connected");
+            }
+        } catch (IOException ie) {
+            ie.printStackTrace();
+        }
+    }
+    
+    /**
+     * Agent connecting to the bank through the proxy.
+     */
+    private void connectToServer() {
+        try {
+            client = new Socket(host, port);
+            setupInputAndOutputStreams();
+            (new Thread(this)).start();
         } catch (IOException io) {
             io.printStackTrace();
         }
     }
-
+    
     /**
-     * Overriding the run method to perform certain tasks.
+     * Adding a message to the banks input stream.
+     */
+    @SuppressWarnings("unchecked")
+    public void sendMessage(Message inMessage) {
+        try {
+            messageQueue.put(inMessage);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
+    }
+    
+    /**
+     * Overriding the run method to perform specialized tasks.
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void run() {
-        
         try {
-            ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
-            ObjectInputStream in = new ObjectInputStream(client.getInputStream());
-            Message message = null;
+            Message response = null, messageInput = null;
             
             do {
                 try {
-                    message = messages.take();
-                    if (message != null) {
-                        // this is where the message analysis should take
-                        // place when fully implemented.
-                        out.writeObject(message);
+                    messageInput = messageQueue.take();
+                    if (messageInput != null) {
+                        out.writeObject(messageInput);
+                        messageInput = null;
                     }
                     
-                    // testing code to write to the auction house
-                    System.out.println(in.readObject());
+                    // testing code to read from the server
+                    response = (Message) in.readObject();
+                    if (agent != null) {
+                        if (response != null) {
+                            agent.addMessage(response);
+                            response = null;
+                        }
+                    } else if (house != null) {
+    //                        house.addMessage(response);
+                    }
+                } catch (EOFException eof) {
+                    agent.setConnected();
+                    out.close();
+                    in.close();
+                    System.out.println("Server has been closed");
+                    break;
                 } catch (ClassNotFoundException cnf) {
                     cnf.printStackTrace();
-                } catch (EOFException eof) {
-                    System.out.println("Server has disconnected!");
-                    connected = false;
                 } catch (InterruptedException ie) {
                     ie.printStackTrace();
                 }
@@ -153,7 +129,6 @@ public class AuctionHouseProxy implements Runnable {
         } catch (IOException io) {
             io.printStackTrace();
         }
-        
     }
 }
 

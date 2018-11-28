@@ -25,7 +25,9 @@ public enum MessageTypes {
     BALANCE("get balance"),
     ACCOUNT_INFO("account information"),
     BID_STATUS("get bid status"),
-    GET_AGENT_ID_FOR_HOUSE("get id for house");
+    GET_AGENT_ID_FOR_HOUSE("get id for house"),
+    ACCOUNT_EXISTS("account already exists"),
+    THANKS("thanks");
 
     private final String message;
 
@@ -53,4 +55,27 @@ public enum MessageTypes {
 
         return response;
     }
+
+    /**
+     * Getting the specific message associated with the type.
+     * @return message for the type
+     */
+    public String getMessage() {
+        return message;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
