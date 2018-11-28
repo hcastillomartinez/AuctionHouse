@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Timer;
 
 /**
  * The Bank class.
@@ -20,7 +21,8 @@ public class Bank implements Runnable {
     private ArrayList<Agent> agents; //list of agent accounts
     private ArrayList<AuctionHouse> auctionHouses; //list of auction house accounts
     private ArrayList<Account> accounts;
-    private HashMap<Integer,ServerThread> serverThreads;
+    private HashMap<Integer,ServerThread> clients;
+    private int clientNumber = 0;
     private int currentAccountNumber = 0;
     static private String address;
     static private int portNumber;
@@ -55,8 +57,23 @@ public class Bank implements Runnable {
         }
         
         Bank bank = new Bank(address, portNumber);
+        Thread bankThread = new Thread(bank);
+        bankThread.start();
+
+        try{
+            ServerSocket server = new ServerSocket(portNumber);
+
+            while (true) {
+                Socket client = server.accept();
+                ServerThread bankClient = new ServerThread(client,bank.clientNumber++);
+                bank.getClients().put(bankClient.idNumber,bankClient);
+                (new Thread(bankClient)).start();
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
         
-        (new Thread(bank)).start();
     }
     
     /**
@@ -67,8 +84,9 @@ public class Bank implements Runnable {
         agents = new ArrayList<Agent>();
         auctionHouses = new ArrayList<AuctionHouse>();
         accounts = new ArrayList<Account>();
-        serverThreads = new HashMap<>();
+        clients = new HashMap<>();
     }
+
 
     /**
      * Pseudocode
@@ -80,24 +98,10 @@ public class Bank implements Runnable {
     @Override
     public void run(){
 
-        //todo is this correct?
-        //Shouldn't this code just be in the main method.
-        //Message handling code should be in the run method.
-        //Why are we creating multiple bank threads? Do they share the same resources?
-        try{
-            ServerSocket server = new ServerSocket(portNumber);
-            
-            while (true) {
-                Socket client = server.accept();
-                ServerThread bank = new ServerThread(client);
-                (new Thread(bank)).start();
-            }
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
+        while(true)
+            System.out.println("Bank thread is running");
     }
-    
+
     /**
      * Creates and returns an account.
      */
@@ -106,21 +110,21 @@ public class Bank implements Runnable {
                                       assignAccountNumber(),
                                       startingBalance,
                                       startingBalance);
-        
+
         if (!this.getAccounts().contains(account)) {
             this.getAccounts().add(account);
         }
-        
+
         return account;
     }
-    
+
     /**
      * Adds an auction house to the list of auction houses.
      */
     public void addAuctionHouse(AuctionHouse house){
         this.auctionHouses.add(house);
     }
-    
+
     /**
      * Assigns an account number to an agent and increments the current account number
      */
@@ -129,7 +133,7 @@ public class Bank implements Runnable {
         this.currentAccountNumber++;
         return number;
     }
-    
+
     /**
      * Gets the list of bank accounts
      * @return
@@ -137,7 +141,15 @@ public class Bank implements Runnable {
     public ArrayList<Account> getAccounts(){
         return accounts;
     }
-    
+
+    /**
+     * Gets the map of integer id's to clients.
+     * @return
+     */
+    public HashMap<Integer, ServerThread> getClients() {
+        return clients;
+    }
+
     /**
      * Gets list of agents for a auction house.
      */
@@ -190,11 +202,13 @@ public class Bank implements Runnable {
         private BufferedReader stdIn;
         private ObjectInputStream inputStream;
         private ObjectOutputStream outputStream;
+        private int idNumber;
         
         // constructor
-        public ServerThread(Socket client) {
+        public ServerThread(Socket client, int idNumber) {
             this.client = client;
-            
+            this.idNumber = idNumber;
+
             try {
                 stdIn = new BufferedReader(new InputStreamReader(System.in));
                 outputStream = new ObjectOutputStream(client.getOutputStream());
