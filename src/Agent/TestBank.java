@@ -213,21 +213,7 @@ public class TestBank implements Runnable {
          * Function to respond after message analysis
          */
         private Message response(Message message, MessageTypes type) {
-//            if (analysis == 2) {
-//                // create account
-//                new Message(NAME,
-//                            MessageTypes.CONFIRMATION,
-//                            "confirmed");
-//            } else if (analysis == 4) {
-//                // return auction house list
-//            } else if (analysis == 6) {
-//                // return account information as a string to the agent
-//            } else if (analysis == 5) {
-//                // return the auction house id for the agent
-//            } else if (analysis == 8) {
-//                // remove funds from the agents account
-//                // message will be a string so need to parse into a double
-//            }
+
             Message response = null;
             ArrayList<Object> list = message.getMessageList();
             

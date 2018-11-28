@@ -115,7 +115,7 @@ public class Agent implements Runnable {
      * Getting and setting the new account information from the bank.
      */
     private synchronized Account openNewBankAccount() {
-        if (account == null) {
+//        if (account == null) {
             // getting the account name
             System.out.print("name: ");
             String name = scanner.next();
@@ -126,10 +126,10 @@ public class Agent implements Runnable {
             System.out.println();
             
             return new Account(name, getId(), amount, amount);
-        } else {
-            System.out.println("Account is already created");
-        }
-        return null;
+//        } else {
+//            System.out.println("Account is already created");
+//        }
+//        return null;
     }
     
     /**
@@ -180,16 +180,11 @@ public class Agent implements Runnable {
     private synchronized Message response(Message message,
                                           MessageTypes type,
                                           int sender) {
-//        if (analysis == 14) {
-//            // update the account from the bank
-//        } else if (analysis == 3) {
-//            // confirmation that the bank has created an account
-//            System.out.println("here in the confirmation");
-//        } else if (analysis == 15) {
+//        else if (analysis == 15) {
 //            // set the auction house id for the specific auction house int
 //            // make sure to have a current auction house
 //        } else if (analysis == 4) {
-//            // set the list of auction houses from the bank
+//            // get the list of auction houses from the bank
 //        } else if (analysis == 10) {
 //            // bid has been denied
 //        } else if (analysis == 16) {
@@ -208,31 +203,21 @@ public class Agent implements Runnable {
         switch (type) {
             case CONFIRMATION:
                 response = new Message(NAME, MessageTypes.THANKS);
-                if (sender == 2) {
-                    passMessage(auctionHouseProxy,
-                                null,
-                                response);
-                } else if (sender == 3) {
-                    passMessage(null,
-                                bank,
-                                response);
-                }
+                bank.sendAgentMessage(response);
                 break;
             case ACCOUNT_EXISTS:
                 response = new Message(NAME, MessageTypes.THANKS);
-                if (sender == 2) {
-                    passMessage(auctionHouseProxy,
-                                null,
-                                response);
-                } else if (sender == 3) {
-                    passMessage(null,
-                                bank,
-                                response);
-                }
+                bank.sendAgentMessage(response);
                 break;
-//            case:
-//                break;
-//            case:
+            case TRANSFER_ITEM:
+                Bid bid = (Bid) message.getMessageList().get(2);
+                response = new Message(NAME,
+                                       MessageTypes.REMOVE_FUNDS,
+                                       getId(),
+                                       bid.getAmount());
+                bank.sendAgentMessage(response);
+                break;
+//            case :
 //                break;
 //            case:
 //                break;
@@ -268,7 +253,7 @@ public class Agent implements Runnable {
      * Handling the choice of the user.
      */
     private synchronized void handleChoice(int choice) {
-        if (choice == 1 && account == null) {
+        if (choice == 1) {
             account = openNewBankAccount();
             bank.sendAgentMessage(new Message(NAME,
                                               MessageTypes.CREATE_ACCOUNT,
