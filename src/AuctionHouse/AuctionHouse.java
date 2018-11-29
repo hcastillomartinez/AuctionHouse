@@ -138,7 +138,6 @@ public class AuctionHouse implements Runnable {
     /*                                          */
     /********************************************/
 
-
     /**
      * Creates an auction for an item if one does not already
      * exist.
@@ -156,9 +155,9 @@ public class AuctionHouse implements Runnable {
     /**
      * Finds the correct auction to pass bid to. If auction not found a new
      * one is created for the item they are trying to bid on.
-     * @param b
+     * @param b, A Bid
      */
-    private void placeBid(Bid b){
+    private void tryBid(Bid b){
         for(Auction a: auctions){
             if(a.getItem().equals(b.getItem())){
                 a.placeBid(b);
