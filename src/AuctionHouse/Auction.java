@@ -109,11 +109,15 @@ public class Auction implements Runnable{
         }
         System.out.println(currentBidderID+" tries "+bid);
         if(bidProtocol.processBid(bid)!=0){
+            //bid is accepted
+            //let agent know he is outbid
             currentWinner=currentBidderID;
+            item.updatePrice(bid);
             bidToBeat=bid;
             System.out.println("current winner "+currentWinner);
         }
         else{
+            //bid is rejected
             System.out.println(currentBidderID+" need to beat "+bidToBeat
                     +" ,you bid "+bid);
         }

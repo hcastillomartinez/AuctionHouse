@@ -28,7 +28,8 @@ public enum MessageTypes {
     GET_AGENT_ID_FOR_HOUSE("get id for house"),
     ACCOUNT_EXISTS("account already exists"),
     THANKS("thanks"),
-    BANK_ACCOUNT("account number");
+    BANK_ACCOUNT("account number"),
+    OUT_BID("out bid");
 
     private final String message;
 
@@ -38,23 +39,6 @@ public enum MessageTypes {
      */
     MessageTypes(String message) {
         this.message = message;
-    }
-
-    /**
-     * Analyzing the message and returning the appropriate response to the
-     * message.
-     * @return response to the message.
-     */
-    public int analyze(String inMessage) {
-        int response = 0;
-
-        for (int i = 1; i < values().length; i++) {
-            if (values()[i].message.equalsIgnoreCase(inMessage)) {
-                return i;
-            }
-        }
-
-        return response;
     }
 
     /**
