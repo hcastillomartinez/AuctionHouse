@@ -137,10 +137,17 @@ public class AuctionHouse implements Runnable {
         return min;
     }
 
-    /********************************************/
-    /* Possible actions from auction house      */
-    /*                                          */
-    /********************************************/
+
+    /******************************************************************/
+    /*                                                                */
+    /*              Possible actions from auction house               */
+    /*                                                                */
+    /******************************************************************/
+
+
+    private void doAction(Message m){
+
+    }
 
     /**
      * Creates an auction for an item if one does not already
@@ -240,15 +247,30 @@ public class AuctionHouse implements Runnable {
         t.start();
     }
 
+    /**
+     * Puts message in queue so that AH can take
+     * appropriate action.
+     * @param m, Message to be analyzed.
+     */
+    public void placeMessageForAnalyzing(Message m){
+        try{
+            messages.put(m);
+        }catch(InterruptedException i){
+            i.printStackTrace();
+        }
+    }
+
+
     @Override
     public void run(){
+        messageWait();
         while(true){
             try {
                 System.out.println("waiting for agents");
-                messageWait();
                 Socket agent = serverSocket.accept();
                 agentCount++;
                 Server server=new Server(agent,agentCount,this);
+                serverThreads.add(server);
             }catch(IOException i){
                 i.printStackTrace();
             }
