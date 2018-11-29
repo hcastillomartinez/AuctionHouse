@@ -299,7 +299,6 @@ public class Bank implements Runnable {
                 outputStream = new ObjectOutputStream(client.getOutputStream());
                 outputStream.flush();
                 inputStream = new ObjectInputStream(client.getInputStream());
-                outputStream.writeObject("You have been connected!");
             } catch (IOException io) {
                 io.printStackTrace();
             }
