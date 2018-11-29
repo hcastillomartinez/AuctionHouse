@@ -34,6 +34,15 @@ public class Item implements Serializable {
     }
 
     /**
+     * Updates the price of item according to the current bid
+     * on it.
+     * @param price Amount that price now is
+     */
+    public void updatePrice(double price){
+        this.price=price;
+    }
+
+    /**
      * Gets the bid state.
      * @return A boolean
      */

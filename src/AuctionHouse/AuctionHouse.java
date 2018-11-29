@@ -6,6 +6,7 @@ import Agent.Message;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -17,6 +18,7 @@ public class AuctionHouse implements Runnable {
     private int houseID;
     private List<Item> itemList;
     private List<Auction> auctions;
+    private List<Server> serverThreads;
     private MakeItems makeItems;
     private ServerSocket serverSocket;
     private int port;
@@ -38,6 +40,8 @@ public class AuctionHouse implements Runnable {
         makeItems = new MakeItems();
         messages=new LinkedBlockingQueue<>();
         itemList = makeItems.getItems(Integer.parseInt(type));
+        serverThreads=new ArrayList<>();
+        auctions=new ArrayList<>();
         this.type = makeItems.getListType();
         this.port=Integer.parseInt(port);
         this.serverName=serverName;
@@ -174,34 +178,38 @@ public class AuctionHouse implements Runnable {
     private class Server implements Runnable {
         private Socket client;
         private int ID;
-        private BlockingQueue<Message> messageLine;
+        private AuctionHouse auctionHouse;
         private BufferedReader stdIn;
         private ObjectInputStream in;
         private ObjectOutputStream out;
-        private HouseMessageAnalyzer HouseMessageAnalyzer;
 
         public Server(Socket client,
                       int id
-                ,BlockingQueue<Message> messages) throws IOException {
+                ,AuctionHouse a) throws IOException {
             this.client = client;
-            messageLine=messages;
-            HouseMessageAnalyzer=new HouseMessageAnalyzer(messageLine);
+            auctionHouse=a;
             this.ID=id;
             in=new ObjectInputStream(client.getInputStream());
             out=new ObjectOutputStream(client.getOutputStream());
             out.writeObject("connected to "+ID);
         }
 
+        /**
+         * Gets the ID of the server thread.
+         * @return
+         */
+        public int getID() {
+            return ID;
+        }
+
         @Override
         public void run()  {
             while(true){
                 try{
-                    messageLine.put((Message) in.readObject());
+                    in.readObject();
                 }catch(IOException i){
                     i.printStackTrace();
                 }catch(ClassNotFoundException i){
-                    i.printStackTrace();
-                }catch(InterruptedException i){
                     i.printStackTrace();
                 }
             }
@@ -210,6 +218,7 @@ public class AuctionHouse implements Runnable {
 
     /**
      * Used to get messages from the server and the auction.
+     *
      */
     private void messageWait(){
         Thread t=new Thread(new Runnable() {
@@ -239,7 +248,7 @@ public class AuctionHouse implements Runnable {
                 messageWait();
                 Socket agent = serverSocket.accept();
                 agentCount++;
-                Server server=new Server(agent,agentCount,messages);
+                Server server=new Server(agent,agentCount,this);
             }catch(IOException i){
                 i.printStackTrace();
             }
