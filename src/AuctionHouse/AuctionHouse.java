@@ -213,7 +213,10 @@ public class AuctionHouse implements Runnable {
         public void run()  {
             while(true){
                 try{
-                    in.readObject();
+                    Message m = (Message) in.readObject();
+                    if(m!=null){
+                        auctionHouse.placeMessageForAnalyzing(m);
+                    }
                 }catch(IOException i){
                     i.printStackTrace();
                 }catch(ClassNotFoundException i){
