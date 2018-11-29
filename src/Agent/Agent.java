@@ -55,15 +55,6 @@ public class Agent implements Runnable {
     }
 
     /**
-     * Making a bid to an auction house.
-     * @param bidAmount amount to bid on the item.
-     */
-    private void placeBid(int bidAmount) {
-        Bid bid = new Bid(item, id, bidAmount);
-        Message message = new Message("Agent", MessageTypes.BID, bid);
-    }
-
-    /**
      * Returning the id of the Agent.
      * @return id of the agent.
      */
@@ -97,7 +88,7 @@ public class Agent implements Runnable {
 
     /*****************************************************************/
     /*                                                               */
-    /*                Actions Based On Input Functions               */
+    /*               Functions For Actions Based On Input            */
     /*                                                               */
     /*****************************************************************/
 
@@ -160,7 +151,7 @@ public class Agent implements Runnable {
     }
     
     /**
-     * Assigning the id for the ah.
+     * Assigning the id for the AuctionHouse.
      */
     private void assignAHID(Message m) {
         String house = (String) m.getMessageList().get(2);
@@ -169,6 +160,17 @@ public class Agent implements Runnable {
             auctionHouseMap.replace(house, houseID);
         } else {
             auctionHouseMap.put(house, houseID);
+        }
+    }
+    
+    /**
+     * Responding to the sender of the message.
+     */
+    private void respondToSender(int sender, Message outMessage) {
+        if (sender == 2) {
+            auctionHouseProxy.sendMessage(outMessage);
+        } else if (sender == 3) {
+            bank.sendAgentMessage(outMessage);
         }
     }
 
@@ -184,51 +186,49 @@ public class Agent implements Runnable {
     private synchronized void response(Message message,
                                           MessageTypes type,
                                           int sender) {
-//       else if (analysis == 17) {
-//            // the bid statuse
-//        }
-        
-        Message response = null;
+        Message response;
         ArrayList<Object> list = message.getMessageList();
         
         switch (type) {
             case CONFIRMATION:
                 response = new Message(NAME, MessageTypes.THANKS);
-                bank.sendAgentMessage(response);
+                respondToSender(sender, response);
                 break;
             case ACCOUNT_EXISTS:
                 response = new Message(NAME, MessageTypes.THANKS);
-                bank.sendAgentMessage(response);
+                respondToSender(sender, response);
                 break;
             case TRANSFER_ITEM:
-                Bid bid = (Bid) message.getMessageList().get(2);
+                Bid bid = (Bid) list.get(2);
                 response = new Message(NAME,
                                        MessageTypes.REMOVE_FUNDS,
                                        getId(),
                                        bid.getAmount());
-                bank.sendAgentMessage(response);
+                respondToSender(sender, response);
                 break;
             case BANK_ACCOUNT:
-                accountNumber = (int) message.getMessageList().get(2);
+                accountNumber = (int) list.get(2);
                 break;
             case GET_AGENT_ID_FOR_HOUSE:
                 assignAHID(message);
                 break;
             case GET_HOUSES:
-                houseList = (ArrayList) message.getMessageList().get(2);
+                if (list.get(2).equals(ArrayList.class)) {
+                    houseList = (ArrayList) list.get(2);
+                }
                 break;
             case BID_REJECTED:
                 reBid(message);
                 break;
             case BID_ACCEPTED:
-                auctionHouseProxy.sendMessage(new Message(NAME,
-                                                          MessageTypes.THANKS));
+                response = new Message(NAME, MessageTypes.THANKS);
+                respondToSender(sender, response);
                 break;
             case OUT_BID:
                 reBid(message);
                 break;
             case BID_STATUS:
-                
+                //// do things here for bid status
                 break;
         }
     }
@@ -298,7 +298,7 @@ public class Agent implements Runnable {
      */
     @Override
     public void run() {
-        Message in, respond = null;
+        Message in;
         MessageAnalyzer analyzer = new MessageAnalyzer();
 
         try {

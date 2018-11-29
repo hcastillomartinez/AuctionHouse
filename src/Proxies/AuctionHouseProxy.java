@@ -101,7 +101,6 @@ public class AuctionHouseProxy implements Runnable {
                     messageInput = messageQueue.take();
                     if (messageInput != null) {
                         out.writeObject(messageInput);
-                        messageInput = null;
                     }
                     
                     // testing code to read from the server
@@ -109,10 +108,9 @@ public class AuctionHouseProxy implements Runnable {
                     if (agent != null) {
                         if (response != null) {
                             agent.addMessage(response);
-                            response = null;
                         }
                     } else if (house != null) {
-    //                        house.addMessage(response);
+//                            bank.addMessage(response);
                     }
                 } catch (EOFException eof) {
                     agent.setConnected();

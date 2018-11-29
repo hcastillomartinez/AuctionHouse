@@ -18,8 +18,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class BankProxy implements Runnable {
 
-    private Bank bank;
-    private Account accout;
     private Agent agent;
     private String host;
     private int port;
@@ -71,11 +69,22 @@ public class BankProxy implements Runnable {
             io.printStackTrace();
         }
     }
+    
+    /**
+     * Function to close all of the open connections.
+     */
+    private void closeConnections() {
+        try {
+            out.close();
+            in.close();
+        } catch (IOException ie) {
+            ie.printStackTrace();
+        }
+    }
 
     /**
      * Adding a message to the banks input stream.
      */
-    @SuppressWarnings("unchecked")
     public void sendAgentMessage(Message inMessage) {
         try {
             messageQueue.put(inMessage);
@@ -93,19 +102,17 @@ public class BankProxy implements Runnable {
         try {
             Message response = null, messageInput = null;
 
-            do {
+            while (connected) {
                 try {
                     messageInput = messageQueue.take();
                     if (messageInput != null) {
                         out.writeObject(messageInput);
-                        messageInput = null;
                     }
-    
+        
                     response = (Message) in.readObject();
                     if (agent != null) {
                         if (response != null) {
                             agent.addMessage(response);
-                            response = null;
                         }
                     } else if (house != null) {
                         if (response != null) {
@@ -113,54 +120,17 @@ public class BankProxy implements Runnable {
                         }
                     }
                 } catch (EOFException eof) {
-                    agent.setConnected();
-                    out.close();
-                    in.close();
-                    System.out.println("Server has been closed");
+                    closeConnections();
                     break;
                 } catch (ClassNotFoundException cnf) {
                     cnf.printStackTrace();
                 } catch (InterruptedException ie) {
                     ie.printStackTrace();
                 }
-            } while (connected);
+            }
+            closeConnections();
         } catch (IOException io) {
             io.printStackTrace();
         }
-    }
-
-    /**
-     * Creates and assigns an account to an agent.
-     * @return the newly opened account
-     */
-    public Account openAccount(String name, double balance){
-        return new Account(name,
-                           agent.getId(),
-                           balance,
-                           balance);
-    }
-
-    /**
-     * Adds an auction house to the list of auction houses.
-     * @param house the house to add to the bank
-     */
-    public void addAuctionHouse(AuctionInfo house) {
-        bank.getAuctionHouses().add(house);
-    }
-
-    /**
-     * Gets list of agents for a auction house.
-     * @return the list of the agents from the bank
-     */
-    public ArrayList<AgentInfo> getAgents() {
-        return bank.getAgents();
-    }
-
-    /**
-     * Gets list of auction houses for a agent.
-     * @return the list of auction houses from the bank
-     */
-    public ArrayList<AuctionInfo> getAuctionHouses() {
-        return bank.getAuctionHouses();
     }
 }
