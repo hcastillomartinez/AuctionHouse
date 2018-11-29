@@ -31,10 +31,10 @@ public class Agent implements Runnable {
     private boolean connected = true;
     private Scanner scanner = new Scanner(System.in);
 
-
     private static String hostName;
     private static int portNumber;
 
+    
     /**
      * Constructor for the Agent.
      */
@@ -331,6 +331,14 @@ public class Agent implements Runnable {
 }
 
 
+
+
+/*
+computers for checking offline
+b146-34
+b146-22
+b146-19
+ */
 
 
 

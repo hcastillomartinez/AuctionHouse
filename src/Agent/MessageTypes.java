@@ -6,9 +6,6 @@ package Agent;
  * Danan High, 11/20/2018
  */
 public enum MessageTypes {
-
-    // will continue adding more as more types are determined for message
-// sending between the types
     
     BID("bid"),
     GET_HOUSES("get houses"),

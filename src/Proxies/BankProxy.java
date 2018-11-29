@@ -101,7 +101,6 @@ public class BankProxy implements Runnable {
                         messageInput = null;
                     }
     
-                    // testing code to read from the server
                     response = (Message) in.readObject();
                     if (agent != null) {
                         if (response != null) {
@@ -109,7 +108,9 @@ public class BankProxy implements Runnable {
                             response = null;
                         }
                     } else if (house != null) {
-//                        house.addMessage(response);
+                        if (response != null) {
+                            house.placeMessageForAnalyzing(response);
+                        }
                     }
                 } catch (EOFException eof) {
                     agent.setConnected();
