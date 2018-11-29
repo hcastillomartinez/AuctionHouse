@@ -2,6 +2,10 @@ package AuctionHouse;
 
 import java.util.*;
 
+/**
+ * Used by auction.java to decide what to do
+ * with the bid.
+ */
 public class BidProtocol {
     private double lastBid;
     private double price;

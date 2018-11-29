@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class AuctionHouse implements Runnable{
+public class AuctionHouse implements Runnable {
     private int agentCount;
     private String type;
     private double houseFunds;
@@ -44,7 +44,7 @@ public class AuctionHouse implements Runnable{
         try {
             serverSocket = new ServerSocket(this.port);
         }catch(IOException i){
-            System.out.println(i);
+            i.printStackTrace();
         }
     }
 
@@ -133,6 +133,45 @@ public class AuctionHouse implements Runnable{
         return min;
     }
 
+    /********************************************/
+    /* Possible actions from auction house      */
+    /*                                          */
+    /********************************************/
+
+
+    /**
+     * Creates an auction for an item if one does not already
+     * exist.
+     * @param b, A Bid
+     */
+    private void createAuction(Bid b){
+        if(!b.getItem().isInBid()){
+            Auction a=new Auction(b);
+            auctions.add(a);
+            Thread t=new Thread(a);
+            t.start();
+        }
+    }
+
+    /**
+     * Finds the correct auction to pass bid to. If auction not found a new
+     * one is created for the item they are trying to bid on.
+     * @param b
+     */
+    private void placeBid(Bid b){
+        for(Auction a: auctions){
+            if(a.getItem().equals(b.getItem())){
+                a.placeBid(b);
+                break;
+            }
+        }
+        createAuction(b);
+    }
+
+    /**
+     * Handles the connections of agents and the messages coming through
+     * their sockets.
+     */
     private class Server implements Runnable {
         private Socket client;
         private int ID;
@@ -140,10 +179,14 @@ public class AuctionHouse implements Runnable{
         private BufferedReader stdIn;
         private ObjectInputStream in;
         private ObjectOutputStream out;
+        private HouseMessageAnalyzer HouseMessageAnalyzer;
 
-        public Server(Socket client,int id,BlockingQueue<Message> messages) throws IOException {
+        public Server(Socket client,
+                      int id
+                ,BlockingQueue<Message> messages) throws IOException {
             this.client = client;
             messageLine=messages;
+            HouseMessageAnalyzer=new HouseMessageAnalyzer(messageLine);
             this.ID=id;
             in=new ObjectInputStream(client.getInputStream());
             out=new ObjectOutputStream(client.getOutputStream());
@@ -153,20 +196,35 @@ public class AuctionHouse implements Runnable{
         @Override
         public void run()  {
             while(true){
-
+                try{
+                    messageLine.put((Message) in.readObject());
+                }catch(IOException i){
+                    i.printStackTrace();
+                }catch(ClassNotFoundException i){
+                    i.printStackTrace();
+                }catch(InterruptedException i){
+                    i.printStackTrace();
+                }
             }
         }
     }
 
+    /**
+     * Used to get messages from the server and the auction.
+     */
     private void messageWait(){
         Thread t=new Thread(new Runnable() {
             @Override
             public void run() {
                 while(true) {
                     try {
+                        System.out.println("waiting for message");
+                        //todo
+                        //here is where auction house decides what to do
+                        //and upon completion should say it has finished.
                         messages.take();
                     } catch (InterruptedException i) {
-                        System.out.println(i);
+                        i.printStackTrace();
                     }
                 }
             }
@@ -184,7 +242,7 @@ public class AuctionHouse implements Runnable{
                 agentCount++;
                 Server server=new Server(agent,agentCount,messages);
             }catch(IOException i){
-                System.out.println(i);
+                i.printStackTrace();
             }
         }
     }

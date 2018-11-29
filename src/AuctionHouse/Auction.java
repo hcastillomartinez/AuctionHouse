@@ -102,7 +102,7 @@ public class Auction implements Runnable{
      * @param bid
      * @return
      */
-    private void analyzeBid(double bid){
+    private synchronized void analyzeBid(double bid){
         if(!auctionActive){
             System.out.println("Auction Over");
             return;
@@ -128,8 +128,16 @@ public class Auction implements Runnable{
             if(b.getItem()!=null) breakDownBid(b);
             bids.put(b);
         }catch(InterruptedException i){
-            System.out.println(i);
+            i.printStackTrace();
         }
+    }
+
+    /**
+     * Gets the item in the auction.
+     * @return An Item.
+     */
+    public Item getItem(){
+        return item;
     }
 
     /**
