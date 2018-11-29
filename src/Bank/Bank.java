@@ -8,10 +8,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Timer;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.*;
+
+import static Agent.MessageTypes.ACCOUNT_INFO;
+import static Agent.MessageTypes.CREATE_ACCOUNT;
+import static Agent.MessageTypes.GET_HOUSES;
 
 /**
  * The Bank class.
@@ -19,16 +21,18 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @version 11-13-18
  */
 public class Bank implements Runnable {
-    //todo change these lists to maps
+    private final String NAME = "bank";
     private LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
-    private ArrayList<Agent> agents; //list of agent accounts
-    private ArrayList<AuctionHouse> auctionHouses; //list of auction house accounts
+    private ArrayList<AgentInfo> agents; //list of agent accounts
+    private ArrayList<AuctionInfo> auctionHouses; //list of auction house accounts
     private ArrayList<Account> accounts;
     private HashMap<Integer,ServerThread> clients;
+    private HashMap<Agent,HashMap<AuctionHouse, Integer>> secretKeys; //todo
     private int clientNumber = 0;
     private int currentAccountNumber = 0;
     static private String address;
     static private int portNumber;
+
     
     /**
      It is static and at a known address (IP address and port number)
@@ -40,14 +44,6 @@ public class Bank implements Runnable {
      It transfers funds from agent to auction accounts, under agent control
      It blocks and unblocks funds in agent accounts, at the request of action houses
      
-     
-     Will have a proxy
-     
-     Some sort of pending balance:
-     every time you make a bid on a new item
-     subtract that amount from pending balance
-     
-     we need to create the bank first
      */
     
     public static void main(String[] args) throws Exception {
@@ -62,21 +58,6 @@ public class Bank implements Runnable {
         Bank bank = new Bank(address, portNumber);
         Thread bankThread = new Thread(bank);
         bankThread.start();
-
-        try{
-            ServerSocket server = new ServerSocket(portNumber);
-
-            while (true) {
-                Socket client = server.accept();
-                ServerThread bankClient = new ServerThread(client,bank.clientNumber++);
-                bank.getClients().put(bankClient.idNumber,bankClient);
-                (new Thread(bankClient)).start();
-            }
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-        
     }
     
     /**
@@ -84,8 +65,8 @@ public class Bank implements Runnable {
      *
      */
     public Bank(String address, int portNumber){
-        agents = new ArrayList<Agent>();
-        auctionHouses = new ArrayList<AuctionHouse>();
+        agents = new ArrayList<AgentInfo>();
+        auctionHouses = new ArrayList<AuctionInfo>();
         accounts = new ArrayList<Account>();
         clients = new HashMap<>();
     }
@@ -101,14 +82,96 @@ public class Bank implements Runnable {
     @Override
     public void run(){
 
-        while(true)
-            System.out.println("Bank thread is running");
+        try{
+            ServerSocket server = new ServerSocket(portNumber);
+
+            while (true) {
+                Socket client = server.accept();
+                ServerThread bankClient = new ServerThread(client,clientNumber++);
+                getClients().put(bankClient.idNumber,bankClient);
+                (new Thread(bankClient)).start();
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void handleMessage(Message message){
+//        MessageAnalyzer analyzer = new MessageAnalyzer();
+//
+//        String sender = (String) message.getMessageList().get(0);
+//        sender.toLowerCase();
+//        MessageTypes type = (MessageTypes) message.getMessageList().get(1);
+//        String
+//
+//        switch(sender){
+//            //all of the casess
+//            case "auction house":
+//                //switch();
+//                break;
+//
+//            case "agent":
+//                break;
+//
+//            default:
+//                System.out.println("Error in handleMessage() case statement in Bank.java");
+//        }
+
+
+    }
+
+    public synchronized void response(Message message,
+                                         MessageTypes type,
+                                         int sender) {
+        Message response = null;
+        ArrayList<Object> messageList = message.getMessageList();
+
+        switch (type) {
+            case REMOVE_FUNDS:
+                if(messageList.size() > 2){
+                    int agentAccountNumber = (int) messageList.get(1);
+                    double amount = (double) messageList.get(2);
+
+                    blockFunds(agentAccountNumber,amount);
+                    //todo send new account back to agent
+                }
+                else{ /*throw error*/}
+                break;
+
+            case CREATE_ACCOUNT:
+                //todo
+                break;
+
+            case ACCOUNT_INFO:
+                //todo
+                break;
+
+            case GET_HOUSES:
+                //return list of HouseInfo objects
+                break;
+
+            case TRANSFER_FUNDS:
+                if(messageList.size() > 3){
+                    int auctionHouseAccountNumber = (int) messageList.get(0);
+                    int agentAccountNumber = (int) messageList.get(1);
+                    double amount = (double) messageList.get(2);
+                    transferFunds(auctionHouseAccountNumber,agentAccountNumber,amount);
+                    //todo send new accounts back to houses and agents
+                }
+                else{ /*throw error*/}
+                //todo
+                break;
+
+             //todo make default
+        }
+
     }
 
     /**
      * Creates and returns an account.
      */
-    public Account makeAccount(String name, int startingBalance) {
+    public synchronized Account makeAccount(String name, int startingBalance) {
         Account account = new Account(name,
                                       assignAccountNumber(),
                                       startingBalance,
@@ -124,14 +187,14 @@ public class Bank implements Runnable {
     /**
      * Adds an auction house to the list of auction houses.
      */
-    public void addAuctionHouse(AuctionHouse house){
+    public synchronized void addAuctionHouse(AuctionInfo house){
         this.auctionHouses.add(house);
     }
 
     /**
      * Assigns an account number to an agent and increments the current account number
      */
-    private int assignAccountNumber() {
+    private synchronized int assignAccountNumber() {
         int number = this.currentAccountNumber;
         this.currentAccountNumber++;
         return number;
@@ -141,7 +204,7 @@ public class Bank implements Runnable {
      * Gets the list of bank accounts
      * @return
      */
-    public ArrayList<Account> getAccounts(){
+    public synchronized ArrayList<Account> getAccounts(){
         return accounts;
     }
 
@@ -149,21 +212,21 @@ public class Bank implements Runnable {
      * Gets the map of integer id's to clients.
      * @return
      */
-    public HashMap<Integer, ServerThread> getClients() {
+    public synchronized HashMap<Integer, ServerThread> getClients() {
         return clients;
     }
 
     /**
      * Gets list of agents for a auction house.
      */
-    public ArrayList<Agent> getAgents() {
+    public synchronized ArrayList<AgentInfo> getAgents() {
         return agents;
     }
     
     /**
      * Gets list of auction houses for a agent.
      */
-    public ArrayList<AuctionHouse> getAuctionHouses() {
+    public synchronized ArrayList<AuctionInfo> getAuctionHouses() {
         return auctionHouses;
     }
     
@@ -173,7 +236,7 @@ public class Bank implements Runnable {
      */
     public synchronized void transferFunds(int auctionHouseAccountNumber,
                                            int agentAccountNumber,
-                                           double amount) throws Exception{
+                                           double amount){
         
         Account houseAccount = accounts.get(auctionHouseAccountNumber);
         Account agentAccount = accounts.get(agentAccountNumber);
@@ -189,15 +252,33 @@ public class Bank implements Runnable {
                     houseAccount.setPendingBalance(houseAccount.getPendingBalance() + amount);
                 }
                 else{
-                    throw new Exception(); //"Unable to transfer funds. The agent's pending balance is less than the specified amount."
+                    //todo sent message back to agent; //"Unable to transfer funds. The agent's pending balance is less than the specified amount."
                 }
             }
         }
     }
-    
-    
-    
-    
+
+    /**
+     * Blocks the funds in an agent account by removing them from the pending balance
+     * @param agentAccountNumber
+     * @param amount
+     */
+    public synchronized void blockFunds(int agentAccountNumber, double amount){
+        Account agentAccount = accounts.get(agentAccountNumber);
+        agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
+    }
+
+    /**
+     * Unblocks funds in an agent account by adding them back to the pending balance.
+     */
+    public synchronized  void unblockFunds(int agentAccountNumber, double amount){
+        Account agentAccount = accounts.get(agentAccountNumber);
+        agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
+    }
+
+
+
+
     // private sub class
     private static class ServerThread implements Runnable {
         
@@ -206,7 +287,8 @@ public class Bank implements Runnable {
         private ObjectInputStream inputStream;
         private ObjectOutputStream outputStream;
         private int idNumber;
-        
+        private LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
+
         // constructor
         public ServerThread(Socket client, int idNumber) {
             this.client = client;
@@ -239,32 +321,23 @@ public class Bank implements Runnable {
         
         @Override
         public void run() {
-            String output, input = null;
-            
-            try {
-                do {
+
+                while(true) {
                     try {
-                        input = (String) inputStream.readObject();
-                        System.out.println(input);
-                        
-                        if (input.equalsIgnoreCase("bye")) {
-                            input = null;
-                        }
-                        
-                        output = stdIn.readLine();
-                        if (output != "") {
-                            outputStream.writeObject("server: " + output);
-                        }
-                    } catch (ClassNotFoundException cnf) {
-                        cnf.printStackTrace();
-                    } catch (EOFException eof) {
-                        System.out.println("Client has disconnected!");
-                        break;
+                        Message msg = (Message) inputStream.readObject();
+                        messages.add(msg);
+                        Message message = messages.take();
+                        System.out.println(message);
+
+
+                    }catch(InterruptedException e){
+                        e.printStackTrace();
+                    }catch(IOException e){
+                        e.printStackTrace();
+                    }catch(ClassNotFoundException e){
+                        e.printStackTrace();
                     }
-                } while (input != null);
-            } catch (IOException io) {
-                io.printStackTrace();
-            }
+                }
         }
     }
     

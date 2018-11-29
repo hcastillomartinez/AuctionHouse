@@ -35,7 +35,6 @@ If you have tests, then explain how they work and how to use them.
 
 
 ## Daniel's Todo's
-Talk with group about bank run method
+How are we synchronizing bank accounts? Each time balances are update, do we send their new account object to Agent/AuctionHouse?
+How are we handling errors such as too few args in a money transfer? Send an error message back?
 Why does the bank proxy have a run method? It isn't a thread in roman's design.
-Does bank need a messageQueue?
-Instead of ServerThread, could we just use two bank proxies to talk to each other?

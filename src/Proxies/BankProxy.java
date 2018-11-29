@@ -143,7 +143,7 @@ public class BankProxy implements Runnable {
      * Adds an auction house to the list of auction houses.
      * @param house the house to add to the bank
      */
-    public void addAuctionHouse(AuctionHouse house) {
+    public void addAuctionHouse(AuctionInfo house) {
         bank.getAuctionHouses().add(house);
     }
 
@@ -151,7 +151,7 @@ public class BankProxy implements Runnable {
      * Gets list of agents for a auction house.
      * @return the list of the agents from the bank
      */
-    public ArrayList<Agent> getAgents() {
+    public ArrayList<AgentInfo> getAgents() {
         return bank.getAgents();
     }
 
@@ -159,7 +159,7 @@ public class BankProxy implements Runnable {
      * Gets list of auction houses for a agent.
      * @return the list of auction houses from the bank
      */
-    public ArrayList<AuctionHouse> getAuctionHouses() {
+    public ArrayList<AuctionInfo> getAuctionHouses() {
         return bank.getAuctionHouses();
     }
 }
