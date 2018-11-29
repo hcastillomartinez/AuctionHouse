@@ -97,7 +97,7 @@ public class Agent implements Runnable {
 
     /*****************************************************************/
     /*                                                               */
-    /*          Analyzing Feedback and User Input Functions          */
+    /*                Actions Based On Input Functions               */
     /*                                                               */
     /*****************************************************************/
 
@@ -105,7 +105,7 @@ public class Agent implements Runnable {
      * Getting and setting the new account information from the bank.
      */
     private synchronized Account openNewBankAccount() {
-//        if (account == null) {
+        if (account == null) {
             // getting the account name
             System.out.print("name: ");
             String name = scanner.next();
@@ -116,10 +116,10 @@ public class Agent implements Runnable {
             System.out.println();
             
             return new Account(name, getId(), amount, amount);
-//        } else {
-//            System.out.println("Account is already created");
-//        }
-//        return null;
+        } else {
+            System.out.println("Account is already created");
+        }
+        return null;
     }
     
     /**
@@ -130,7 +130,6 @@ public class Agent implements Runnable {
         System.out.println("amount to bid");
         double amount = scanner.nextDouble();
         System.out.println();
-        
         return new Bid(item, getId(), amount);
     }
     
@@ -146,15 +145,30 @@ public class Agent implements Runnable {
     }
     
     /**
-     * Function to pass along messages to the appropriate proxy.
+     * Function to handle rebidding.
      */
-    private void passMessage(AuctionHouseProxy ahp,
-                             BankProxy bp,
-                             Message m) {
-        if (ahp != null) {
-            ahp.sendMessage(m);
-        } else if (bp != null) {
-            bp.sendAgentMessage(m);
+    private void reBid(Message m) {
+        MessageTypes reject = (MessageTypes) m.getMessageList().get(1);
+        System.out.println(reject.getMessage()+ ". New bid?(y/n)");
+        String answer = scanner.next();
+        
+        if (answer.contains("y")) {
+            auctionHouseProxy.sendMessage(new Message(NAME,
+                                                      MessageTypes.BID,
+                                                      makeBid()));
+        }
+    }
+    
+    /**
+     * Assigning the id for the ah.
+     */
+    private void assignAHID(Message m) {
+        String house = (String) m.getMessageList().get(2);
+        int houseID = (int) m.getMessageList().get(3);
+        if (auctionHouseMap.containsKey(house)) {
+            auctionHouseMap.replace(house, houseID);
+        } else {
+            auctionHouseMap.put(house, houseID);
         }
     }
 
@@ -167,19 +181,11 @@ public class Agent implements Runnable {
     /**
      * Function to respond after message analysis
      */
-    private synchronized Message response(Message message,
+    private synchronized void response(Message message,
                                           MessageTypes type,
                                           int sender) {
-//       else if (analysis == 10) {
-//            // bid has been denied
-//        } else if (analysis == 16) {
-//            // been outbid
-//        } else if (analysis == 9) {
-//            // bid has been accepted
-//        } else if (analysis == 17) {
+//       else if (analysis == 17) {
 //            // the bid statuse
-//        } else if (analysis == 11) {
-//            // setting the item won (adding to a list of items won?)
 //        }
         
         Message response = null;
@@ -206,35 +212,25 @@ public class Agent implements Runnable {
                 accountNumber = (int) message.getMessageList().get(2);
                 break;
             case GET_AGENT_ID_FOR_HOUSE:
-                String house = (String) message.getMessageList().get(2);
-                int houseID = (int) message.getMessageList().get(3);
-                if (auctionHouseMap.containsKey(house)) {
-                    auctionHouseMap.replace(house, houseID);
-                } else {
-                    auctionHouseMap.put(house, houseID);
-                }
+                assignAHID(message);
                 break;
             case GET_HOUSES:
                 houseList = (ArrayList) message.getMessageList().get(2);
                 break;
             case BID_REJECTED:
-                MessageTypes reject
-                        = (MessageTypes) message.getMessageList().get(1);
-                System.out.println(reject.getMessage()+ ". New bid?(y/n)");
-                String answer = scanner.next();
-                if (answer.contains("y")) {
-                    auctionHouseProxy.sendMessage(new Message(NAME,
-                                                              MessageTypes.BID,
-                                                              makeBid()));
-                }
+                reBid(message);
                 break;
-//            case:
-//                break;
-//            case:
-//                break;
+            case BID_ACCEPTED:
+                auctionHouseProxy.sendMessage(new Message(NAME,
+                                                          MessageTypes.THANKS));
+                break;
+            case OUT_BID:
+                reBid(message);
+                break;
+            case BID_STATUS:
+                
+                break;
         }
-        
-        return null;
     }
     
     /**
@@ -298,7 +294,7 @@ public class Agent implements Runnable {
     /*****************************************************************/
 
     /**
-     * Overrides run to perform certain tasks.
+     * Overrides run to perform specific tasks.
      */
     @Override
     public void run() {
@@ -313,12 +309,9 @@ public class Agent implements Runnable {
                 
                 if (messageQueue.size() > 0) {
                     in = messageQueue.take();
-                    respond = response(in,
-                                       (MessageTypes) in.getMessageList().get(1),
-                                       analyzer.analyze(in));
-                    if (respond != null) {
-                        bank.sendAgentMessage(respond);
-                    }
+                    response(in,
+                             (MessageTypes) in.getMessageList().get(1),
+                             analyzer.analyze(in));
                 }
             }
         } catch (InterruptedException ie) {
@@ -336,6 +329,8 @@ public class Agent implements Runnable {
         (new Thread(agent)).start();
     }
 }
+
+
 
 
 
