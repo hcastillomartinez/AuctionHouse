@@ -283,6 +283,16 @@ public class AuctionHouse implements Runnable {
             return ID;
         }
 
+        public void closeClient(){
+            try{
+                in.close();
+                out.close();
+                client.close();
+            }catch(IOException i){
+                i.printStackTrace();
+            }
+        }
+
         @Override
         public void run()  {
             while(true){
@@ -300,13 +310,25 @@ public class AuctionHouse implements Runnable {
         }
     }
 
-
+    /**
+     * Closes all the server thread's clients and also the server socket.
+     */
+    public void closeAllSockets(){
+        for(Server s: serverThreads){
+            s.closeClient();
+        }
+        try {
+            serverSocket.close();
+        }catch(IOException i){
+            i.printStackTrace();
+        }
+    }
 
 
     @Override
     public void run(){
         messageWait();
-        while(true){
+        while(auctionOpen){
             try {
                 System.out.println("waiting for agents");
                 Socket agent = serverSocket.accept();
@@ -316,6 +338,7 @@ public class AuctionHouse implements Runnable {
             }catch(IOException i){
                 i.printStackTrace();
             }
+            closeAllSockets();
         }
     }
 

@@ -72,6 +72,4 @@ public class AuctionHouseGUI extends Application {
     public void stop(){
         auctionOpen=false;
     }
-
-
 }
