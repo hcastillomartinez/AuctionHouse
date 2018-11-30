@@ -25,6 +25,7 @@ public class AuctionHouse implements Runnable {
     private int port;
     private String serverName;
     private BlockingQueue<Message> messages;
+    private boolean auctionOpen;
 
 
     /**
@@ -36,6 +37,7 @@ public class AuctionHouse implements Runnable {
     public AuctionHouse(String type,String port,String serverName){
         agentCount = 0;
         houseFunds = 0;
+        auctionOpen=true;
         houseID = ((int)(Math.random()*60000)+30000)
                 -((int)(Math.random()*30000)+1);
         makeItems = new MakeItems();
@@ -58,6 +60,10 @@ public class AuctionHouse implements Runnable {
     /*                Getters and Setters                             */
     /*                                                                */
     /******************************************************************/
+
+    public boolean getAuctionStatus(){
+        return auctionOpen;
+    }
 
     /**
      * Gets the amount of money a house has.
@@ -316,6 +322,9 @@ public class AuctionHouse implements Runnable {
 
     public static void main(String[] args){
         AuctionHouse auctionHouse = new AuctionHouse(args[0],args[1],args[3]);
+        AuctionHouseGUI gui=new AuctionHouseGUI(auctionHouse.getItemList(),
+                auctionHouse.getAuctionStatus());
+        gui.launch();
         Thread t = new Thread(auctionHouse);
         t.start();
     }
