@@ -1,14 +1,10 @@
 package AuctionHouse;
 
-import Agent.Agent;
 import Agent.Bid;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Auction implements Runnable{
@@ -18,7 +14,7 @@ public class Auction implements Runnable{
     private int currentBidderID;
     private BlockingQueue<Bid> bids;
     private BidProtocol bidProtocol;
-    private int currentWinner;
+    private int currentWinnerID;
     private Item item;
     private int time;
     private double bidToBeat;
@@ -111,10 +107,10 @@ public class Auction implements Runnable{
         if(bidProtocol.processBid(bid)!=0){
             //bid is accepted
             //let agent know he is outbid
-            currentWinner=currentBidderID;
+            currentWinnerID =currentBidderID;
             item.updatePrice(bid);
             bidToBeat=bid;
-            System.out.println("current winner "+currentWinner);
+            System.out.println("current winner "+ currentWinnerID);
         }
         else{
             //bid is rejected
@@ -137,6 +133,14 @@ public class Auction implements Runnable{
     }
 
     /**
+     * Gets the current winner of the auction
+     * @return An int that is key of bidder that is winning.
+     */
+    public int getCurrentWinnerID(){
+        return currentBidderID;
+    }
+
+    /**
      * Gets the item in the auction.
      * @return An Item.
      */
@@ -153,7 +157,7 @@ public class Auction implements Runnable{
             getBid();
             if(time==0)setTime();
         }
-        System.out.println("winner: "+currentWinner);
+        System.out.println("winner: "+ currentWinnerID);
     }
 
     public static void main(String[] args)throws Exception {

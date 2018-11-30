@@ -15,6 +15,7 @@ public class AuctionHouse implements Runnable {
     private int agentCount;
     private String type;
     private double houseFunds;
+    private HouseMessageAnalyzer messageAnalyzer;
     private int houseID;
     private List<Item> itemList;
     private List<Auction> auctions;
@@ -33,18 +34,18 @@ public class AuctionHouse implements Runnable {
      * @param type An int
      */
     public AuctionHouse(String type,String port,String serverName){
-        agentCount=0;
-        houseFunds=0;
-        houseID=((int)(Math.random()*60000)+30000)
+        agentCount = 0;
+        houseFunds = 0;
+        houseID = ((int)(Math.random()*60000)+30000)
                 -((int)(Math.random()*30000)+1);
         makeItems = new MakeItems();
-        messages=new LinkedBlockingQueue<>();
+        messages = new LinkedBlockingQueue<>();
         itemList = makeItems.getItems(Integer.parseInt(type));
-        serverThreads=new ArrayList<>();
-        auctions=new ArrayList<>();
+        serverThreads = new ArrayList<>();
+        auctions = new ArrayList<>();
         this.type = makeItems.getListType();
-        this.port=Integer.parseInt(port);
-        this.serverName=serverName;
+        this.port = Integer.parseInt(port);
+        this.serverName = serverName;
         try {
             serverSocket = new ServerSocket(this.port);
         }catch(IOException i){
@@ -52,6 +53,11 @@ public class AuctionHouse implements Runnable {
         }
     }
 
+    /******************************************************************/
+    /*                                                                */
+    /*                Getters and Setters                             */
+    /*                                                                */
+    /******************************************************************/
 
     /**
      * Gets the amount of money a house has.
@@ -74,7 +80,7 @@ public class AuctionHouse implements Runnable {
      * @param houseFunds double that is funds to be added
      */
     public void setHouseFunds(double houseFunds) {
-        this.houseFunds+=houseFunds;
+        this.houseFunds += houseFunds;
     }
 
     /**
@@ -108,9 +114,9 @@ public class AuctionHouse implements Runnable {
      * @return An int that is max price
      */
     public double maxPrice(){
-        double max=0;
+        double max = 0;
         for(Item t:itemList){
-            if(t.getPrice()>max)max=t.getPrice();
+            if(t.getPrice() > max) max = t.getPrice();
         }
         return max;
     }
@@ -130,9 +136,9 @@ public class AuctionHouse implements Runnable {
      * @return An int that is the lowest price.
      */
     public double lowestPrice(){
-        double min=10000;
+        double min = 10000;
         for(Item t:itemList){
-            if(t.getPrice()<min)min=t.getPrice();
+            if(t.getPrice() < min) min = t.getPrice();
         }
         return min;
     }
@@ -146,7 +152,16 @@ public class AuctionHouse implements Runnable {
 
 
     private void doAction(Message m){
+        int action = messageAnalyzer.analyzeMessage(m);
 
+        if(action == 1){
+            //send back item list
+        }else if(action == 2){
+            //tries to place bid
+            tryBid((Bid) m.getMessageList().get(2));
+        }else if(action == 3){
+            //send status back but what does agent want to receive back?
+        }
     }
 
     /**
@@ -154,11 +169,11 @@ public class AuctionHouse implements Runnable {
      * exist.
      * @param b, A Bid
      */
-    private void createAuction(Bid b){
+    private synchronized void createAuction(Bid b){
         if(!b.getItem().isInBid()){
-            Auction a=new Auction(b);
+            Auction a = new Auction(b);
             auctions.add(a);
-            Thread t=new Thread(a);
+            Thread t = new Thread(a);
             t.start();
         }
     }
@@ -168,7 +183,7 @@ public class AuctionHouse implements Runnable {
      * one is created for the item they are trying to bid on.
      * @param b, A Bid
      */
-    private void tryBid(Bid b){
+    private synchronized void tryBid(Bid b){
         for(Auction a: auctions){
             if(a.getItem().equals(b.getItem())){
                 a.placeBid(b);
@@ -178,57 +193,14 @@ public class AuctionHouse implements Runnable {
         createAuction(b);
     }
 
-    /**
-     * Handles the connections of agents and the messages coming through
-     * their sockets.
-     */
-    private class Server implements Runnable {
-        private Socket client;
-        private int ID;
-        private AuctionHouse auctionHouse;
-        private BufferedReader stdIn;
-        private ObjectInputStream in;
-        private ObjectOutputStream out;
-
-        public Server(Socket client,
-                      int id
-                ,AuctionHouse a) throws IOException {
-            this.client = client;
-            auctionHouse=a;
-            this.ID=id;
-            in=new ObjectInputStream(client.getInputStream());
-            out=new ObjectOutputStream(client.getOutputStream());
-            out.writeObject("connected to "+ID);
-        }
-
-        /**
-         * Gets the ID of the server thread.
-         * @return
-         */
-        public int getID() {
-            return ID;
-        }
-
-        @Override
-        public void run()  {
-            while(true){
-                try{
-                    Message m = (Message) in.readObject();
-                    if(m!=null){
-                        auctionHouse.placeMessageForAnalyzing(m);
-                    }
-                }catch(IOException i){
-                    i.printStackTrace();
-                }catch(ClassNotFoundException i){
-                    i.printStackTrace();
-                }
-            }
-        }
-    }
+    /******************************************************************/
+    /*                                                                */
+    /*              Local Message Handling                            */
+    /*                                                                */
+    /******************************************************************/
 
     /**
-     * Used to get messages from the server and the auction.
-     *
+     * Used to get messages from the server threads and the auction.
      */
     private void messageWait(){
         Thread t=new Thread(new Runnable() {
@@ -237,10 +209,7 @@ public class AuctionHouse implements Runnable {
                 while(true) {
                     try {
                         System.out.println("waiting for message");
-                        //todo
-                        //here is where auction house decides what to do
-                        //and upon completion should say it has finished.
-                        messages.take();
+                        doAction(messages.take());
                     } catch (InterruptedException i) {
                         i.printStackTrace();
                     }
@@ -264,6 +233,70 @@ public class AuctionHouse implements Runnable {
     }
 
 
+
+    /**
+     * Handles the connections of agents and the messages coming through
+     * their sockets.
+     */
+    private class Server implements Runnable {
+        private Socket client;
+        private int ID;
+        private AuctionHouse auctionHouse;
+        private BufferedReader stdIn;
+        private ObjectInputStream in;
+        private ObjectOutputStream out;
+
+        public Server(Socket client,
+                      int id
+                ,AuctionHouse a) throws IOException {
+            this.client = client;
+            auctionHouse = a;
+            this.ID = id;
+            in = new ObjectInputStream(client.getInputStream());
+            out = new ObjectOutputStream(client.getOutputStream());
+            out.writeObject("connected to "+ID);
+        }
+
+        /**
+         * Writes to the client
+         * @param m Message that client will receive.
+         */
+        public synchronized void getMessage(Message m){
+            try{
+             out.writeObject(m);
+            }catch(IOException i){
+                i.printStackTrace();
+            }
+        }
+
+        /**
+         * Gets the ID of the server thread.
+         * @return ID of the serve thread.
+         */
+        public int getID() {
+            return ID;
+        }
+
+        @Override
+        public void run()  {
+            while(true){
+                try{
+                    Message m = (Message) in.readObject();
+                    if(m != null){
+                        auctionHouse.placeMessageForAnalyzing(m);
+                    }
+                }catch(IOException i){
+                    i.printStackTrace();
+                }catch(ClassNotFoundException i){
+                    i.printStackTrace();
+                }
+            }
+        }
+    }
+
+
+
+
     @Override
     public void run(){
         messageWait();
@@ -272,7 +305,7 @@ public class AuctionHouse implements Runnable {
                 System.out.println("waiting for agents");
                 Socket agent = serverSocket.accept();
                 agentCount++;
-                Server server=new Server(agent,agentCount,this);
+                Server server = new Server(agent,agentCount,this);
                 serverThreads.add(server);
             }catch(IOException i){
                 i.printStackTrace();
@@ -282,8 +315,8 @@ public class AuctionHouse implements Runnable {
 
 
     public static void main(String[] args){
-        AuctionHouse auctionHouse=new AuctionHouse(args[0],args[1],args[3]);
-        Thread t=new Thread(auctionHouse);
+        AuctionHouse auctionHouse = new AuctionHouse(args[0],args[1],args[3]);
+        Thread t = new Thread(auctionHouse);
         t.start();
     }
 }
