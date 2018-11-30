@@ -2,14 +2,15 @@ package Agent;
 
 import AuctionHouse.*;
 import Bank.*;
-import Proxies.AuctionHouseProxy;
+import MessageHandling.Message;
+import MessageHandling.MessageAnalyzer;
+import MessageHandling.MessageTypes;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The Bank class.

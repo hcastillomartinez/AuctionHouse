@@ -1,4 +1,4 @@
-package Agent;
+package MessageHandling;
 
 /**
  * MessageTypes.java is the Enum class that responds to the different types of
@@ -26,7 +26,10 @@ public enum MessageTypes {
     ACCOUNT_EXISTS("account already exists"),
     THANKS("thanks"),
     BANK_ACCOUNT("account number"),
-    OUT_BID("out bid");
+    OUT_BID("out bid"),
+    ITEMS("items"),
+    HOUSES("houses"),
+    ID_FOR_HOUSE("id for house");
 
     private final String message;
 

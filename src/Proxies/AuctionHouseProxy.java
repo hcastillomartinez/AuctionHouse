@@ -3,11 +3,10 @@ package Proxies;
 import Agent.*;
 import AuctionHouse.*;
 import Bank.Bank;
+import MessageHandling.Message;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 

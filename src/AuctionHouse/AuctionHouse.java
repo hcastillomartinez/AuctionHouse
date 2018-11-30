@@ -1,7 +1,7 @@
 package AuctionHouse;
 
 import Agent.Bid;
-import Agent.Message;
+import MessageHandling.Message;
 
 import java.io.*;
 import java.net.ServerSocket;

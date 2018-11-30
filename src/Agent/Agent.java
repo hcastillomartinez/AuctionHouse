@@ -2,8 +2,13 @@ package Agent;
 
 import AuctionHouse.*;
 import Bank.*;
+import MessageHandling.Message;
+import MessageHandling.MessageAnalyzer;
+import MessageHandling.MessageTypes;
 import Proxies.AuctionHouseProxy;
 import Proxies.BankProxy;
+import javafx.application.Application;
+import javafx.stage.Stage;
 
 import java.io.*;
 import java.util.*;
@@ -12,7 +17,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Agent.java is the class that bids on objects inside the auction house.
- * Danan High, 11/13/2018
+ * @author Danan High, 11/13/2018
  */
 public class Agent implements Runnable {
     
@@ -20,11 +25,11 @@ public class Agent implements Runnable {
  
     private int id, key, accountNumber;
     private Account account = null;
-    private AuctionHouseProxy auctionHouseProxy;
+    private AuctionHouseProxy aHProxy;
     private BankProxy bank;
     private Item item = null;
     private AuctionHouse auctionHouse = null;
-    private ArrayList<AuctionHouse> houseList;
+    private ArrayList<String> houseList;
     private ArrayList<Item> itemList;
     private BlockingQueue<Message> messageQueue;
     private HashMap<String, Integer> auctionHouseMap;
@@ -48,10 +53,10 @@ public class Agent implements Runnable {
                                   portNumber,
                                   this,
                                   null);
-        this.auctionHouseProxy = new AuctionHouseProxy(hostName,
-                                                       portNumber,
-                                                       this,
-                                                       null);
+        this.aHProxy = new AuctionHouseProxy(hostName,
+                                             portNumber,
+                                             this,
+                                             null);
     }
 
     /**
@@ -71,7 +76,7 @@ public class Agent implements Runnable {
      */
     @SuppressWarnings("unchecked")
     private void getItems() {
-//        itemList = (ArrayList) auctionHouseProxy.getItemList();
+//        itemList = (ArrayList) aHProxy.getItemList();
     }
 
     /**
@@ -97,16 +102,23 @@ public class Agent implements Runnable {
      */
     private synchronized Account openNewBankAccount() {
         if (account == null) {
-            // getting the account name
-            System.out.print("name: ");
-            String name = scanner.next();
+            // getting the account first name
+            System.out.print("First Name: ");
+            String firstName = scanner.next();
+    
+            // getting the account last name
+            System.out.print("Last Name: ");
+            String lastName = scanner.next();
 
             // getting the account starting amount
             System.out.print("staring balance: ");
             double amount = scanner.nextDouble();
             System.out.println();
             
-            return new Account(name, getId(), amount, amount);
+            return new Account(firstName + " " + lastName,
+                               getId(),
+                               amount,
+                               amount);
         } else {
             System.out.println("Account is already created");
         }
@@ -144,9 +156,7 @@ public class Agent implements Runnable {
         String answer = scanner.next();
         
         if (answer.contains("y")) {
-            auctionHouseProxy.sendMessage(new Message(NAME,
-                                                      MessageTypes.BID,
-                                                      makeBid()));
+            aHProxy.sendMessage(new Message(NAME, MessageTypes.BID, makeBid()));
         }
     }
     
@@ -168,9 +178,28 @@ public class Agent implements Runnable {
      */
     private void respondToSender(int sender, Message outMessage) {
         if (sender == 2) {
-            auctionHouseProxy.sendMessage(outMessage);
+            aHProxy.sendMessage(outMessage);
         } else if (sender == 3) {
             bank.sendAgentMessage(outMessage);
+        }
+    }
+    
+    /**
+     * Choosing an auction house.
+     */
+    private void chooseHouse() {
+        int choice;
+        for (String s: houseList) {
+            System.out.println(s);
+        }
+        System.out.print("House Choice: ");
+        choice = scanner.nextInt();
+        
+        while (choice < 0 && choice > houseList.size()) {
+            System.out.println("Invalid choice!");
+            System.out.println();
+            System.out.print("House Choice: ");
+            choice = scanner.nextInt();
         }
     }
 
@@ -183,6 +212,7 @@ public class Agent implements Runnable {
     /**
      * Function to respond after message analysis
      */
+    @SuppressWarnings("unchecked")
     private synchronized void response(Message message,
                                           MessageTypes type,
                                           int sender) {
@@ -191,10 +221,6 @@ public class Agent implements Runnable {
         
         switch (type) {
             case CONFIRMATION:
-                response = new Message(NAME, MessageTypes.THANKS);
-                respondToSender(sender, response);
-                break;
-            case ACCOUNT_EXISTS:
                 response = new Message(NAME, MessageTypes.THANKS);
                 respondToSender(sender, response);
                 break;
@@ -209,12 +235,14 @@ public class Agent implements Runnable {
             case BANK_ACCOUNT:
                 accountNumber = (int) list.get(2);
                 break;
-            case GET_AGENT_ID_FOR_HOUSE:
+            case ID_FOR_HOUSE:
                 assignAHID(message);
                 break;
-            case GET_HOUSES:
+            case HOUSES:
                 if (list.get(2).equals(ArrayList.class)) {
                     houseList = (ArrayList) list.get(2);
+                    System.out.println("");
+                    chooseHouse();
                 }
                 break;
             case BID_REJECTED:
@@ -227,8 +255,10 @@ public class Agent implements Runnable {
             case OUT_BID:
                 reBid(message);
                 break;
-            case BID_STATUS:
-                //// do things here for bid status
+            case ITEMS:
+                if (list.get(2).equals(ArrayList.class)) {
+                    itemList = (ArrayList) list.get(2);
+                }
                 break;
         }
     }
@@ -243,7 +273,8 @@ public class Agent implements Runnable {
                          "4. Make Bid\n" +
                          "5. Get Account Information\n" +
                          "6. Choose an Item for Bidding\n" +
-                         "7. Check Bid Status\n");
+                         "7. Check Bid Status\n" +
+                         "8. Select Auction House\n");
         System.out.print("Enter Option: ");
         return scanner.nextInt();
     }
@@ -251,7 +282,8 @@ public class Agent implements Runnable {
     /**
      * Handling the choice of the user.
      */
-    private synchronized void handleChoice(int choice) {
+    public synchronized void handleChoice(int choice) {
+        System.out.println("here");
         if (choice == 1) {
             account = openNewBankAccount();
             bank.sendAgentMessage(new Message(NAME,
@@ -259,25 +291,22 @@ public class Agent implements Runnable {
                                               getId(),
                                               account));
         } else if (choice == 2) {
-            bank.sendAgentMessage(new Message(NAME,
-                                              MessageTypes.GET_HOUSES));
-        } else if (choice == 3 && auctionHouse != null) {
-            // for testing getting item list
-            bank.sendAgentMessage(new Message(NAME,
-                                              MessageTypes.GET_ITEMS,
-                                              auctionHouse.getType()));
+            bank.sendAgentMessage(new Message(NAME, MessageTypes.GET_HOUSES));
+        } else if (choice == 3) {
+            if (auctionHouse == null) {
+                System.out.println("Please choose an auction house.");
+            } else {
+                aHProxy.sendMessage(new Message(NAME, MessageTypes.GET_ITEMS));
+            }
         } else if (choice == 4) {
             if (item == null) {
                 System.out.println("Please choose an item before making a bid");
             } else {
                 Bid bid = makeBid();
-                bank.sendAgentMessage(new Message(NAME,
-                                                  MessageTypes.BID,
-                                                  bid));
+                aHProxy.sendMessage(new Message(NAME, MessageTypes.BID, bid));
             }
         } else if (choice == 5) {
-            bank.sendAgentMessage(new Message(NAME,
-                                              MessageTypes.ACCOUNT_INFO));
+            bank.sendAgentMessage(new Message(NAME, MessageTypes.ACCOUNT_INFO));
         } else if (choice == 6) {
         
         } else if (choice == 7) {
@@ -303,30 +332,29 @@ public class Agent implements Runnable {
 
         try {
             while (connected) {
-                
-                handleChoice(displayUserOptions());
-                System.out.println();
-                
-                if (messageQueue.size() > 0) {
-                    in = messageQueue.take();
+//                handleChoice(displayUserOptions());
+//                System.out.println();
+    
+                in = messageQueue.take();
+                if (in != null) {
                     response(in,
                              (MessageTypes) in.getMessageList().get(1),
                              analyzer.analyze(in));
                 }
+                in = null;
             }
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
     }
-
+    
     /**
      * Main method to start the program for the user/agent.
      */
     public static void main(String[] args) throws IOException {
         hostName = args[0];
         portNumber = Integer.parseInt(args[1]);
-        Agent agent = new Agent(hostName, portNumber);
-        (new Thread(agent)).start();
+        AgentGUI.launch(args);
     }
 }
 

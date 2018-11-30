@@ -1,10 +1,4 @@
-package Agent;
-
-import AuctionHouse.*;
-import Bank.*;
-
-import java.util.ArrayList;
-import java.util.List;
+package MessageHandling;
 
 /**
  * Class to handle the analysis of the messages and providing the correct

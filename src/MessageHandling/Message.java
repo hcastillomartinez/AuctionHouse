@@ -1,4 +1,4 @@
-package Agent;
+package MessageHandling;
 
 import java.io.Serializable;
 import java.util.ArrayList;

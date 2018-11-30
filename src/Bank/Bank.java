@@ -2,6 +2,8 @@ package Bank;
 
 import Agent.*;
 import AuctionHouse.*;
+import MessageHandling.Message;
+import MessageHandling.MessageTypes;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -9,11 +11,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.*;
-
-import static Agent.MessageTypes.ACCOUNT_INFO;
-import static Agent.MessageTypes.CREATE_ACCOUNT;
-import static Agent.MessageTypes.GET_HOUSES;
 
 /**
  * The Bank class.
