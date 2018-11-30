@@ -35,9 +35,8 @@ public class Agent implements Runnable {
     private HashMap<String, Integer> auctionHouseMap;
     private boolean connected = true;
     private Scanner scanner = new Scanner(System.in);
-
-    private static String hostName;
-    private static int portNumber;
+    private String hostName;
+    private int portNumber;
 
     
     /**
@@ -273,8 +272,7 @@ public class Agent implements Runnable {
                          "4. Make Bid\n" +
                          "5. Get Account Information\n" +
                          "6. Choose an Item for Bidding\n" +
-                         "7. Check Bid Status\n" +
-                         "8. Select Auction House\n");
+                         "7. Select Auction House\n");
         System.out.print("Enter Option: ");
         return scanner.nextInt();
     }
@@ -352,8 +350,6 @@ public class Agent implements Runnable {
      * Main method to start the program for the user/agent.
      */
     public static void main(String[] args) throws IOException {
-        hostName = args[0];
-        portNumber = Integer.parseInt(args[1]);
         AgentGUI.launch(args);
     }
 }
