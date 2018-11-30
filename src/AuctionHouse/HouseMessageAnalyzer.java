@@ -1,8 +1,7 @@
 package AuctionHouse;
 
-import Agent.Message;
-import Agent.MessageAnalyzer;
-import Agent.MessageTypes;
+import MessageHandling.*;
+
 
 /**
  * Used by auction house to decide what action needs to
