@@ -20,7 +20,7 @@ import java.util.HashMap;
 public class TestBank implements Runnable {
     
     private ArrayList<Agent> agents; //list of agent accounts
-    private ArrayList<AuctionHouse> auctionHouses; //list of auction house accounts
+    private ArrayList<String> auctionHouses; //list of auction house accounts
     private ArrayList<Account> accounts;
     private HashMap<Integer, Account> userAccounts;
     private int currentAccountNumber = 0;
@@ -68,7 +68,7 @@ public class TestBank implements Runnable {
      */
     public TestBank(String address, int portNumber){
         agents = new ArrayList<Agent>();
-        auctionHouses = new ArrayList<AuctionHouse>();
+        auctionHouses = new ArrayList<>();
         accounts = new ArrayList<Account>();
         userAccounts = new HashMap<>();
     }
@@ -110,7 +110,7 @@ public class TestBank implements Runnable {
      * Adds an auction house to the list of auction houses.
      */
     public void addAuctionHouse(AuctionHouse house){
-        this.auctionHouses.add(house);
+//        this.auctionHouses.add(house);
     }
     
     /**
@@ -140,7 +140,7 @@ public class TestBank implements Runnable {
     /**
      * Gets list of auction houses for a agent.
      */
-    public ArrayList<AuctionHouse> getAuctionHouses() {
+    public ArrayList<String> getAuctionHouses() {
         return auctionHouses;
     }
     
@@ -222,9 +222,10 @@ public class TestBank implements Runnable {
                 case THANKS:
                     break;
                 case GET_HOUSES:
+                    System.out.println(message);
                     response = new Message(NAME,
-                                           MessageTypes.GET_HOUSES,
-                                           bank.auctionHouses);
+                                           MessageTypes.HOUSES,
+                                           bank.getAuctionHouses());
                     break;
                 case ACCOUNT_INFO:
                     response = new Message(NAME,

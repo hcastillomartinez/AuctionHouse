@@ -233,14 +233,13 @@ public class Agent implements Runnable {
      */
     @SuppressWarnings("unchecked")
     private synchronized void response(Message message,
-                                          MessageTypes type,
-                                          int sender) {
+                                       MessageTypes type,
+                                       int sender) {
         Message response;
         ArrayList<Object> list = message.getMessageList();
         
         switch (type) {
             case CONFIRMATION:
-                System.out.println(message);
                 response = new Message(NAME, MessageTypes.THANKS);
                 respondToSender(sender, response);
                 break;
@@ -259,11 +258,8 @@ public class Agent implements Runnable {
                 assignAHID(message);
                 break;
             case HOUSES:
-                if (list.get(2).equals(ArrayList.class)) {
-                    houseList = (ArrayList) list.get(2);
-                    System.out.println("");
-                    chooseHouse();
-                }
+                houseList = (ArrayList<String>) list.get(2);
+                System.out.println(houseList);
                 break;
             case BID_REJECTED:
                 reBid(message);
@@ -280,59 +276,21 @@ public class Agent implements Runnable {
                     itemList = (ArrayList) list.get(2);
                 }
                 break;
+            case ACCOUNT_INFO:
+                account = (Account) list.get(2);
+                break;
         }
     }
-    
+
     /**
-     * Displaying the user options for the menu.
+     * Function to send messages to get updates for the auction houses and the
+     * bank account information.
      */
-    private synchronized int displayUserOptions() {
-        System.out.print("1. Create Account\n" +
-                         "2. Get Auction Houses\n" +
-                         "3. Get Items from Auction House\n" +
-                         "4. Make Bid\n" +
-                         "5. Get Account Information\n" +
-                         "6. Choose an Item for Bidding\n" +
-                         "7. Select Auction House\n");
-        System.out.print("Enter Option: ");
-        return scanner.nextInt();
-    }
-    
-    /**
-     * Handling the choice of the user.
-     */
-    public synchronized void handleChoice(int choice) {
-        System.out.println("here");
-        if (choice == 1) {
-            account = openNewBankAccount();
-            bank.sendAgentMessage(new Message(NAME,
-                                              MessageTypes.CREATE_ACCOUNT,
-                                              getId(),
-                                              account));
-        } else if (choice == 2) {
-            bank.sendAgentMessage(new Message(NAME, MessageTypes.GET_HOUSES));
-        } else if (choice == 3) {
-            if (auctionHouse == null) {
-                System.out.println("Please choose an auction house.");
-            } else {
-                aHProxy.sendMessage(new Message(NAME, MessageTypes.GET_ITEMS));
-            }
-        } else if (choice == 4) {
-            if (item == null) {
-                System.out.println("Please choose an item before making a bid");
-            } else {
-                Bid bid = makeBid();
-                aHProxy.sendMessage(new Message(NAME, MessageTypes.BID, bid));
-            }
-        } else if (choice == 5) {
-            bank.sendAgentMessage(new Message(NAME, MessageTypes.ACCOUNT_INFO));
-        } else if (choice == 6) {
-        
-        } else if (choice == 7) {
-        
-        } else {
-            System.out.println("Response not recognized!");
-        }
+    private void sendMessageForUpdates() {
+        bank.sendAgentMessage(new Message(NAME,
+                                          MessageTypes.GET_HOUSES));
+        bank.sendAgentMessage(new Message(NAME,
+                                          MessageTypes.ACCOUNT_INFO));
     }
 
     /*****************************************************************/
@@ -351,9 +309,7 @@ public class Agent implements Runnable {
 
         try {
             while (connected) {
-//                handleChoice(displayUserOptions());
-//                System.out.println();
-    
+                sendMessageForUpdates();
                 in = messageQueue.take();
                 if (in != null) {
                     response(in,

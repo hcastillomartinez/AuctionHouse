@@ -84,7 +84,7 @@ public class AgentGUI extends Application {
      */
     private void makeCreateAccountButton() {
         createAccountButton = new Button("New Account");
-        createAccountButton.setTextFill(Color.BLACK);
+        createAccountButton.setTextFill(Color.WHITE);
         createAccountButton.setMaxWidth(175);
         createAccountButton.setMaxHeight(HEIGHT * 0.1 - 5);
         createAccountButton.setBackground(new Background(GREY));
@@ -117,7 +117,7 @@ public class AgentGUI extends Application {
      */
     private void makePlaceBidButton() {
         placeBid = new Button("Place Bid");
-        placeBid.setTextFill(Color.BLACK);
+        placeBid.setTextFill(Color.WHITE);
         placeBid.setMaxWidth(175);
         placeBid.setMaxHeight(HEIGHT * 0.1 - 5);
         placeBid.setBackground(new Background(GREY));
@@ -134,7 +134,7 @@ public class AgentGUI extends Application {
      */
     private void makeSelectItemButton() {
         selectItem = new Button("Place Bid");
-        selectItem.setTextFill(Color.BLACK);
+        selectItem.setTextFill(Color.WHITE);
         selectItem.setMaxWidth(175);
         selectItem.setMaxHeight(HEIGHT * 0.1 - 5);
         selectItem.setBackground(new Background(GREY));
