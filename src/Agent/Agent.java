@@ -11,6 +11,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -29,7 +30,7 @@ public class Agent implements Runnable {
     private BankProxy bank;
     private Item item = null;
     private AuctionHouse auctionHouse = null;
-    private ArrayList<String> houseList;
+    private ArrayList<AuctionHouseInfo> houseList;
     private ArrayList<Item> itemList;
     private BlockingQueue<Message> messageQueue;
     private HashMap<String, Integer> auctionHouseMap;
@@ -37,6 +38,9 @@ public class Agent implements Runnable {
     private Scanner scanner = new Scanner(System.in);
     private String hostName;
     private int portNumber;
+
+    // tester value for the auction house info
+    private AuctionHouseInfo auctionHouseInfo;
 
     
     /**
@@ -56,6 +60,22 @@ public class Agent implements Runnable {
                                              portNumber,
                                              this,
                                              null);
+    }
+
+    /**
+     * Setting the auction house for the agent.
+     * @param auctionHouseInfo house for functionality
+     */
+    public void setAuctionHouse(AuctionHouseInfo auctionHouseInfo) {
+        this.auctionHouseInfo = auctionHouseInfo;
+    }
+
+    /**
+     * Getting the house list from the agent.
+     * @return list of the houses
+     */
+    public ArrayList<AuctionHouseInfo> getHouseList() {
+        return houseList;
     }
 
     /**
@@ -202,25 +222,6 @@ public class Agent implements Runnable {
             bank.sendAgentMessage(outMessage);
         }
     }
-    
-    /**
-     * Choosing an auction house.
-     */
-    private void chooseHouse() {
-        int choice;
-        for (String s: houseList) {
-            System.out.println(s);
-        }
-        System.out.print("House Choice: ");
-        choice = scanner.nextInt();
-        
-        while (choice < 0 && choice > houseList.size()) {
-            System.out.println("Invalid choice!");
-            System.out.println();
-            System.out.print("House Choice: ");
-            choice = scanner.nextInt();
-        }
-    }
 
     /*****************************************************************/
     /*                                                               */
@@ -258,7 +259,7 @@ public class Agent implements Runnable {
                 assignAHID(message);
                 break;
             case HOUSES:
-                houseList = (ArrayList<String>) list.get(2);
+                houseList = (ArrayList<AuctionHouseInfo>) list.get(2);
                 System.out.println(houseList);
                 break;
             case BID_REJECTED:

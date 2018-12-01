@@ -7,6 +7,7 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
@@ -37,13 +38,14 @@ public class AgentGUI extends Application {
     // worker fields
     private static Agent agent;
     private HashMap<String, Integer> numberList = new HashMap<>();
+    private ChoiceBox<AuctionHouseInfo> auctionHouses;
 
     // filler variables for the boxes
     private Label firName, lastName, acctBalance, pendingBalanceLabel,
         ahLabel, idLabel, itemLabel, bidLabel;
     private TextField firNameField, lastNameField, acctBalanceField,
         pendingField, ahField, idField, itemField, bidField;
-    private Button createAccountButton, placeBid, selectItem;
+    private Button createAccountButton, placeBid, selectItem, updateButton;
 
     // box variables
     private VBox accountBox, bidContainer, auctionContainer, appVertContainer;
@@ -282,6 +284,12 @@ public class AgentGUI extends Application {
         auctionContainer = new VBox();
         auctionContainer.setMinWidth(WIDTH * 0.5);
         auctionContainer.setMinHeight(HEIGHT);
+        auctionContainer.setSpacing(5);
+        auctionContainer.getChildren().addAll(updateButton,
+                                              auctionHouses);
+        // TODO:
+        // Come back here to add the auction update button
+        // choice box and list of the items
     }
 
     /**
@@ -313,6 +321,42 @@ public class AgentGUI extends Application {
     }
 
     /**
+     * Filling the choice box with the auction house options.
+     */
+    private void updateAuctionHouseChoices() {
+        ArrayList<AuctionHouseInfo> temp = agent.getHouseList();
+        for (AuctionHouseInfo s: temp) {
+            auctionHouses.getItems().add(s);
+        }
+    }
+
+    /**
+     * Function to build the choice box containing the auction houses.
+     */
+    private void buildChoiceBox() {
+        auctionHouses = new ChoiceBox<>();
+        auctionHouses.setMinWidth(175);
+        auctionHouses.setMinHeight(HEIGHT * 0.1 - 5);
+        auctionHouses.setOnAction(e -> {
+            agent.setAuctionHouse(auctionHouses.getValue());
+        });
+    }
+
+    /**
+     * Function to make the update button.
+     */
+    private void buildUpdateButton() {
+        updateButton = new Button("Update");
+        updateButton.setTextFill(Color.WHITE);
+        updateButton.setMinWidth(175);
+        updateButton.setMinHeight(HEIGHT * 0.05);
+        updateButton.setBackground(new Background(GREY));
+        updateButton.setOnAction(e -> {
+            updateAuctionHouseChoices();
+        });
+    }
+
+    /**
      * Function to combine the containers into the main view.
      */
     private void fillContainers() {
@@ -341,6 +385,8 @@ public class AgentGUI extends Application {
         makeLabels();
         makeTextFields();
         initializeHBoxes();
+        buildChoiceBox();
+        buildUpdateButton();
         buildAuctionBox();
         buildBidContainer();
         buildAccountContainer();
