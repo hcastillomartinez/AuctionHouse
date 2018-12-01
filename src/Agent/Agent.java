@@ -293,6 +293,13 @@ public class Agent implements Runnable {
                                           MessageTypes.ACCOUNT_INFO));
     }
 
+    /**
+     * Function to close the connection.
+     */
+    public void closeApplicationConnection() {
+        bank.closeConnections();
+    }
+
     /*****************************************************************/
     /*                                                               */
     /*                         Override Functions                    */
@@ -309,7 +316,6 @@ public class Agent implements Runnable {
 
         try {
             while (connected) {
-                sendMessageForUpdates();
                 in = messageQueue.take();
                 if (in != null) {
                     response(in,

@@ -72,7 +72,7 @@ public class BankProxy implements Runnable {
     /**
      * Function to close all of the open connections.
      */
-    private void closeConnections() {
+    public void closeConnections() {
         try {
             out.close();
             in.close();

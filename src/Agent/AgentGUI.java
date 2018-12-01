@@ -35,7 +35,7 @@ public class AgentGUI extends Application {
     private static int port;
 
     // worker fields
-    private Agent agent;
+    private static Agent agent;
     private HashMap<String, Integer> numberList = new HashMap<>();
 
     // filler variables for the boxes
@@ -64,6 +64,7 @@ public class AgentGUI extends Application {
         host = args[0];
         port = Integer.parseInt(args[1]);
         AgentGUI.launch(AgentGUI.class);
+        agent.closeApplicationConnection();
         System.exit(1);
     }
     

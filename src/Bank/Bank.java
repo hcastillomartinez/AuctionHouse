@@ -359,7 +359,6 @@ public class Bank implements Runnable {
          */
         private void closeClient() {
             try {
-                outputStream.writeObject("Server " + client.getLocalAddress() + " has closed.");
                 inputStream.close();
                 outputStream.close();
                 stdIn.close();
