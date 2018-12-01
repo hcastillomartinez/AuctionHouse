@@ -1,6 +1,8 @@
 package AuctionHouse;
 
 import Agent.Bid;
+import MessageHandling.Message;
+import MessageHandling.MessageTypes;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -34,6 +36,8 @@ public class Auction implements Runnable{
      * @param a An Item
      */
     public Auction(AuctionHouse a,Item i){
+        currentClientID=0;
+        winningClientID=0;
         auctionHouse=a;
         item=i;
         time = 0;
@@ -107,14 +111,26 @@ public class Auction implements Runnable{
         System.out.println(currentBidderID+" tries "+bid);
         if(bidProtocol.processBid(bid)!=0){
             //bid is accepted
-//            winningClientID=currentClientID;
-            //let agent know he is outbid
-            currentWinnerID =currentBidderID;
+            if(winningClientID==0){
+                //first bid that passes threshold
+                auctionHouse.sendToServer(currentClientID,new Message(
+                        "auction house", MessageTypes.BID_ACCEPTED));
+            }
+            else {
+                auctionHouse.sendToServer(currentClientID,new Message(
+                        "auction house",MessageTypes.BID_ACCEPTED));
+                auctionHouse.sendToServer(winningClientID,new Message(
+                        "auction house",MessageTypes.OUT_BID));
+            }
+            winningClientID = currentClientID;
+            currentWinnerID = currentBidderID;
             item.updatePrice(bid);
-            bidToBeat=bid;
-            System.out.println("current winner "+ currentWinnerID);
+            bidToBeat = bid;
+            System.out.println("current winner " + currentWinnerID);
         }
         else{
+            auctionHouse.sendToServer(currentClientID,new Message("auction " +
+                    "house",MessageTypes.BID_REJECTED));
             //bid is rejected
             System.out.println(currentBidderID+" need to beat "+bidToBeat
                     +" ,you bid "+bid);
@@ -161,10 +177,12 @@ public class Auction implements Runnable{
             getBid();
             if(time==0)setTime();
         }
+//        auctionHouse.sendToServer(winningClientID,
+//                new Message("auction house"),MessageTypes.);
         System.out.println("winner: "+ currentWinnerID);
     }
 
-    public static void main(String[] args)throws Exception {
+//    public static void main(String[] args)throws Exception {
 //        Furniture f = Furniture.desk;
 //        Auction bidCoord=new Auction(new Bid(new Item("desk",20,f.getIDType()),new Agent(1),20));
 //        Thread t=new Thread(bidCoord);
@@ -176,5 +194,5 @@ public class Auction implements Runnable{
 //            bidCoord.placeBid(new Bid(new Item("desk",20,f.getIDType()),new Agent(Integer.parseInt(i)),Double.parseDouble(i)));
 //        }
 //        System.out.println("No longer taking input");
-    }
+//    }
 }
