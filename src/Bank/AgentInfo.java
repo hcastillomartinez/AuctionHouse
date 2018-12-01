@@ -6,7 +6,7 @@ package Bank;
 public class AgentInfo {
     String name;
     String IPAddress;
-    int auctionID, portNumber, idNumber;
+    int auctionID, portNumber, idNumber, accountNumber;
 
     public AgentInfo(String name,
                        String IPAddress,

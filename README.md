@@ -38,3 +38,8 @@ If you have tests, then explain how they work and how to use them.
 How are we synchronizing bank accounts? Each time balances are update, do we send their new account object to Agent/AuctionHouse?
 How are we handling errors such as too few args in a money transfer? Send an error message back?
 Why does the bank proxy have a run method? It isn't a thread in roman's design.
+Add an UNBLOCK_FUNDS message type
+When I create an account, I am assuming that agents and auction houses will send an
+    AgentInfo or AuctionInfo object to bank.
+Is it okay to send THANKS back as the default in my cases?
+Once funds are blocked in an agent account, how do I send the agent's new account back to him?

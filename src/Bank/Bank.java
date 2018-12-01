@@ -119,9 +119,45 @@ public class Bank implements Runnable {
 
     }
 
-    public synchronized Message response(Message message,
-                                         MessageTypes type,
-                                         int sender) {
+    public synchronized  Message responseToAuctionHouse(Message message,
+                                                        MessageTypes type){
+        Message response = null;
+        ArrayList<Object> messageList = message.getMessageList();
+        int agentAccountNumber;
+        int auctionHouseAccountNumber;
+        double amount;
+
+        switch(type) {
+            case CREATE_ACCOUNT:
+                String name = (String) messageList.get(1);
+
+                Account account = makeAccount(name,0);
+
+                AuctionInfo auction = (AuctionInfo) messageList.get(0);
+                addAuctionHouse(auction);
+
+                return new Message(NAME, MessageTypes.ACCOUNT_INFO,account);
+
+            case ACCOUNT_INFO:
+                agentAccountNumber = (int) messageList.get(0);
+                return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(agentAccountNumber));
+
+            case REMOVE_FUNDS:
+                agentAccountNumber = (int) messageList.get(1);
+                amount = (double) messageList.get(2);
+
+                blockFunds(agentAccountNumber, amount);
+                //todo figure out how to send the agent's new account back to it
+
+            //todo case UNBLOCK_FUNDS:
+
+            default: return new Message(NAME,MessageTypes.THANKS);
+
+        }
+    }
+
+    public synchronized Message responseToAgent(Message message,
+                                         MessageTypes type) {
         Message response = null;
         ArrayList<Object> messageList = message.getMessageList();
         int agentAccountNumber;
@@ -129,17 +165,19 @@ public class Bank implements Runnable {
         double amount;
 
         switch (type) {
-            case REMOVE_FUNDS:
-                agentAccountNumber = (int) messageList.get(1);
-                amount = (double) messageList.get(2);
-
-                blockFunds(agentAccountNumber,amount);
-                return new Message(NAME,
-                                   MessageTypes.ACCOUNT_INFO,
-                                   accounts.get(agentAccountNumber));
 
             case CREATE_ACCOUNT:
-                //todo
+                //add agent to list
+
+                String firstName = (String) messageList.get(1);
+                String lastName = (String) messageList.get(2);
+                double startingBalance = (double) messageList.get(3);
+
+                Account account = makeAccount(firstName + " " + lastName,startingBalance);
+
+                AgentInfo agent = (AgentInfo) messageList.get(0);
+                addAgent(agent);
+
                 break;
 
             case ACCOUNT_INFO:
@@ -157,24 +195,24 @@ public class Bank implements Runnable {
                     amount = (double) messageList.get(2);
                     boolean success = transferFunds(auctionHouseAccountNumber,agentAccountNumber,amount);
                     if(success){
-                        //todo send new accounts back to houses and agents
+                        //todo figure out how to send the auctionhouse's new account back to it
+                        return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(agentAccountNumber));
                     }
                 }
                 else{ /*throw error*/}
                 //todo
                 break;
 
-             //todo make default
-
+            default: return new Message(NAME,MessageTypes.THANKS);
         }
-
-            return new Message(NAME,MessageTypes.CONFIRMATION);
+        //todo remove
+        return new Message(NAME,MessageTypes.CONFIRMATION);
     }
 
     /**
      * Creates and returns an account.
      */
-    public synchronized Account makeAccount(String name, int startingBalance) {
+    public synchronized Account makeAccount(String name, double startingBalance) {
         Account account = new Account(name,
                                       assignAccountNumber(),
                                       startingBalance,
@@ -192,6 +230,10 @@ public class Bank implements Runnable {
      */
     public synchronized void addAuctionHouse(AuctionInfo house){
         this.auctionHouses.add(house);
+    }
+
+    public synchronized  void addAgent(AgentInfo agent){
+        this.agents.add(agent);
     }
 
     /**
@@ -225,7 +267,8 @@ public class Bank implements Runnable {
     public synchronized ArrayList<AgentInfo> getAgents() {
         return agents;
     }
-    
+
+
     /**
      * Gets list of auction houses for a agent.
      */
@@ -336,12 +379,18 @@ public class Bank implements Runnable {
                         Message message = messages.take();
                         System.out.println(message);
 
-                        Message response = bank.response(message,
-                                                        (MessageTypes) message.getMessageList().get(1),
-                                                         analyzer.analyze(message));
+                        Message response;
+                        if(analyzer.analyze(message) == 1){
+                            response = bank.responseToAgent(message,
+                                                           (MessageTypes) message.getMessageList().get(1));
+                        }
+                        else{
+                            response = bank.responseToAuctionHouse(message,
+                                                                  (MessageTypes) message.getMessageList().get(1));
+
+                        }
 
                         outputStream.writeObject(response);
-
 
                     }catch(InterruptedException e){
                         e.printStackTrace();
