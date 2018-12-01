@@ -9,8 +9,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class Auction implements Runnable{
 
-    private final int duration;
+    private final int DURATION=30;
+    private AuctionHouse auctionHouse;
     private double bidAmount;
+    private int currentClientID;
+    private int winningClientID;
     private int currentBidderID;
     private BlockingQueue<Bid> bids;
     private BidProtocol bidProtocol;
@@ -28,27 +31,26 @@ public class Auction implements Runnable{
     /**
      * Takes an item and sets auction up for the
      * item.
-     * @param b An Item
+     * @param a An Item
      */
-    public Auction(Bid b){
-        duration=30;
-        time=0;
-        breakDownBid(b);
+    public Auction(AuctionHouse a,Item i){
+        auctionHouse=a;
+        item=i;
+        time = 0;
         item.setInBid(true);
-        bids=new LinkedBlockingQueue<>();
-        bidProtocol=new BidProtocol(item.getPrice());
-        auctionActive=true;
-        bidToBeat=item.getPrice();
-        t=new Timer();
+        bids = new LinkedBlockingQueue<>();
+        bidProtocol = new BidProtocol(item.getPrice());
+        auctionActive = true;
+        bidToBeat = item.getPrice();
+        t = new Timer();
     }
 
     /**
      * Deconstructs the bid and gets the necessary component of a bid.
      */
     private void breakDownBid(Bid b){
-        item=b.getItem();
-        bidAmount=b.getAmount();
-        currentBidderID=b.getBidder();
+        bidAmount = b.getAmount();
+        currentBidderID = b.getBidder();
     }
 
     /**
@@ -58,10 +60,10 @@ public class Auction implements Runnable{
         t.schedule(new TimerTask() {
             @Override
             public void run() {
-                if(time>=duration){
-                    auctionActive=false;
+                if(time>= DURATION){
+                    auctionActive = false;
                     t.cancel();
-                    placeBid(new Bid(null,9,0));
+                    placeBid(new Bid(null,9,0),1);
                 }
                 else {
                     time++;
@@ -95,8 +97,7 @@ public class Auction implements Runnable{
     /**
      * Checks bid if is valid, returns 0 if it is,
      * else returns 1 and sets winning bid.
-     * @param bid
-     * @return
+     * @param bid Double that is the bid amount.
      */
     private synchronized void analyzeBid(double bid){
         if(!auctionActive){
@@ -106,6 +107,7 @@ public class Auction implements Runnable{
         System.out.println(currentBidderID+" tries "+bid);
         if(bidProtocol.processBid(bid)!=0){
             //bid is accepted
+//            winningClientID=currentClientID;
             //let agent know he is outbid
             currentWinnerID =currentBidderID;
             item.updatePrice(bid);
@@ -123,9 +125,11 @@ public class Auction implements Runnable{
      * Puts bid onto queue.
      * @param b An int
      */
-    public void placeBid(Bid b){
+    public void placeBid(Bid b,int currentClientID){
         try {
             if(b.getItem()!=null) breakDownBid(b);
+            this.currentClientID=currentClientID;
+            breakDownBid(b);
             bids.put(b);
         }catch(InterruptedException i){
             i.printStackTrace();

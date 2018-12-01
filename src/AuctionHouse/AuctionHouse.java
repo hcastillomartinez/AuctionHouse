@@ -2,6 +2,7 @@ package AuctionHouse;
 
 import Agent.Bid;
 import MessageHandling.Message;
+import MessageHandling.MessageTypes;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -156,17 +157,22 @@ public class AuctionHouse implements Runnable {
     /*                                                                */
     /******************************************************************/
 
-
+    /**
+     * Where based off incoming message, sends back the appropriate response.
+     * @param m Message that will be analyzed and responded to.
+     */
     private void doAction(Message m){
         int action = messageAnalyzer.analyzeMessage(m);
-
         if(action == 1){
-            //send back item list
+           int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
+           sendToServer(id,new Message("auction house",
+                   MessageTypes.GET_ITEMS,itemList));
         }else if(action == 2){
-            //tries to place bid
-            tryBid((Bid) m.getMessageList().get(2));
+            int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
+            tryBid((Bid) m.getMessageList().get(2),id);
         }else if(action == 3){
             //send status back but what does agent want to receive back?
+
         }
     }
 
@@ -175,9 +181,10 @@ public class AuctionHouse implements Runnable {
      * exist.
      * @param b, A Bid
      */
-    private synchronized void createAuction(Bid b){
+    private synchronized void createAuction(Bid b,int serverThreadID){
         if(!b.getItem().isInBid()){
-            Auction a = new Auction(b);
+            Auction a = new Auction(this,b.getItem());
+            a.placeBid(b,serverThreadID);
             auctions.add(a);
             Thread t = new Thread(a);
             t.start();
@@ -189,14 +196,14 @@ public class AuctionHouse implements Runnable {
      * one is created for the item they are trying to bid on.
      * @param b, A Bid
      */
-    private synchronized void tryBid(Bid b){
+    private synchronized void tryBid(Bid b,int serverThreadID){
         for(Auction a: auctions){
             if(a.getItem().equals(b.getItem())){
-                a.placeBid(b);
+                a.placeBid(b,serverThreadID);
                 break;
             }
         }
-        createAuction(b);
+        createAuction(b,serverThreadID);
     }
 
     /******************************************************************/
@@ -240,6 +247,12 @@ public class AuctionHouse implements Runnable {
 
 
 
+    /******************************************************************/
+    /*                                                                */
+    /*     Socket code and handling of messages for socket            */
+    /*                                                                */
+    /******************************************************************/
+
     /**
      * Handles the connections of agents and the messages coming through
      * their sockets.
@@ -267,12 +280,21 @@ public class AuctionHouse implements Runnable {
          * Writes to the client
          * @param m Message that client will receive.
          */
-        public synchronized void getMessage(Message m){
+        public synchronized void placeMessage(Message m){
             try{
              out.writeObject(m);
             }catch(IOException i){
                 i.printStackTrace();
             }
+        }
+
+        /**
+         * Adds ID of server thread that way when passes through the auction
+         * house it knows which of the server threads to send response to.
+         * @param m Message that ID will be appended to.
+         */
+        private void addID(Message m){
+            m.getMessageList().add(ID);
         }
 
         /**
@@ -283,7 +305,11 @@ public class AuctionHouse implements Runnable {
             return ID;
         }
 
-        public void closeClient(){
+
+        /**
+         * Goes through all socket connection and closes them.
+         */
+        private void closeClient(){
             try{
                 in.close();
                 out.close();
@@ -299,6 +325,7 @@ public class AuctionHouse implements Runnable {
                 try{
                     Message m = (Message) in.readObject();
                     if(m != null){
+                        addID(m);
                         auctionHouse.placeMessageForAnalyzing(m);
                     }
                 }catch(IOException i){
@@ -313,7 +340,7 @@ public class AuctionHouse implements Runnable {
     /**
      * Closes all the server thread's clients and also the server socket.
      */
-    public void closeAllSockets(){
+    private void closeAllSockets(){
         for(Server s: serverThreads){
             s.closeClient();
         }
@@ -321,6 +348,19 @@ public class AuctionHouse implements Runnable {
             serverSocket.close();
         }catch(IOException i){
             i.printStackTrace();
+        }
+    }
+
+    /**
+     * Based off the id, passes message to correct server thread.
+     * @param ID int that is ID of server thread.
+     * @param m Message that needs to be sent to server thread.
+     */
+    public void sendToServer(int ID,Message m){
+        for(Server server:serverThreads){
+            if(ID==server.getID()){
+                server.placeMessage(m);
+            }
         }
     }
 
@@ -344,10 +384,11 @@ public class AuctionHouse implements Runnable {
 
 
     public static void main(String[] args){
-        AuctionHouse auctionHouse = new AuctionHouse(args[0],args[1],args[3]);
-        AuctionHouseGUI gui=new AuctionHouseGUI(auctionHouse.getItemList(),
-                auctionHouse.getAuctionStatus());
-        gui.launch();
+        AuctionHouse auctionHouse = new AuctionHouse("1","4444",
+                "localhost");
+//        AuctionHouseGUI gui=new AuctionHouseGUI(auctionHouse.getItemList(),
+//                auctionHouse.getAuctionStatus());
+//        gui.launch();
         Thread t = new Thread(auctionHouse);
         t.start();
     }

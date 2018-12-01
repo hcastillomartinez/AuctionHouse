@@ -26,9 +26,6 @@ public class HouseMessageAnalyzer {
             else if(type.equals(MessageTypes.BID)){
                 return 2;
             }
-            else if(type.equals(MessageTypes.BID_STATUS)){
-                return 3;
-            }
             else{
                 System.out.println("Not a covered message");
             }
