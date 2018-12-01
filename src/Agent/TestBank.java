@@ -253,9 +253,10 @@ public class TestBank implements Runnable {
                                            MessageTypes.CONFIRMATION);
                     break;
                 case CREATE_ACCOUNT:
-                    int agentID = (int) list.get(2);
-                    if (!bank.userAccounts.containsKey(agentID)) {
-                        bank.userAccounts.put(agentID, (Account) list.get(3));
+                    System.out.println(message);
+                    Account account = (Account) list.get(2);
+                    if (!bank.userAccounts.containsKey(account.getId())) {
+                        bank.userAccounts.put(account.getId(), account);
                         response = new Message(NAME,
                                                MessageTypes.CONFIRMATION);
                     } else {

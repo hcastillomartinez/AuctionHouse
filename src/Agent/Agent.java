@@ -59,6 +59,20 @@ public class Agent implements Runnable {
     }
 
     /**
+     * Returning the name of the class for messages.
+     * @return NAME of the class object
+     */
+    public String getNAME() { return NAME; }
+
+    /**
+     * Returning the bank from the Agent.
+     * @return bank to send messages to
+     */
+    public BankProxy getBank() {
+        return bank;
+    }
+
+    /**
      * Returning the id of the Agent.
      * @return id of the agent.
      */
@@ -84,6 +98,12 @@ public class Agent implements Runnable {
     private void setKey() {
 //        key = bank.setKey();
     }
+
+    /**
+     * Setting the account of the agent.
+     * @param account for the agent
+     */
+    public void setAccount(Account account) { this.account = account; }
 
     /**
      * Setting the connected status to not connected.
@@ -220,6 +240,7 @@ public class Agent implements Runnable {
         
         switch (type) {
             case CONFIRMATION:
+                System.out.println(message);
                 response = new Message(NAME, MessageTypes.THANKS);
                 respondToSender(sender, response);
                 break;

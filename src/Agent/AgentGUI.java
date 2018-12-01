@@ -1,6 +1,10 @@
 package Agent;
 
+import Bank.Account;
+import MessageHandling.Message;
+import MessageHandling.MessageTypes;
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -11,6 +15,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -38,44 +43,18 @@ public class AgentGUI extends Application {
         ahLabel, idLabel, itemLabel, bidLabel;
     private TextField firNameField, lastNameField, acctBalanceField,
         pendingField, ahField, idField, itemField, bidField;
-    private Label[] labels = {firName,
-                              lastName,
-                              acctBalance,
-                              pendingBalanceLabel,
-                              ahLabel,
-                              idLabel,
-                              itemLabel,
-                              bidLabel};
-    private TextField[] fields = {firNameField,
-                                  lastNameField,
-                                  acctBalanceField,
-                                  pendingField,
-                                  ahField,
-                                  idField,
-                                  itemField,
-                                  bidField};
     private Button createAccountButton, placeBid, selectItem;
 
     // box variables
     private VBox accountBox, bidContainer, auctionContainer, appVertContainer;
-    private VBox[] vBoxes = {accountBox,
-                           bidContainer,
-                           auctionContainer};
     private HBox firstNameBox, lastNameBox, accountBalance, aucHouseHBox,
-        idBox, itemBox, bidBox, appFullContainer;
-    private HBox[] hBoxes = {firstNameBox,
-                             lastNameBox,
-                             accountBalance,
-                             aucHouseHBox,
-                             idBox,
-                             itemBox,
-                             bidBox};
-    private BackgroundFill black = new BackgroundFill(Color.BLUE,
-                                                      null,
-                                                      null);
-    private BackgroundFill grey = new BackgroundFill(Color.GREY, new
-                                                     CornerRadii(10),
-                                                     null);
+        idBox, itemBox, bidBox, appFullContainer, pendingBalanceBox;
+
+    // background fillers
+    private final BackgroundFill BLUE
+            = new BackgroundFill(Color.BLUE, null, null);
+    private final BackgroundFill GREY
+            = new BackgroundFill(Color.GREY, new CornerRadii(10), null);
     
     /**
      * Launching the application.
@@ -85,6 +64,7 @@ public class AgentGUI extends Application {
         host = args[0];
         port = Integer.parseInt(args[1]);
         AgentGUI.launch(AgentGUI.class);
+        System.exit(1);
     }
     
     /**
@@ -95,72 +75,8 @@ public class AgentGUI extends Application {
             numberList.put("" + i + "", i);
         }
 
-        this.agent = new Agent(host, port);
+        agent = new Agent(host, port);
         (new Thread(agent)).start();
-    }
-
-    /**
-     * Setting up the horizontal boxes that contain the input fields
-     * @param box vertical box.
-     * @param label label for the box
-     * @param field textField for the box
-     * @param width width of the box
-     * @param height height of the box
-     */
-    private void setupHBox(HBox box,
-                           Label label,
-                           TextField field,
-                           double width,
-                           double height) {
-        box = new HBox();
-        box.setMinWidth(width);
-        box.setMinHeight(height);
-        box.getChildren().addAll(label, field);
-    }
-
-    /**
-     * Setting up the vertical boxes that contain the fields.
-     * @param box vertical box
-     * @param hBox horizontal box
-     * @param width width of the box
-     * @param height height of the box
-     */
-    private void setupVBox(VBox box,
-                           HBox hBox,
-                           double width,
-                           double height) {
-        box = new VBox();
-        box.setMinWidth(width);
-        box.setMinHeight(height);
-        box.getChildren().add(hBox);
-    }
-
-    /**
-     * Function for distributing making of the vBoxes.
-     */
-    private void makeVBoxes() {
-        for (int i = 0; i < vBoxes.length; i++) {
-            if (i == 0) {
-                for (int j = 0; j < 4; j++) {
-                    setupVBox(vBoxes[i],
-                              hBoxes[j],
-                              WIDTH * 0.5,
-                              HEIGHT * 0.1 - 5);
-                }
-                vBoxes[i].getChildren().add(createAccountButton);
-            } else if (i == 1) {
-                for (int j = 4; j < 8; j++) {
-                    setupVBox(vBoxes[i],
-                              hBoxes[j],
-                              WIDTH * 0.5,
-                              HEIGHT * 0.10 - 5);
-                }
-                vBoxes[i].getChildren().add(placeBid);
-            } else {
-                setupVBox(vBoxes[i], null, WIDTH * 0.5, HEIGHT);
-                vBoxes[i].getChildren().add(selectItem);
-            }
-        }
     }
     
     /**
@@ -168,18 +84,30 @@ public class AgentGUI extends Application {
      */
     private void makeCreateAccountButton() {
         createAccountButton = new Button("New Account");
-        createAccountButton.setTextFill(Color.WHITE);
-        createAccountButton.setMinWidth(WIDTH * 0.75);
-        createAccountButton.setMinHeight(HEIGHT * 0.1 - 5);
-        createAccountButton.setBackground(new Background(grey));
+        createAccountButton.setTextFill(Color.BLACK);
+        createAccountButton.setMaxWidth(175);
+        createAccountButton.setMaxHeight(HEIGHT * 0.1 - 5);
+        createAccountButton.setBackground(new Background(GREY));
         createAccountButton.setOnAction(e -> {
-            if (!firName.getText().isEmpty() &&
-                !lastName.getText().isEmpty() &&
-                !acctBalance.getText().isEmpty()) {
-                System.out.println("new account");
-                firName.setDisable(true);
-                lastName.setDisable(true);
-                acctBalance.setDisable(true);
+            if (!firNameField.getText().isEmpty() &&
+                !lastNameField.getText().isEmpty() &&
+                !acctBalanceField.getText().isEmpty()) {
+                String name
+                        = firNameField.getText() + " " + lastNameField.getText();
+                Double balance = Double.parseDouble(acctBalanceField.getText());
+                Account account = new Account(name,
+                                              agent.getId(),
+                                              balance,
+                                              balance);
+                agent.getBank().sendAgentMessage(new Message(agent.getNAME(),
+                                                             MessageTypes.CREATE_ACCOUNT,
+                                                             account));
+                pendingField.setText(balance.toString());
+                agent.setAccount(account);
+                firNameField.setEditable(false);
+                lastNameField.setEditable(false);
+                acctBalanceField.setEditable(false);
+                pendingField.setEditable(false);
             }
         });
     }
@@ -189,10 +117,10 @@ public class AgentGUI extends Application {
      */
     private void makePlaceBidButton() {
         placeBid = new Button("Place Bid");
-        placeBid.setTextFill(Color.WHITE);
-        placeBid.setMinWidth(WIDTH * 0.75);
-        placeBid.setMinHeight(HEIGHT * 0.1 - 5);
-        placeBid.setBackground(new Background(grey));
+        placeBid.setTextFill(Color.BLACK);
+        placeBid.setMaxWidth(175);
+        placeBid.setMaxHeight(HEIGHT * 0.1 - 5);
+        placeBid.setBackground(new Background(GREY));
         placeBid.setOnAction(e -> {
             if (!itemField.getText().isEmpty() &&
                 !bidField.getText().isEmpty()) {
@@ -206,10 +134,10 @@ public class AgentGUI extends Application {
      */
     private void makeSelectItemButton() {
         selectItem = new Button("Place Bid");
-        selectItem.setTextFill(Color.WHITE);
-        selectItem.setMinWidth(WIDTH * 0.75);
-        selectItem.setMinHeight(HEIGHT * 0.1 - 5);
-        selectItem.setBackground(new Background(grey));
+        selectItem.setTextFill(Color.BLACK);
+        selectItem.setMaxWidth(175);
+        selectItem.setMaxHeight(HEIGHT * 0.1 - 5);
+        selectItem.setBackground(new Background(GREY));
         selectItem.setOnAction(e -> {
             System.out.println("select item");
         });
@@ -244,6 +172,163 @@ public class AgentGUI extends Application {
     }
 
     /**
+     * Function to setup last name box.
+     */
+    private void buildLastNameBox() {
+        lastNameBox = new HBox();
+        lastNameBox.setMinWidth(WIDTH * 0.25);
+        lastNameBox.setMinHeight(HEIGHT * 0.1);
+        lastNameBox.setSpacing(5);
+        lastNameBox.getChildren().addAll(lastName, lastNameField);
+    }
+
+    /**
+     * Function to setup first name box.
+     */
+    private void buildFirstNameBox() {
+        firstNameBox = new HBox();
+        firstNameBox.setMinWidth(WIDTH * 0.25);
+        firstNameBox.setMinHeight(HEIGHT * 0.1);
+        firstNameBox.setSpacing(5);
+        firstNameBox.getChildren().addAll(firName, firNameField);
+    }
+
+    /**
+     * Function to setup account balance box.
+     */
+    private void buildAccountBalanceBox() {
+        accountBalance = new HBox();
+        accountBalance.setMinWidth(WIDTH * 0.25);
+        accountBalance.setMinHeight(HEIGHT * 0.1);
+        accountBalance.setSpacing(5);
+        accountBalance.getChildren().addAll(acctBalance, acctBalanceField);
+    }
+
+    /**
+     * Function to setup pending balance box.
+     */
+    private void buildPendingBalanceBox() {
+        pendingBalanceBox = new HBox();
+        pendingBalanceBox.setMinWidth(WIDTH * 0.25);
+        pendingBalanceBox.setMinHeight(HEIGHT * 0.1);
+        pendingBalanceBox.setSpacing(5);
+        pendingBalanceBox.getChildren().addAll(pendingBalanceLabel,
+                                               pendingField);
+    }
+
+    /**
+     * Function to setup auc house horizontal box.
+     */
+    private void buildAuctionHoueHorizontalBox() {
+        aucHouseHBox = new HBox();
+        aucHouseHBox.setMinWidth(WIDTH * 0.25);
+        aucHouseHBox.setMinHeight(HEIGHT * 0.1);
+        aucHouseHBox.setSpacing(5);
+        aucHouseHBox.getChildren().addAll(ahLabel, ahField);
+    }
+
+    /**
+     * Function to setup the idBox.
+     */
+    private void buildIDBox() {
+        idBox = new HBox();
+        idBox.setMinWidth(WIDTH * 0.25);
+        idBox.setMinHeight(HEIGHT * 0.1);
+        idBox.setSpacing(5);
+        idBox.getChildren().addAll(idLabel, idField);
+    }
+
+    /**
+     * Function to setup the item box.
+     */
+    private void buildItemBox() {
+        itemBox = new HBox();
+        itemBox.setMinWidth(WIDTH * 0.25);
+        itemBox.setMinHeight(HEIGHT * 0.1);
+        itemBox.setSpacing(5);
+        itemBox.getChildren().addAll(itemLabel, itemField);
+    }
+
+    /**
+     * Function to setup the bid box.
+     */
+    private void buildBidBox() {
+        bidBox = new HBox();
+        bidBox.setMinWidth(WIDTH * 0.25);
+        bidBox.setMinHeight(HEIGHT * 0.1);
+        bidBox.setSpacing(5);
+        bidBox.getChildren().addAll(bidLabel, bidField);
+    }
+
+    /**
+     * Function to set up the boxes.
+     */
+    private void initializeHBoxes() {
+        buildFirstNameBox();
+        buildLastNameBox();
+        buildAccountBalanceBox();
+        buildPendingBalanceBox();
+        buildAuctionHoueHorizontalBox();
+        buildIDBox();
+        buildItemBox();
+        buildBidBox();
+    }
+
+    /**
+     * Function to initialize the vertical boxes
+     */
+    private void buildAuctionBox() {
+        auctionContainer = new VBox();
+        auctionContainer.setMinWidth(WIDTH * 0.5);
+        auctionContainer.setMinHeight(HEIGHT);
+    }
+
+    /**
+     * Function to add fields to the accountBox container.
+     */
+    private void buildAccountContainer() {
+        accountBox = new VBox();
+        accountBox.setMinWidth(WIDTH * 0.5);
+        accountBox.setMinHeight(HEIGHT * 0.5);
+        accountBox.getChildren().addAll(firstNameBox,
+                                        lastNameBox,
+                                        accountBalance,
+                                        pendingBalanceBox,
+                                        createAccountButton);
+    }
+
+    /**
+     * Function to add fields to the bidBox container.
+     */
+    private void buildBidContainer() {
+        bidContainer = new VBox();
+        bidContainer.setMinWidth(WIDTH * 0.5);
+        bidContainer.setMinHeight(HEIGHT * 0.5);
+        bidContainer.getChildren().addAll(aucHouseHBox,
+                                          idBox,
+                                          itemBox,
+                                          bidBox,
+                                          placeBid);
+    }
+
+    /**
+     * Function to combine the containers into the main view.
+     */
+    private void fillContainers() {
+        appVertContainer = new VBox();
+        appVertContainer.setMinWidth(WIDTH * 0.5);
+        appVertContainer.setMinHeight(HEIGHT);
+        appVertContainer.setSpacing(5);
+        appVertContainer.getChildren().addAll(accountBox, bidContainer);
+
+        appFullContainer = new HBox();
+        appFullContainer.setMinWidth(WIDTH);
+        appFullContainer.setMinHeight(HEIGHT);
+        appFullContainer.setSpacing(5);
+        appFullContainer.getChildren().addAll(appVertContainer, auctionContainer);
+    }
+
+    /**
      * Function to start running the application.
      */
     @Override
@@ -254,47 +339,21 @@ public class AgentGUI extends Application {
         makeSelectItemButton();
         makeLabels();
         makeTextFields();
-
-        for (int i = 0; i < hBoxes.length; i++) {
-            setupHBox(hBoxes[i],
-                      labels[i],
-                      fields[i],
-                      WIDTH * 0.5,
-                      HEIGHT * 0.25 - 5);
-        }
-        makeVBoxes();
-    
-        TextField field = new TextField();
-        field.setOnAction(e -> {
-            boolean goodInput = true;
-            if (!field.getText().isEmpty()) {
-                String text = field.getText();
-                for (String s: numberList.keySet()) {
-                    if (s.equalsIgnoreCase(text)) {
-                        agent.handleChoice(numberList.get(s));
-                    }
-                }
-            }
-        });
-
-        appVertContainer = new VBox();
-        appVertContainer.setMinWidth(WIDTH * 0.5);
-        appVertContainer.setMinHeight(HEIGHT);
-        appVertContainer.getChildren().addAll(vBoxes[0], vBoxes[1]);
-
-        appFullContainer = new HBox();
-        appFullContainer.setMinWidth(WIDTH * 0.5);
-        appFullContainer.setMinHeight(HEIGHT);
-        appFullContainer.getChildren().addAll(vBoxes[2]);
+        initializeHBoxes();
+        buildAuctionBox();
+        buildBidContainer();
+        buildAccountContainer();
+        fillContainers();
     
         Scene scene = new Scene(appFullContainer);
         primaryStage.setScene(scene);
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 
     // TODO:
     /*
-        finish debugging issue with null child, buttons and drop down box
+        buttons and drop down box
      */
 }
 
