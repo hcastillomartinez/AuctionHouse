@@ -105,6 +105,8 @@ public class Auction implements Runnable{
      */
     private synchronized void analyzeBid(double bid){
         if(!auctionActive){
+            auctionHouse.sendToServer(currentClientID,new Message("auction " +
+                    "house",MessageTypes.BID_REJECTED));
             System.out.println("Auction Over");
             return;
         }
@@ -177,8 +179,8 @@ public class Auction implements Runnable{
             getBid();
             if(time==0)setTime();
         }
-//        auctionHouse.sendToServer(winningClientID,
-//                new Message("auction house"),MessageTypes.);
+        auctionHouse.sendToServer(winningClientID,
+                new Message("auction house",MessageTypes.TRANSFER_ITEM,item));
         System.out.println("winner: "+ currentWinnerID);
     }
 

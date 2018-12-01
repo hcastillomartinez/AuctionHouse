@@ -15,6 +15,8 @@ public enum MessageTypes {
     TRANSFER_FUNDS("transfer funds"),
     CONFIRMATION("confirmation"),
     REMOVE_FUNDS("remove funds"),
+    BLOCK_FUNDS("block funds"),
+    UNBLOCK_FUNDS("unblock funds"),
     BID_ACCEPTED("bid accepted"),
     BID_REJECTED("bid rejected"),
     TRANSFER_ITEM("transfer item"),

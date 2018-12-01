@@ -170,9 +170,6 @@ public class AuctionHouse implements Runnable {
         }else if(action == 2){
             int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
             tryBid((Bid) m.getMessageList().get(2),id);
-        }else if(action == 3){
-            //send status back but what does agent want to receive back?
-
         }
     }
 
