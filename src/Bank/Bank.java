@@ -3,6 +3,7 @@ package Bank;
 import Agent.*;
 import AuctionHouse.*;
 import MessageHandling.Message;
+import MessageHandling.MessageAnalyzer;
 import MessageHandling.MessageTypes;
 
 import java.io.*;
@@ -84,7 +85,7 @@ public class Bank implements Runnable {
 
             while (true) {
                 Socket client = server.accept();
-                ServerThread bankClient = new ServerThread(client,clientNumber++);
+                ServerThread bankClient = new ServerThread(client,clientNumber++,this);
                 getClients().put(bankClient.idNumber,bankClient);
                 (new Thread(bankClient)).start();
             }
@@ -118,23 +119,24 @@ public class Bank implements Runnable {
 
     }
 
-    public synchronized void response(Message message,
+    public synchronized Message response(Message message,
                                          MessageTypes type,
                                          int sender) {
         Message response = null;
         ArrayList<Object> messageList = message.getMessageList();
+        int agentAccountNumber;
+        int auctionHouseAccountNumber;
+        double amount;
 
         switch (type) {
             case REMOVE_FUNDS:
-                if(messageList.size() > 2){
-                    int agentAccountNumber = (int) messageList.get(1);
-                    double amount = (double) messageList.get(2);
+                agentAccountNumber = (int) messageList.get(1);
+                amount = (double) messageList.get(2);
 
-                    blockFunds(agentAccountNumber,amount);
-                    //todo send new account back to agent
-                }
-                else{ /*throw error*/}
-                break;
+                blockFunds(agentAccountNumber,amount);
+                return new Message(NAME,
+                                   MessageTypes.ACCOUNT_INFO,
+                                   accounts.get(agentAccountNumber));
 
             case CREATE_ACCOUNT:
                 //todo
@@ -144,25 +146,29 @@ public class Bank implements Runnable {
                 //todo
                 break;
 
+            //return list of HouseInfo objects
             case GET_HOUSES:
-                //return list of HouseInfo objects
-                break;
+                return new Message(NAME,MessageTypes.HOUSES,this.auctionHouses);
 
             case TRANSFER_FUNDS:
                 if(messageList.size() > 3){
-                    int auctionHouseAccountNumber = (int) messageList.get(0);
-                    int agentAccountNumber = (int) messageList.get(1);
-                    double amount = (double) messageList.get(2);
-                    transferFunds(auctionHouseAccountNumber,agentAccountNumber,amount);
-                    //todo send new accounts back to houses and agents
+                    auctionHouseAccountNumber = (int) messageList.get(0);
+                    agentAccountNumber = (int) messageList.get(1);
+                    amount = (double) messageList.get(2);
+                    boolean success = transferFunds(auctionHouseAccountNumber,agentAccountNumber,amount);
+                    if(success){
+                        //todo send new accounts back to houses and agents
+                    }
                 }
                 else{ /*throw error*/}
                 //todo
                 break;
 
              //todo make default
+
         }
 
+            return new Message(NAME,MessageTypes.CONFIRMATION);
     }
 
     /**
@@ -231,7 +237,7 @@ public class Bank implements Runnable {
     /**
      * Transfers funds from an Agent account to an AuctionHouse account.
      */
-    public synchronized void transferFunds(int auctionHouseAccountNumber,
+    public synchronized boolean transferFunds(int auctionHouseAccountNumber,
                                            int agentAccountNumber,
                                            double amount){
         
@@ -247,8 +253,10 @@ public class Bank implements Runnable {
                     agentAccount.setBalance(agentAccount.getBalance() - amount);
                     houseAccount.setBalance(houseAccount.getBalance() + amount);
                     houseAccount.setPendingBalance(houseAccount.getPendingBalance() + amount);
+                    return true;
                 }
                 else{
+                    return false;
                     //todo sent message back to agent; //"Unable to transfer funds. The agent's pending balance is less than the specified amount."
                 }
             }
@@ -276,9 +284,10 @@ public class Bank implements Runnable {
 
 
 
-    // private sub class
+    // private nested class
     private static class ServerThread implements Runnable {
-        
+
+        private Bank bank;
         private Socket client;
         private BufferedReader stdIn;
         private ObjectInputStream inputStream;
@@ -287,7 +296,8 @@ public class Bank implements Runnable {
         private LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
 
         // constructor
-        public ServerThread(Socket client, int idNumber) {
+        public ServerThread(Socket client, int idNumber, Bank bank) {
+            this.bank = bank;
             this.client = client;
             this.idNumber = idNumber;
 
@@ -317,6 +327,7 @@ public class Bank implements Runnable {
         
         @Override
         public void run() {
+            MessageAnalyzer analyzer = new MessageAnalyzer();
 
                 while(true) {
                     try {
@@ -324,6 +335,12 @@ public class Bank implements Runnable {
                         messages.add(msg);
                         Message message = messages.take();
                         System.out.println(message);
+
+                        Message response = bank.response(message,
+                                                        (MessageTypes) message.getMessageList().get(1),
+                                                         analyzer.analyze(message));
+
+                        outputStream.writeObject(response);
 
 
                     }catch(InterruptedException e){
