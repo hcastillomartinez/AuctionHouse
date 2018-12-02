@@ -5,6 +5,7 @@ import Bank.Account;
 import Bank.AuctionInfo;
 import MessageHandling.Message;
 import MessageHandling.MessageTypes;
+import javafx.application.Application;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -51,21 +52,22 @@ public class AuctionHouse implements Runnable {
         this.port = Integer.parseInt(port);
         this.serverName = serverName;
         try {
-            bankClient=new Socket("b146-19",4444);
-            objectOutputStream=
-                    new ObjectOutputStream(bankClient.getOutputStream());
-            objectInputStream=
-                    new ObjectInputStream(bankClient.getInputStream());
-            sendToBank(new Message("auction house",
-                    MessageTypes.CREATE_ACCOUNT,new AuctionInfo(type,
-                    serverName,0,Integer.parseInt(port))));
-            doAction((Message)objectInputStream.readObject());
+//            bankClient=new Socket("b146-19",4444);
+//            objectOutputStream=
+//                    new ObjectOutputStream(bankClient.getOutputStream());
+//            objectInputStream=
+//                    new ObjectInputStream(bankClient.getInputStream());
+//            sendToBank(new Message("auction house",
+//                    MessageTypes.CREATE_ACCOUNT,new AuctionInfo(type,
+//                    serverName,0,Integer.parseInt(port))));
+//            doAction((Message)objectInputStream.readObject());
             serverSocket = new ServerSocket(this.port);
         }catch(IOException i){
             i.printStackTrace();
-        }catch(ClassNotFoundException i){
-            i.printStackTrace();
         }
+//        catch(ClassNotFoundException i){
+//            i.printStackTrace();
+//        }
     }
 
 
@@ -75,10 +77,18 @@ public class AuctionHouse implements Runnable {
     /*                                                                */
     /******************************************************************/
 
+    /**
+     * Checks if auction house taking in anything else.
+     * @return boolean, whether or not AH is open.
+     */
     public boolean getAuctionStatus(){
         return auctionOpen;
     }
 
+    /**
+     * Gets the account of the AH.
+     * @return Account, holds info for bank.
+     */
     public Account getAccount(){
         return account;
     }
@@ -99,13 +109,6 @@ public class AuctionHouse implements Runnable {
         return account.getAccountNumber();
     }
 
-    /**
-     * Used to add money to the funds of house from bank.
-     * @param account double that is funds to be added
-     */
-    public void updateAccount(Account account) {
-        this.account = account;
-    }
 
     /**
      * Used to get port number that server is on.
@@ -191,6 +194,14 @@ public class AuctionHouse implements Runnable {
             updateAccount((Account) m.getMessageList().get(2));
         }
 
+    }
+
+    /**
+     * Used to add money to the funds of house from bank.
+     * @param account double that is funds to be added
+     */
+    private void updateAccount(Account account) {
+        this.account = account;
     }
 
     /**
@@ -416,12 +427,6 @@ public class AuctionHouse implements Runnable {
 
 
     public static void main(String[] args){
-        AuctionHouse auctionHouse = new AuctionHouse(args[0],args[1],
-                "localhost");
-//        AuctionHouseGUI gui=new AuctionHouseGUI(auctionHouse.getItemList(),
-//                auctionHouse.getAuctionStatus());
-//        gui.launch();
-        Thread t = new Thread(auctionHouse);
-        t.start();
+        AuctionHouseGUI.launch(args);
     }
 }

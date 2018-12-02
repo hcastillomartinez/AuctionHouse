@@ -209,6 +209,9 @@ public class Auction implements Runnable{
         auctionHouse.sendToServer(winningClientID,new Message("auction house",
                 MessageTypes.TRANSFER_ITEM,item));
 
+        //removes item from its list
+        auctionHouse.getItemList().remove(item);
+
         System.out.println("winner: "+ currentWinnerID);
     }
 

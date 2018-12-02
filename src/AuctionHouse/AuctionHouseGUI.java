@@ -6,6 +6,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,22 +15,28 @@ import java.util.List;
  */
 public class AuctionHouseGUI extends Application {
 
-    private AnchorPane root;
+    private AnchorPane root=new AnchorPane();
+    private static AuctionHouse auctionHouse;
     private List<Item> auctionItems;
     private ListView<Item> displayItems;
     private boolean auctionOpen;
 
-    public AuctionHouseGUI(List<Item> items, boolean open){
-        root=new AnchorPane();
-        displayItems=new ListView<>();
-        auctionItems=items;
-        auctionOpen=open;
+
+    public void setAuctionItems(List<Item> auctionItems) {
+        this.auctionItems = auctionItems;
+    }
+
+    public void setAuctionOpen(boolean auctionOpen) {
+        this.auctionOpen = auctionOpen;
     }
 
     /**
      * Used to launch the GUI from another class.
      */
-    public static void launch(){
+    public static void launch(String[] args){
+        auctionHouse=new AuctionHouse("1","4444","localhost");
+        Thread t=new Thread(auctionHouse);
+        t.start();
         AuctionHouseGUI.launch(AuctionHouseGUI.class);
     }
 
@@ -42,6 +50,7 @@ public class AuctionHouseGUI extends Application {
             @Override
             public void run() {
                 while(auctionOpen) {
+                    System.out.println("caa");
                     displayItems.getItems().removeAll();
                     displayItems.getItems().addAll(auctionItems);
                 }
@@ -52,15 +61,18 @@ public class AuctionHouseGUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        root.setLayoutX(Screen.getPrimary().getBounds().getWidth()*.75);
-        root.setLayoutY(Screen.getPrimary().getBounds().getHeight()*.75);
-        displayItems.setLayoutX(100);
-        displayItems.setLayoutY(100);
-        displayItems.setPrefSize(200,200);
+        displayItems=new ListView<>();
+        auctionItems=auctionHouse.getItemList();
+
+        root.setPrefSize(500,500);
+        displayItems.setLayoutX(0);
+        displayItems.setLayoutY(0);
+        displayItems.setPrefSize(350,250);
 
         root.getChildren().add(displayItems);
+        displayItems.getItems().addAll(auctionItems);
+//        updateItemList();
 
-        updateItemList();
         Scene scene=new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -68,6 +80,7 @@ public class AuctionHouseGUI extends Application {
 
     @Override
     public void stop(){
+        System.out.println("GUI closed");
         auctionOpen=false;
     }
 }
