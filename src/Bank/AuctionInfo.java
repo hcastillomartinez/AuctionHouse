@@ -17,4 +17,20 @@ public class AuctionInfo {
         this.auctionID = auctionID;
         this.portNumber = portNumber;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getAuctionID() {
+        return auctionID;
+    }
+
+    public String getIPAddress() {
+        return IPAddress;
+    }
+
+    public int getPortNumber() {
+        return portNumber;
+    }
 }

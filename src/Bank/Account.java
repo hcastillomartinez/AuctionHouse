@@ -11,20 +11,20 @@ import java.io.Serializable;
 public class Account implements Serializable{
     
     private static final long serialVersionUID = 1L;
-    private int id;
+    private Integer accountNumber;
     private double balance, pendingBalance;
     private String name;
 
     /**
      * Constructor for Account.
      *
-     * @param id the account id
+     * @param accountNumber the account number
      * @param balance the account balance
      * @param pendingBalance the pending account balance
      */
-    public Account(String name, int id, double balance, double pendingBalance){
+    public Account(String name, int accountNumber, double balance, double pendingBalance){
         this.name = name;
-        this.id = id;
+        this.accountNumber = accountNumber;
         this.balance = balance;
         this.pendingBalance = pendingBalance;
     }
@@ -36,7 +36,7 @@ public class Account implements Serializable{
     @Override
     public synchronized String toString() {
         return "Account{name="+ name +
-                ", id=" + id +
+                ", accountNumber=" + accountNumber +
                 ", balance=" + balance +
                 ", pendingBalance=" + pendingBalance +
                 '}';
@@ -62,7 +62,11 @@ public class Account implements Serializable{
         this.pendingBalance = pendingBalance;
     }
 
-    public int getId() {
-        return id;
+    public Integer getAccountNumber() {
+        return accountNumber;
+    }
+
+    public String getName() {
+        return name;
     }
 }

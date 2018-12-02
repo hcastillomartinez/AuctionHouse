@@ -20,4 +20,27 @@ public class AgentInfo {
         this.idNumber = idNumber;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getIPAddress() {
+        return IPAddress;
+    }
+
+    public int getAuctionID() {
+        return auctionID;
+    }
+
+    public int getPortNumber() {
+        return portNumber;
+    }
+
+    public int getIdNumber() {
+        return idNumber;
+    }
+
+    public int getAccountNumber() {
+        return accountNumber;
+    }
 }

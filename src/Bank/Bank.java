@@ -106,12 +106,11 @@ public class Bank implements Runnable {
 
         switch(type) {
             case CREATE_ACCOUNT:
-                String name = (String) messageList.get(1);
+                AuctionInfo auctionInfo = (AuctionInfo) messageList.get(2);
 
-                Account account = makeAccount(name,0);
+                Account account = makeAccount(auctionInfo.getName(),0);
 
-                AuctionInfo auction = (AuctionInfo) messageList.get(0);
-                addAuctionHouse(auction);
+                addAuctionHouse(auctionInfo);
 
                 return new Message(NAME, MessageTypes.ACCOUNT_INFO,account);
 
@@ -120,8 +119,8 @@ public class Bank implements Runnable {
                 return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(auctionHouseAccountNumber));
 
             case REMOVE_FUNDS:
-                agentAccountNumber = (int) messageList.get(1);
-                amount = (double) messageList.get(2);
+                agentAccountNumber = (int) messageList.get(2);
+                amount = (double) messageList.get(3);
 
                 blockFunds(agentAccountNumber, amount);
 
@@ -135,7 +134,6 @@ public class Bank implements Runnable {
                 }
                 return new Message(NAME,MessageTypes.CONFIRMATION);
 
-            //todo case UNBLOCK_FUNDS:
 
             default: return new Message(NAME,MessageTypes.THANKS);
 
@@ -155,13 +153,10 @@ public class Bank implements Runnable {
             case CREATE_ACCOUNT:
                 //add agent to list
 
-                String firstName = (String) messageList.get(1);
-                String lastName = (String) messageList.get(2);
-                double startingBalance = (double) messageList.get(3);
+                Account account = (Account) messageList.get(2);
 
-                Account account = makeAccount(firstName + " " + lastName,startingBalance);
 
-                AgentInfo agent = (AgentInfo) messageList.get(0);
+                AgentInfo agent = (AgentInfo) messageList.get(3);
                 addAgent(agent);
 
                 return new Message(NAME,MessageTypes.ACCOUNT_INFO,account);
@@ -178,7 +173,12 @@ public class Bank implements Runnable {
                 if(success){
                     return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(agentAccountNumber));
                 }
+
+                //todo send hector his account back to him
                 break;
+
+//            case UNBLOCK_FUNDS:
+//                break;
 
             default: return new Message(NAME,MessageTypes.THANKS);
         }
