@@ -3,7 +3,6 @@ package AuctionHouse;
 import Agent.Bid;
 import MessageHandling.Message;
 import MessageHandling.MessageTypes;
-import org.omg.CORBA.INTERNAL;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,9 +29,7 @@ public class Auction implements Runnable{
     private Timer t;
     private boolean auctionActive;
 
-    //todo
-    //have way to send winner
-    //relay out once  agent taken over, to release hold on pending.
+
 
     /**
      * Takes an item and sets auction up for the
@@ -130,10 +127,18 @@ public class Auction implements Runnable{
 
                 auctionHouse.sendToServer(currentClientID,new Message(
                         "auction house",MessageTypes.BID_ACCEPTED));
+                if(bidMaps.get(currentBidderID)!=null){
+                    //returning bidder
+                    auctionHouse.sendToBank(new Message("auction house",
+                            MessageTypes.BLOCK_FUNDS,currentBidderID,
+                            bid-bidToBeat));
+                }
+                else{
+                    //someone new entering bidding
+                    auctionHouse.sendToBank(new Message("auction house",
+                            MessageTypes.BLOCK_FUNDS,currentBidderID, bid));
+                }
 
-                auctionHouse.sendToBank(new Message("auction house",
-                        MessageTypes.BLOCK_FUNDS,currentBidderID,
-                        bid-bidMaps.get(currentBidderID)));
                 bidMaps.put(currentBidderID,bid);
                 auctionHouse.sendToServer(winningClientID,new Message(
                         "auction house",MessageTypes.OUT_BID));
@@ -143,7 +148,6 @@ public class Auction implements Runnable{
             }
             winningClientID = currentClientID;
             currentWinnerID = currentBidderID;
-
             item.updatePrice(bid);
             bidToBeat = bid;
             System.out.println("current winner " + currentWinnerID);
