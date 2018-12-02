@@ -196,7 +196,7 @@ public class TestBank implements Runnable {
                 io.printStackTrace();
             }
         }
-
+        
         /**
          * Function to close the client from the server.
          */
@@ -256,8 +256,8 @@ public class TestBank implements Runnable {
                 case CREATE_ACCOUNT:
                     System.out.println(message);
                     Account account = (Account) list.get(2);
-                    if (!bank.userAccounts.containsKey(account.getId())) {
-                        bank.userAccounts.put(account.getId(), account);
+                    if (!bank.userAccounts.containsKey(account.getAccountNumber())) {
+                        bank.userAccounts.put(account.getAccountNumber(), account);
                         response = new Message(NAME,
                                                MessageTypes.CONFIRMATION);
                     } else {

@@ -1,16 +1,20 @@
 package Bank;
 
+import java.io.Serializable;
+
 /**
  * Used by bank to store Agent information in a list.
  */
-public class AgentInfo {
+public class AgentInfo implements Serializable {
+    
+    private static final long serialVersionUID = 250L;
     String name;
     String IPAddress;
-    int auctionID, portNumber, idNumber, accountNumber;
+    Integer auctionID, portNumber, idNumber, accountNumber;
 
     public AgentInfo(String name,
                        String IPAddress,
-                       int auctionID,
+                       Integer auctionID,
                        int portNumber,
                        int idNumber) {
         this.name = name;

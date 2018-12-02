@@ -351,8 +351,9 @@ public class Bank implements Runnable {
         @Override
         public void run() {
             MessageAnalyzer analyzer = new MessageAnalyzer();
+            boolean connected = true;
 
-            while(!client.isClosed()) {
+            while(connected) {
                 try {
                     Message msg = (Message) inputStream.readObject();
                     messages.add(msg);
@@ -374,7 +375,9 @@ public class Bank implements Runnable {
 
                 }catch(InterruptedException e){
                     e.printStackTrace();
-                }catch(IOException e){
+                } catch (EOFException e) {
+                    connected = !connected;
+                } catch(IOException e){
                     e.printStackTrace();
                 }catch(ClassNotFoundException e){
                     e.printStackTrace();

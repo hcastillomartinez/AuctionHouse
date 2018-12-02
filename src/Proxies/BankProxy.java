@@ -31,11 +31,10 @@ public class BankProxy implements Runnable {
      * Constructor for the bank proxy.
      * Builds a reference to the bank for bank functionality
      */
-    public BankProxy(String host, int port, Agent agent, AuctionHouse house) {
+    public BankProxy(String host, int port, Agent agent) {
         this.host = host;
         this.port = port;
         this.agent = agent;
-        this.house = house;
         connectToServer();
     }
     
@@ -73,6 +72,10 @@ public class BankProxy implements Runnable {
      * Function to close all of the open connections.
      */
     public void closeConnections() {
+        connected = !connected;
+    }
+    
+    private void closeSocket() {
         try {
             out.close();
             in.close();
@@ -113,13 +116,9 @@ public class BankProxy implements Runnable {
                         if (response != null) {
                             agent.addMessage(response);
                         }
-                    } else if (house != null) {
-                        if (response != null) {
-                            house.placeMessageForAnalyzing(response);
-                        }
                     }
                 } catch (EOFException eof) {
-                    closeConnections();
+                    closeSocket();
                     break;
                 } catch (ClassNotFoundException cnf) {
                     cnf.printStackTrace();
@@ -127,7 +126,7 @@ public class BankProxy implements Runnable {
                     ie.printStackTrace();
                 }
             }
-            closeConnections();
+            closeSocket();
         } catch (IOException io) {
             io.printStackTrace();
         }

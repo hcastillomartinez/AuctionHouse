@@ -18,7 +18,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class AuctionHouseProxy implements Runnable {
 
-    private Bank bank;
     private Agent agent;
     private String host;
     private int port;
@@ -35,12 +34,10 @@ public class AuctionHouseProxy implements Runnable {
      */
     public AuctionHouseProxy(String host,
                              int port,
-                             Agent agent,
-                             Bank bank) {
+                             Agent agent) {
         this.host = host;
         this.port = port;
         this.agent = agent;
-        this.bank = bank;
         connectToServer();
     }
     
@@ -108,8 +105,6 @@ public class AuctionHouseProxy implements Runnable {
                         if (response != null) {
                             agent.addMessage(response);
                         }
-                    } else if (house != null) {
-//                            bank.addMessage(response);
                     }
                 } catch (EOFException eof) {
                     agent.setConnected();

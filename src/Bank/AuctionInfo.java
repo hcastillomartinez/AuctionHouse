@@ -1,9 +1,13 @@
 package Bank;
 
+import java.io.Serializable;
+
 /**
  * Used by bank to store Auction House information in a list
  */
-public class AuctionInfo {
+public class AuctionInfo implements Serializable{
+    
+    private static final long serialVersionUID = 3000L;
     String name;
     String IPAddress;
     int auctionID, portNumber;

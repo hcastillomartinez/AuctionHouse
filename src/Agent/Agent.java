@@ -40,7 +40,8 @@ public class Agent implements Runnable {
     private int portNumber;
 
     // tester value for the auction house info
-    private AuctionInfo auctionHouseInfo;
+    private AuctionHouseInfo auctionHouseInfo;
+    private AuctionInfo auctionInfo;
 
     
     /**
@@ -54,20 +55,30 @@ public class Agent implements Runnable {
 
         this.bank = new BankProxy(hostName,
                                   portNumber,
-                                  this,
-                                  null);
+                                  this);
         this.aHProxy = new AuctionHouseProxy(hostName,
                                              portNumber,
-                                             this,
-                                             null);
+                                             this);
     }
+    
+    /**
+     * Getting the port number.
+     * @return portNumber for the client
+     */
+    public int getPortNumber() { return portNumber; }
 
     /**
-     * Setting the auction house for the agent.
-     * @param auctionHouseInfo house for functionality
+     * Getting the host name.
+     * @return host name for the client.
      */
-    public void setAuctionHouse(AuctionInfo auctionHouseInfo) {
-        this.auctionHouseInfo = auctionHouseInfo;
+    public String getHostName() { return hostName; }
+
+/**
+     * Setting the auction house for the agent.
+     * @param auctionInfo house for functionality
+     */
+    public void setAuctionHouse(AuctionInfo auctionInfo) {
+        this.auctionInfo = auctionInfo;
     }
 
     /**
@@ -90,6 +101,17 @@ public class Agent implements Runnable {
      */
     public BankProxy getBank() {
         return bank;
+    }
+    
+    /**
+     * Returning the list of auction house infos.
+     * @return list of the auction house infos
+     */
+    public Integer getCurrentAuctionID() {
+        if (auctionInfo != null) {
+            return auctionInfo.getAuctionID();
+        }
+        return null;
     }
 
     /**
@@ -280,6 +302,13 @@ public class Agent implements Runnable {
             case ACCOUNT_INFO:
                 account = (Account) list.get(2);
                 break;
+            case UNBLOCK_FUNDS:
+                int aucID = (int) list.get(2);
+                double price = (double) list.get(3);
+                bank.sendAgentMessage(new Message(NAME,
+                                                  MessageTypes.UNBLOCK_FUNDS,
+                                                  aucID));
+                break;
         }
     }
 
@@ -298,7 +327,7 @@ public class Agent implements Runnable {
      * Function to close the connection.
      */
     public void closeApplicationConnection() {
-        bank.closeConnections();
+        connected = !connected;
     }
 
     /*****************************************************************/
@@ -328,6 +357,7 @@ public class Agent implements Runnable {
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
+        bank.closeConnections();
     }
     
     /**
@@ -346,7 +376,7 @@ computers for checking offline
 b146-34
 b146-22
 b146-19
- */
+*/
 
 
 

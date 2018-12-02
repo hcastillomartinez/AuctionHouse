@@ -1,6 +1,8 @@
 package Agent;
 
+import AuctionHouse.AuctionHouse;
 import Bank.Account;
+import Bank.AgentInfo;
 import Bank.AuctionInfo;
 import MessageHandling.Message;
 import MessageHandling.MessageTypes;
@@ -38,7 +40,6 @@ public class AgentGUI extends Application {
 
     // worker fields
     private static Agent agent;
-    private HashMap<String, Integer> numberList = new HashMap<>();
     private ChoiceBox<AuctionInfo> auctionHouses;
 
     // filler variables for the boxes
@@ -66,20 +67,15 @@ public class AgentGUI extends Application {
     public static void launch(String...args) {
         host = args[0];
         port = Integer.parseInt(args[1]);
+        agent = new Agent(host, port);
         AgentGUI.launch(AgentGUI.class);
         agent.closeApplicationConnection();
-        System.exit(1);
     }
     
     /**
      * Setting up the map to check against numbers.
      */
     private void setupNumbersAndAgent() {
-        for (int i = 0; i < 10; i++) {
-            numberList.put("" + i + "", i);
-        }
-
-        agent = new Agent(host, port);
         (new Thread(agent)).start();
     }
     
@@ -103,9 +99,15 @@ public class AgentGUI extends Application {
                                               agent.getId(),
                                               balance,
                                               balance);
+                AgentInfo agInfo = new AgentInfo(agent.getNAME(),
+                                                 agent.getHostName(),
+                                                 agent.getCurrentAuctionID(),
+                                                 agent.getPortNumber(),
+                                                 agent.getId());
                 agent.getBank().sendAgentMessage(new Message(agent.getNAME(),
                                                              MessageTypes.CREATE_ACCOUNT,
-                                                             account));
+                                                             account,
+                                                             agInfo));
                 pendingField.setText(balance.toString());
                 agent.setAccount(account);
                 firNameField.setEditable(false);
@@ -379,6 +381,11 @@ public class AgentGUI extends Application {
      */
     @Override
     public void start(Stage primaryStage) throws Exception {
+        primaryStage.setOnCloseRequest(e -> {
+            agent.setConnected();
+            primaryStage.close();
+            System.exit(3);
+        });
         setupNumbersAndAgent();
         makePlaceBidButton();
         makeCreateAccountButton();
