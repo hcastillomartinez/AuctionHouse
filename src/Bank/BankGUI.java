@@ -29,7 +29,9 @@ public class BankGUI extends Application {
 
     public BankGUI(){
         mainPane = new Pane();
-        //mainPane.setBackground(BLUE);
+
+        //for debugging
+        mainPane.setBackground(new Background(new BackgroundFill(Color.BLUE,null,null)));
     }
 
     /**

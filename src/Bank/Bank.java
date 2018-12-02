@@ -31,6 +31,8 @@ public class Bank implements Runnable {
     static private String address;
     static private int portNumber;
 
+    private BankGUI gui;
+
     
     /**
      It is static and at a known address (IP address and port number)
@@ -56,6 +58,9 @@ public class Bank implements Runnable {
         Bank bank = new Bank(address, portNumber);
         Thread bankThread = new Thread(bank);
         bankThread.start();
+
+        BankGUI.launch(args);
+
     }
     
     /**
@@ -67,6 +72,7 @@ public class Bank implements Runnable {
         auctionHouses = new ArrayList<AuctionInfo>();
         accounts = new ArrayList<Account>();
         clients = new HashMap<>();
+        this.gui = new BankGUI();
     }
 
 
