@@ -1,6 +1,8 @@
 package AuctionHouse;
 
 import Agent.Bid;
+import Bank.Account;
+import Bank.AuctionInfo;
 import MessageHandling.Message;
 import MessageHandling.MessageTypes;
 
@@ -15,18 +17,20 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class AuctionHouse implements Runnable {
     private int agentCount;
     private String type;
-    private double houseFunds;
     private HouseMessageAnalyzer messageAnalyzer;
-    private int houseID;
     private List<Item> itemList;
     private List<Auction> auctions;
     private List<Server> serverThreads;
     private MakeItems makeItems;
     private ServerSocket serverSocket;
+    private Socket bankClient;
+    private ObjectInputStream objectInputStream;
+    private ObjectOutputStream objectOutputStream;
     private int port;
     private String serverName;
     private BlockingQueue<Message> messages;
     private boolean auctionOpen;
+    private Account account;
 
 
     /**
@@ -37,10 +41,7 @@ public class AuctionHouse implements Runnable {
      */
     public AuctionHouse(String type,String port,String serverName){
         agentCount = 0;
-        houseFunds = 0;
-        auctionOpen=true;
-        houseID = ((int)(Math.random()*60000)+30000)
-                -((int)(Math.random()*30000)+1);
+        auctionOpen = true;
         makeItems = new MakeItems();
         messages = new LinkedBlockingQueue<>();
         itemList = makeItems.getItems(Integer.parseInt(type));
@@ -50,11 +51,23 @@ public class AuctionHouse implements Runnable {
         this.port = Integer.parseInt(port);
         this.serverName = serverName;
         try {
+            bankClient=new Socket("b146-19",4444);
+            objectOutputStream=
+                    new ObjectOutputStream(bankClient.getOutputStream());
+            objectInputStream=
+                    new ObjectInputStream(bankClient.getInputStream());
+            sendToBank(new Message("auction house",
+                    MessageTypes.CREATE_ACCOUNT,new AuctionInfo(type,
+                    serverName,0,Integer.parseInt(port))));
+            doAction((Message)objectInputStream.readObject());
             serverSocket = new ServerSocket(this.port);
         }catch(IOException i){
             i.printStackTrace();
+        }catch(ClassNotFoundException i){
+            i.printStackTrace();
         }
     }
+
 
     /******************************************************************/
     /*                                                                */
@@ -66,12 +79,16 @@ public class AuctionHouse implements Runnable {
         return auctionOpen;
     }
 
+    public Account getAccount(){
+        return account;
+    }
+
     /**
      * Gets the amount of money a house has.
      * @return Amount of money the house has, double.
      */
     public double getHouseFunds() {
-        return houseFunds;
+        return account.getBalance();
     }
 
     /**
@@ -79,15 +96,15 @@ public class AuctionHouse implements Runnable {
      * @return An int, is the ID
      */
     public int getHouseID() {
-        return houseID;
+        return account.getAccountNumber();
     }
 
     /**
      * Used to add money to the funds of house from bank.
-     * @param houseFunds double that is funds to be added
+     * @param account double that is funds to be added
      */
-    public void setHouseFunds(double houseFunds) {
-        this.houseFunds += houseFunds;
+    public void updateAccount(Account account) {
+        this.account = account;
     }
 
     /**
@@ -171,9 +188,9 @@ public class AuctionHouse implements Runnable {
             int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
             tryBid((Bid) m.getMessageList().get(2),id);
         }else if(action == 3){
-            //send status back but what does agent want to receive back?
-
+            updateAccount((Account) m.getMessageList().get(2));
         }
+
     }
 
     /**
@@ -271,8 +288,8 @@ public class AuctionHouse implements Runnable {
             this.client = client;
             auctionHouse = a;
             this.ID = id;
-            in = new ObjectInputStream(client.getInputStream());
             out = new ObjectOutputStream(client.getOutputStream());
+            in = new ObjectInputStream(client.getInputStream());
             out.writeObject("connected to "+ID);
         }
 
@@ -321,17 +338,20 @@ public class AuctionHouse implements Runnable {
 
         @Override
         public void run()  {
-            while(true){
+            while(!client.isConnected()){
                 try{
                     Message m = (Message) in.readObject();
                     if(m != null){
                         addID(m);
                         auctionHouse.placeMessageForAnalyzing(m);
                     }
-                }catch(IOException i){
+                }catch(EOFException i){
+                    closeClient();
                     i.printStackTrace();
                 }catch(ClassNotFoundException i){
                     i.printStackTrace();
+                }catch(IOException i){
+                    System.out.println(i);
                 }
             }
         }
@@ -364,6 +384,18 @@ public class AuctionHouse implements Runnable {
         }
     }
 
+    /**
+     * Writes out messages to the bank.
+     * @param m Message to be passed to bank.
+     */
+    public void sendToBank(Message m){
+        try{
+            objectOutputStream.writeObject(m);
+        }catch(IOException i){
+            i.printStackTrace();
+        }
+    }
+
 
     @Override
     public void run(){
@@ -384,7 +416,7 @@ public class AuctionHouse implements Runnable {
 
 
     public static void main(String[] args){
-        AuctionHouse auctionHouse = new AuctionHouse("1","4444",
+        AuctionHouse auctionHouse = new AuctionHouse(args[0],args[1],
                 "localhost");
 //        AuctionHouseGUI gui=new AuctionHouseGUI(auctionHouse.getItemList(),
 //                auctionHouse.getAuctionStatus());
