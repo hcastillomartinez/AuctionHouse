@@ -1,6 +1,7 @@
 package Agent;
 
 import Bank.Account;
+import Bank.AuctionInfo;
 import MessageHandling.Message;
 import MessageHandling.MessageTypes;
 import javafx.application.Application;
@@ -38,7 +39,7 @@ public class AgentGUI extends Application {
     // worker fields
     private static Agent agent;
     private HashMap<String, Integer> numberList = new HashMap<>();
-    private ChoiceBox<AuctionHouseInfo> auctionHouses;
+    private ChoiceBox<AuctionInfo> auctionHouses;
 
     // filler variables for the boxes
     private Label firName, lastName, acctBalance, pendingBalanceLabel,
@@ -324,8 +325,8 @@ public class AgentGUI extends Application {
      * Filling the choice box with the auction house options.
      */
     private void updateAuctionHouseChoices() {
-        ArrayList<AuctionHouseInfo> temp = agent.getHouseList();
-        for (AuctionHouseInfo s: temp) {
+        ArrayList<AuctionInfo> temp = agent.getHouseList();
+        for (AuctionInfo s: temp) {
             auctionHouses.getItems().add(s);
         }
     }

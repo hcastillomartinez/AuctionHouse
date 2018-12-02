@@ -85,7 +85,8 @@ public class Bank implements Runnable {
 
             while (true) {
                 Socket client = server.accept();
-                ServerThread bankClient = new ServerThread(client,clientNumber++,this);
+                ServerThread bankClient = new ServerThread(client,clientNumber,this);
+                clientNumber++;
                 getClients().put(bankClient.idNumber,bankClient);
                 (new Thread(bankClient)).start();
             }
@@ -95,33 +96,9 @@ public class Bank implements Runnable {
         }
     }
 
-    public void handleMessage(Message message){
-//        MessageAnalyzer analyzer = new MessageAnalyzer();
-//
-//        String sender = (String) message.getMessageList().get(0);
-//        sender.toLowerCase();
-//        MessageTypes type = (MessageTypes) message.getMessageList().get(1);
-//        String
-//
-//        switch(sender){
-//            //all of the casess
-//            case "auction house":
-//                //switch();
-//                break;
-//
-//            case "agent":
-//                break;
-//
-//            default:
-//                System.out.println("Error in handleMessage() case statement in Bank.java");
-//        }
-
-
-    }
 
     public synchronized  Message responseToAuctionHouse(Message message,
                                                         MessageTypes type){
-        Message response = null;
         ArrayList<Object> messageList = message.getMessageList();
         int agentAccountNumber;
         int auctionHouseAccountNumber;
@@ -139,15 +116,24 @@ public class Bank implements Runnable {
                 return new Message(NAME, MessageTypes.ACCOUNT_INFO,account);
 
             case ACCOUNT_INFO:
-                agentAccountNumber = (int) messageList.get(0);
-                return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(agentAccountNumber));
+                auctionHouseAccountNumber = (int) messageList.get(0);
+                return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(auctionHouseAccountNumber));
 
             case REMOVE_FUNDS:
                 agentAccountNumber = (int) messageList.get(1);
                 amount = (double) messageList.get(2);
 
                 blockFunds(agentAccountNumber, amount);
-                //todo figure out how to send the agent's new account back to it
+
+                try{
+                clients.get(agentAccountNumber).outputStream.writeObject(new Message(NAME,
+                                                                         MessageTypes.ACCOUNT_INFO,
+                                                                         accounts.get(agentAccountNumber)));
+
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+                return new Message(NAME,MessageTypes.CONFIRMATION);
 
             //todo case UNBLOCK_FUNDS:
 
@@ -158,7 +144,7 @@ public class Bank implements Runnable {
 
     public synchronized Message responseToAgent(Message message,
                                          MessageTypes type) {
-        Message response = null;
+
         ArrayList<Object> messageList = message.getMessageList();
         int agentAccountNumber;
         int auctionHouseAccountNumber;
@@ -178,29 +164,20 @@ public class Bank implements Runnable {
                 AgentInfo agent = (AgentInfo) messageList.get(0);
                 addAgent(agent);
 
-                break;
-
-            case ACCOUNT_INFO:
-                //todo
-                break;
+                return new Message(NAME,MessageTypes.ACCOUNT_INFO,account);
 
             //return list of HouseInfo objects
             case GET_HOUSES:
                 return new Message(NAME,MessageTypes.HOUSES,this.auctionHouses);
 
             case TRANSFER_FUNDS:
-                if(messageList.size() > 3){
-                    auctionHouseAccountNumber = (int) messageList.get(0);
-                    agentAccountNumber = (int) messageList.get(1);
-                    amount = (double) messageList.get(2);
-                    boolean success = transferFunds(auctionHouseAccountNumber,agentAccountNumber,amount);
-                    if(success){
-                        //todo figure out how to send the auctionhouse's new account back to it
-                        return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(agentAccountNumber));
-                    }
+                auctionHouseAccountNumber = (int) messageList.get(0);
+                agentAccountNumber = (int) messageList.get(1);
+                amount = (double) messageList.get(2);
+                boolean success = transferFunds(auctionHouseAccountNumber,agentAccountNumber,amount);
+                if(success){
+                    return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(agentAccountNumber));
                 }
-                else{ /*throw error*/}
-                //todo
                 break;
 
             default: return new Message(NAME,MessageTypes.THANKS);
@@ -325,8 +302,6 @@ public class Bank implements Runnable {
     }
 
 
-
-
     // private nested class
     private static class ServerThread implements Runnable {
 
@@ -371,45 +346,37 @@ public class Bank implements Runnable {
         public void run() {
             MessageAnalyzer analyzer = new MessageAnalyzer();
 
-                while(true) {
-                    try {
-                        Message msg = (Message) inputStream.readObject();
-                        messages.add(msg);
-                        Message message = messages.take();
-                        System.out.println(message);
+            while(!client.isClosed()) {
+                try {
+                    Message msg = (Message) inputStream.readObject();
+                    messages.add(msg);
+                    Message message = messages.take();
+                    System.out.println(message);
 
-                        Message response;
-                        if(analyzer.analyze(message) == 1){
-                            response = bank.responseToAgent(message,
-                                                           (MessageTypes) message.getMessageList().get(1));
-                        }
-                        else{
-                            response = bank.responseToAuctionHouse(message,
-                                                                  (MessageTypes) message.getMessageList().get(1));
-
-                        }
-
-                        outputStream.writeObject(response);
-
-                    }catch(InterruptedException e){
-                        e.printStackTrace();
-                    }catch(IOException e){
-                        e.printStackTrace();
-                    }catch(ClassNotFoundException e){
-                        e.printStackTrace();
+                    Message response;
+                    if(analyzer.analyze(message) == 1){
+                        response = bank.responseToAgent(message,
+                                                       (MessageTypes) message.getMessageList().get(1));
                     }
+                    else{
+                        response = bank.responseToAuctionHouse(message,
+                                                              (MessageTypes) message.getMessageList().get(1));
+
+                    }
+
+                    outputStream.writeObject(response);
+
+                }catch(InterruptedException e){
+                    e.printStackTrace();
+                }catch(IOException e){
+                    e.printStackTrace();
+                }catch(ClassNotFoundException e){
+                    e.printStackTrace();
                 }
+            }
+            closeClient();
+            System.out.println("ServerThread is stopping");
         }
     }
-    
-    
-    
-    
-    
-    //TODO
-    
-    
-    /**
-     * Handles messages received from Houses and Agents.
-     */
+
 }

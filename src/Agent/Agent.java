@@ -30,7 +30,7 @@ public class Agent implements Runnable {
     private BankProxy bank;
     private Item item = null;
     private AuctionHouse auctionHouse = null;
-    private ArrayList<AuctionHouseInfo> houseList;
+    private ArrayList<AuctionInfo> houseList;
     private ArrayList<Item> itemList;
     private BlockingQueue<Message> messageQueue;
     private HashMap<String, Integer> auctionHouseMap;
@@ -40,7 +40,7 @@ public class Agent implements Runnable {
     private int portNumber;
 
     // tester value for the auction house info
-    private AuctionHouseInfo auctionHouseInfo;
+    private AuctionInfo auctionHouseInfo;
 
     
     /**
@@ -66,7 +66,7 @@ public class Agent implements Runnable {
      * Setting the auction house for the agent.
      * @param auctionHouseInfo house for functionality
      */
-    public void setAuctionHouse(AuctionHouseInfo auctionHouseInfo) {
+    public void setAuctionHouse(AuctionInfo auctionHouseInfo) {
         this.auctionHouseInfo = auctionHouseInfo;
     }
 
@@ -74,7 +74,7 @@ public class Agent implements Runnable {
      * Getting the house list from the agent.
      * @return list of the houses
      */
-    public ArrayList<AuctionHouseInfo> getHouseList() {
+    public ArrayList<AuctionInfo> getHouseList() {
         return houseList;
     }
 
@@ -259,7 +259,7 @@ public class Agent implements Runnable {
                 assignAHID(message);
                 break;
             case HOUSES:
-                houseList = (ArrayList<AuctionHouseInfo>) list.get(2);
+                houseList = (ArrayList<AuctionInfo>) list.get(2);
                 System.out.println(houseList);
                 break;
             case BID_REJECTED:
