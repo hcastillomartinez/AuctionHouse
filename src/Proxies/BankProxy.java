@@ -73,6 +73,12 @@ public class BankProxy implements Runnable {
      * Function to close all of the open connections.
      */
     public void closeConnections() {
+        System.out.println("before connection change");
+        connected = !connected;
+        System.out.println("here");
+    }
+    
+    private void closeSocket() {
         try {
             out.close();
             in.close();
@@ -119,7 +125,7 @@ public class BankProxy implements Runnable {
                         }
                     }
                 } catch (EOFException eof) {
-                    closeConnections();
+                    closeSocket();
                     break;
                 } catch (ClassNotFoundException cnf) {
                     cnf.printStackTrace();
@@ -127,7 +133,7 @@ public class BankProxy implements Runnable {
                     ie.printStackTrace();
                 }
             }
-            closeConnections();
+            closeSocket();
         } catch (IOException io) {
             io.printStackTrace();
         }

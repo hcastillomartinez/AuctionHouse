@@ -298,7 +298,7 @@ public class Agent implements Runnable {
      * Function to close the connection.
      */
     public void closeApplicationConnection() {
-        bank.closeConnections();
+        connected = !connected;
     }
 
     /*****************************************************************/
@@ -328,6 +328,8 @@ public class Agent implements Runnable {
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
+        System.out.println("here in the agent");
+        bank.closeConnections();
     }
     
     /**
@@ -346,7 +348,7 @@ computers for checking offline
 b146-34
 b146-22
 b146-19
- */
+*/
 
 
 
