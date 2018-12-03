@@ -124,16 +124,16 @@ public class Agent implements Runnable {
         return bank;
     }
     
-//    /**
-//     * Returning the list of auction house infos.
-//     * @return list of the auction house infos
-//     */
-//    public Integer getCurrentAuctionID() {
-//        if (auctionInfo != null) {
-//            return auctionInfo.getAuctionID();
-//        }
-//        return null;
-//    }
+    /**
+     * Returning the list of auction house infos.
+     * @return list of the auction house infos
+     */
+    public Integer getCurrentAuctionID() {
+        if (auctionInfo != null) {
+            return auctionInfo.getAuctionID();
+        }
+        return null;
+    }
 
     /**
      * Returning the id of the Agent.

@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
@@ -13,8 +14,6 @@ import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-import javax.swing.text.html.ListView;
-import java.awt.*;
 import java.util.ArrayList;
 
 /**
@@ -22,7 +21,7 @@ import java.util.ArrayList;
  */
 public class BankGUI extends Application {
     Pane mainPane;
-    static Bank bank = new Bank(null,0);
+    static Bank bank;
 
     private final BackgroundFill BLUE
             = new BackgroundFill(Color.BLUE, null, null);//todo remove
@@ -38,8 +37,8 @@ public class BankGUI extends Application {
 
 
     //list views for displaying agent and auction house bank accounts
-    private ListView agentAccounts;
-    private ListView auctionHouseAccounts;
+    private ListView<Account> agentAccountsListView;
+    private ListView<Account> auctionHouseAccountsListView;
 
     private final Background WHITE = new Background(new BackgroundFill(Color.WHITE,
                                                                   null,
@@ -51,10 +50,27 @@ public class BankGUI extends Application {
         mainPane.setBackground(WHITE);
 
         //initialize ObservableLists
-        agentAccountList = FXCollections.observableArrayList();
-        auctionHouseAccountList = FXCollections.observableArrayList();
+        agentAccountList = FXCollections.observableArrayList(new ArrayList<Account>());
+        auctionHouseAccountList = FXCollections.observableArrayList(new ArrayList<Account>());
 
-        //agentAccounts = new ListView()
+        //initialize listviews todo move to methods
+        agentAccountsListView = new ListView<>(agentAccountList);
+        agentAccountsListView.setEditable(true);
+        agentAccountsListView.setLayoutX(0);
+        agentAccountsListView.setLayoutY(0);
+
+        auctionHouseAccountsListView = new ListView<>(auctionHouseAccountList);
+        auctionHouseAccountsListView.setEditable(true);
+        auctionHouseAccountsListView.setLayoutX(WIDTH / 2);
+        auctionHouseAccountsListView.setLayoutY(0);
+
+        mainPane.getChildren().addAll(agentAccountsListView,auctionHouseAccountsListView);
+
+
+
+
+
+
     }
 
     ArrayList<Account> getHouseAccounts(){
@@ -93,6 +109,7 @@ public class BankGUI extends Application {
         }
 
         bank = new Bank(address, portNumber);
+
         Thread bankThread = new Thread(bank);
         bankThread.start();
 
