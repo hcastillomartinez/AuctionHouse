@@ -34,13 +34,14 @@ public class Agent implements Runnable {
     private ArrayList<Item> itemList;
     private BlockingQueue<Message> messageQueue;
     private HashMap<String, Integer> auctionHouseMap;
+    private HashMap<AuctionInfo, AuctionHouseProxy> houseProxyMap;
     private boolean connected = true;
     private Scanner scanner = new Scanner(System.in);
     private String hostName;
     private int portNumber;
 
     // tester value for the auction house info
-    private AuctionHouseInfo auctionHouseInfo;
+    private HashMap<Item, Bid> itemBidMap;
     private AuctionInfo auctionInfo;
 
     
@@ -52,15 +53,35 @@ public class Agent implements Runnable {
         messageQueue = new LinkedBlockingQueue<>();
         auctionHouseMap = new HashMap<>();
         houseList = new ArrayList<>();
+        houseProxyMap = new HashMap<>();
+        itemBidMap = new HashMap<>();
 
         this.bank = new BankProxy(hostName,
                                   portNumber,
                                   this);
-        this.aHProxy = new AuctionHouseProxy(hostName,
-                                             portNumber,
-                                             this);
     }
-    
+
+    /**
+     * Getting the auction info that holds the status of the house.
+     * @return auctionInfo object
+     */
+    public AuctionInfo getAuctionInfo() { return auctionInfo; }
+
+    /**
+     * Getting the current item.
+     * @return currentItem selected.
+     */
+    public Item getItem() { return item; }
+
+    /**
+     * Getting the correct auction house proxy to send the message.
+     * @param info of the auction house
+     * @return auctionHouseProxy to send the messages
+     */
+    public AuctionHouseProxy getAHProxy(AuctionInfo info) {
+        return houseProxyMap.get(info);
+    }
+
     /**
      * Getting the port number.
      * @return portNumber for the client
@@ -73,7 +94,7 @@ public class Agent implements Runnable {
      */
     public String getHostName() { return hostName; }
 
-/**
+    /**
      * Setting the auction house for the agent.
      * @param auctionInfo house for functionality
      */
@@ -237,9 +258,11 @@ public class Agent implements Runnable {
     /**
      * Responding to the sender of the message.
      */
-    private void respondToSender(int sender, Message outMessage) {
+    private void respondToSender(int sender,
+                                 Message outMessage,
+                                 AuctionHouseProxy proxy) {
         if (sender == 2) {
-            aHProxy.sendMessage(outMessage);
+            proxy.sendMessage(outMessage);
         } else if (sender == 3) {
             bank.sendAgentMessage(outMessage);
         }
@@ -264,7 +287,7 @@ public class Agent implements Runnable {
         switch (type) {
             case CONFIRMATION:
                 response = new Message(NAME, MessageTypes.THANKS);
-                respondToSender(sender, response);
+                respondToSender(sender, response, getAHProxy(auctionInfo));
                 break;
             case TRANSFER_ITEM:
                 Bid bid = (Bid) list.get(2);
@@ -272,7 +295,7 @@ public class Agent implements Runnable {
                                        MessageTypes.REMOVE_FUNDS,
                                        getId(),
                                        bid.getAmount());
-                respondToSender(sender, response);
+                respondToSender(sender, response, getAHProxy(auctionInfo));
                 break;
             case BANK_ACCOUNT:
                 accountNumber = (int) list.get(2);
@@ -289,7 +312,7 @@ public class Agent implements Runnable {
                 break;
             case BID_ACCEPTED:
                 response = new Message(NAME, MessageTypes.THANKS);
-                respondToSender(sender, response);
+                respondToSender(sender, response, getAHProxy(auctionInfo));
                 break;
             case OUT_BID:
                 reBid(message);
