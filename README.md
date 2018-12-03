@@ -35,6 +35,8 @@ If you have tests, then explain how they work and how to use them.
 
 
 ## Daniel's Todo's
-Add an UNBLOCK_FUNDS message type
+Fix lookup of server threads
+    make client number and account number the same value
 When I create an account, I am assuming that agents and auction houses will send an
     AgentInfo or AuctionInfo object to bank.
+    

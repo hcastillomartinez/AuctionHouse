@@ -121,11 +121,23 @@ public class Bank implements Runnable {
                 clients.get(agentAccountNumber).outputStream.writeObject(new Message(NAME,
                                                                          MessageTypes.ACCOUNT_INFO,
                                                                          accounts.get(agentAccountNumber)));
-
                 }catch(Exception e){
                     e.printStackTrace();
                 }
                 return new Message(NAME,MessageTypes.CONFIRMATION);
+
+            case UNBLOCK_FUNDS:
+                agentAccountNumber = (int) messageList.get(2);
+                amount = (double) messageList.get(3);
+                unblockFunds(agentAccountNumber,amount);
+
+                try{
+                    clients.get(agentAccountNumber).outputStream.writeObject(new Message(NAME,
+                            MessageTypes.ACCOUNT_INFO,
+                            accounts.get(agentAccountNumber)));
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
 
 
             default: return new Message(NAME,MessageTypes.THANKS);
@@ -157,27 +169,23 @@ public class Bank implements Runnable {
 
             //return list of HouseInfo objects
             case GET_HOUSES:
-                return new Message(NAME,MessageTypes.HOUSES,this.auctionHouses);
+                return new Message(NAME,MessageTypes.HOUSES,this.getAuctionHouses());
 
             case TRANSFER_FUNDS:
                 auctionHouseAccountNumber = (int) messageList.get(0);
                 agentAccountNumber = (int) messageList.get(1);
                 amount = (double) messageList.get(2);
                 boolean success = transferFunds(auctionHouseAccountNumber,agentAccountNumber,amount);
-                if(success){
-                    return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(agentAccountNumber));
-                }
 
-                //todo send hector his account back to him
-                break;
-
-//            case UNBLOCK_FUNDS:
-//                break;
+                try{
+                    clients.get(auctionHouseAccountNumber).outputStream.writeObject(new Message(NAME,
+                            MessageTypes.ACCOUNT_INFO,
+                            accounts.get(agentAccountNumber)));
+                }catch(Exception e){ e.printStackTrace();}
+                return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(agentAccountNumber));
 
             default: return new Message(NAME,MessageTypes.THANKS);
         }
-        //todo remove
-        return new Message(NAME,MessageTypes.CONFIRMATION);
     }
 
     /**
