@@ -41,7 +41,7 @@ public class AuctionHouseGUI extends Application {
      * Used to launch the GUI from another class.
      */
     public static void launch(String[] args){
-        auctionHouse=new AuctionHouse("1","4444","localhost");
+        auctionHouse=new AuctionHouse(args[0],args[1],args[2]);
         Thread t=new Thread(auctionHouse);
         t.start();
         AuctionHouseGUI.launch(AuctionHouseGUI.class);
@@ -101,7 +101,7 @@ public class AuctionHouseGUI extends Application {
 
     @Override
     public void stop(){
-        auctionHouse.sendToBank("close");
+//        auctionHouse.sendToBank("close");
         System.out.println("GUI closed");
         System.exit(1);
         timer.cancel();
