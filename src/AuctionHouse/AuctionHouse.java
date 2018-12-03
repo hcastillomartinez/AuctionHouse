@@ -22,6 +22,7 @@ public class AuctionHouse implements Runnable {
     private List<Item> itemList;
     private List<Auction> auctions;
     private List<Server> serverThreads;
+    private boolean safeToClose;
     private MakeItems makeItems;
     private ServerSocket serverSocket;
     private Socket bankClient;
@@ -40,9 +41,10 @@ public class AuctionHouse implements Runnable {
      * and any other number for car.
      * @param type An int
      */
-    public AuctionHouse(String type,String port,String serverName){
+    public  AuctionHouse(String type,String port,String serverName){
         agentCount = 0;
         auctionOpen = true;
+        safeToClose=true;
         makeItems = new MakeItems();
         messages = new LinkedBlockingQueue<>();
         itemList = makeItems.getItems(Integer.parseInt(type));
@@ -52,15 +54,15 @@ public class AuctionHouse implements Runnable {
         this.port = Integer.parseInt(port);
         this.serverName = serverName;
         try {
-//            bankClient=new Socket("b146-19",4444);
-//            objectOutputStream=
-//                    new ObjectOutputStream(bankClient.getOutputStream());
-//            objectInputStream=
-//                    new ObjectInputStream(bankClient.getInputStream());
-//            sendToBank(new Message("auction house",
-//                    MessageTypes.CREATE_ACCOUNT,new AuctionInfo(type,
-//                    serverName,0,Integer.parseInt(port))));
-//            doAction((Message)objectInputStream.readObject());
+            bankClient=new Socket("b146-19",4444);
+            objectOutputStream=
+                    new ObjectOutputStream(bankClient.getOutputStream());
+            objectInputStream=
+                    new ObjectInputStream(bankClient.getInputStream());
+            sendToBank(new Message("auction house",
+                    MessageTypes.CREATE_ACCOUNT,new AuctionInfo(type,
+                    serverName,0,Integer.parseInt(port))));
+            handleMessagesFromBank();
             serverSocket = new ServerSocket(this.port);
         }catch(IOException i){
             i.printStackTrace();
@@ -83,6 +85,22 @@ public class AuctionHouse implements Runnable {
      */
     public boolean getAuctionStatus(){
         return auctionOpen;
+    }
+
+    /**
+     * Gets the auctions created
+     * @return A list of auctions
+     */
+    public List<Auction> getAuctions() {
+        return auctions;
+    }
+
+    public void setSafeToClose(boolean safeToClose) {
+        this.safeToClose = safeToClose;
+    }
+
+    public boolean isSafeToClose() {
+        return safeToClose;
     }
 
     /**
@@ -181,7 +199,7 @@ public class AuctionHouse implements Runnable {
      * Where based off incoming message, sends back the appropriate response.
      * @param m Message that will be analyzed and responded to.
      */
-    private void doAction(Message m){
+    private synchronized void doAction(Message m){
         int action = messageAnalyzer.analyzeMessage(m);
         if(action == 1){
            int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
@@ -395,11 +413,30 @@ public class AuctionHouse implements Runnable {
         }
     }
 
+    private void handleMessagesFromBank(){
+        Thread t=new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    while (!objectInputStream.readObject().equals(
+                            "close")){
+                        doAction((Message)objectInputStream.readObject());
+                    }
+                }catch(IOException i){
+                    i.printStackTrace();
+                }catch(ClassNotFoundException i){
+                    i.printStackTrace();
+                }
+            }
+        });
+        t.start();
+    }
+
     /**
      * Writes out messages to the bank.
      * @param m Message to be passed to bank.
      */
-    public void sendToBank(Message m){
+    public void sendToBank(Object m){
         try{
             objectOutputStream.writeObject(m);
         }catch(IOException i){
