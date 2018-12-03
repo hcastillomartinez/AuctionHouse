@@ -3,6 +3,8 @@ package Bank;
 import Agent.Agent;
 import Agent.AgentGUI;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -11,7 +13,9 @@ import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import javax.swing.text.html.ListView;
 import java.awt.*;
+import java.util.ArrayList;
 
 /**
  * @author Daniel Miller
@@ -29,6 +33,14 @@ public class BankGUI extends Application {
     private final double HEIGHT
             = Screen.getPrimary().getBounds().getHeight() * 0.75;
 
+    private ObservableList<Account> agentAccountList = FXCollections.observableArrayList();
+    private ObservableList<Account> auctionHouseAccountList = FXCollections.observableArrayList();
+
+
+    //list views for displaying agent and auction house bank accounts
+    private ListView agentAccounts;
+    private ListView auctionHouseAccounts;
+
     private final Background WHITE = new Background(new BackgroundFill(Color.WHITE,
                                                                   null,
                                                                  null));
@@ -37,6 +49,30 @@ public class BankGUI extends Application {
         mainPane = new Pane();
         //for debugging
         mainPane.setBackground(WHITE);
+
+        //initialize ObservableLists
+        agentAccountList = FXCollections.observableArrayList();
+        auctionHouseAccountList = FXCollections.observableArrayList();
+
+        //agentAccounts = new ListView()
+    }
+
+    ArrayList<Account> getHouseAccounts(){
+        ArrayList<Account> accounts = new ArrayList<>();
+        for(AuctionInfo house : bank.getAuctionHouses()){
+            Account account = bank.getAccounts().get(house.getAccountNumber());
+            accounts.add(account);
+        }
+        return accounts;
+    }
+
+    ArrayList<Account> getAgentAccounts(){
+        ArrayList<Account> accounts = new ArrayList<>();
+        for(AgentInfo agent : bank.getAgents()){
+            Account account = bank.getAccounts().get(agent.getAccountNumber());
+            accounts.add(account);
+        }
+        return accounts;
     }
 
     /**
@@ -79,6 +115,7 @@ public class BankGUI extends Application {
         primaryStage.show();
 
         Thread bankThread = new Thread(bank);
+        bankThread.start();
     }
 
 }

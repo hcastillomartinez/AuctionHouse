@@ -10,15 +10,15 @@ public class AuctionInfo implements Serializable{
     private static final long serialVersionUID = 3000L;
     String name;
     String IPAddress;
-    int auctionID, portNumber;
+    int accountNumber, portNumber;
 
     public AuctionInfo(String name,
                        String IPAddress,
-                       int auctionID,
+                       int accountNumber,
                        int portNumber) {
         this.name = name;
         this.IPAddress = IPAddress;
-        this.auctionID = auctionID;
+        this.accountNumber = accountNumber;
         this.portNumber = portNumber;
     }
 
@@ -26,8 +26,8 @@ public class AuctionInfo implements Serializable{
         return name;
     }
 
-    public int getAuctionID() {
-        return auctionID;
+    public int getAccountNumber() {
+        return accountNumber;
     }
 
     public String getIPAddress() {

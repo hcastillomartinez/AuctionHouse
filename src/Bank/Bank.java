@@ -27,7 +27,6 @@ public class Bank implements Runnable {
     private HashMap<Integer,ServerThread> clients;
     private HashMap<Agent,HashMap<AuctionHouse, Integer>> secretKeys; //todo
     private int clientNumber = 0;
-    private int currentAccountNumber = 0;
     static private String address;
     static private int portNumber;
 
@@ -101,7 +100,7 @@ public class Bank implements Runnable {
             case CREATE_ACCOUNT:
                 AuctionInfo auctionInfo = (AuctionInfo) messageList.get(2);
 
-                Account account = makeAccount(auctionInfo.getName(),0);
+                Account account = makeAccount(auctionInfo.getName(),0,clientNumber); //todo might be a bug if an agent starts a thread and doesn't create an account right away
 
                 addAuctionHouse(auctionInfo,account);
 
@@ -191,9 +190,9 @@ public class Bank implements Runnable {
     /**
      * Creates and returns an account.
      */
-    public synchronized Account makeAccount(String name, double startingBalance) {
+    public synchronized Account makeAccount(String name, double startingBalance, int accountNumber) {
         Account account = new Account(name,
-                                      assignAccountNumber(),
+                                      assignAccountNumber(accountNumber),
                                       startingBalance,
                                       startingBalance);
 
@@ -218,9 +217,7 @@ public class Bank implements Runnable {
     /**
      * Assigns an account number to an agent and increments the current account number
      */
-    private synchronized int assignAccountNumber() {
-        int number = this.currentAccountNumber;
-        this.currentAccountNumber++;
+    private synchronized int assignAccountNumber(int number) {
         return number;
     }
 
