@@ -187,7 +187,7 @@ public class TestBank implements Runnable {
         // constructor
         public ServerThread(Socket client, TestBank bank) {
             this.bank = bank;
-            
+            System.out.println("Created new connection!");
             try {
                 out = new ObjectOutputStream(client.getOutputStream());
                 out.flush();
@@ -202,7 +202,6 @@ public class TestBank implements Runnable {
          */
         private void closeClient() {
             try {
-                out.writeObject("Server has closed!");
                 in.close();
                 out.close();
             } catch (IOException io) {

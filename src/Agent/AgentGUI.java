@@ -1,13 +1,11 @@
 package Agent;
 
-import AuctionHouse.AuctionHouse;
 import Bank.Account;
 import Bank.AgentInfo;
 import Bank.AuctionInfo;
 import MessageHandling.Message;
 import MessageHandling.MessageTypes;
 import javafx.application.Application;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -15,12 +13,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * AgentGUI.java displays the agent gui for user interactions.
@@ -40,14 +36,15 @@ public class AgentGUI extends Application {
 
     // worker fields
     private static Agent agent;
-    private ChoiceBox<AuctionInfo> auctionHouses;
+    private ChoiceBox<String> auctionHouses;
 
     // filler variables for the boxes
     private Label firName, lastName, acctBalance, pendingBalanceLabel,
         ahLabel, idLabel, itemLabel, bidLabel;
     private TextField firNameField, lastNameField, acctBalanceField,
         pendingField, ahField, idField, itemField, bidField;
-    private Button createAccountButton, placeBid, selectItem, updateButton;
+    private Button createAccountButton, placeBidButton, selectItemButton,
+            updateButton, chooseAuctionHouseButton;
 
     // box variables
     private VBox accountBox, bidContainer, auctionContainer, appVertContainer;
@@ -78,7 +75,36 @@ public class AgentGUI extends Application {
     private void setupNumbersAndAgent() {
         (new Thread(agent)).start();
     }
-    
+
+    /**
+     * Function to choose the auction house.
+     */
+    private void setAuctionHouseOnChoice() {
+        String aucName = auctionHouses.getValue();
+        ArrayList<AuctionInfo> tempList = agent.getHouseList();
+
+        for (AuctionInfo ai: tempList) {
+            if (ai.getName().equalsIgnoreCase(aucName)) {
+                agent.setAuctionHouse(ai);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Function to make the auction house selection button
+     */
+    private void makeChooseAuctionHouseButton() {
+        chooseAuctionHouseButton = new Button("Set House");
+        chooseAuctionHouseButton.setTextFill(Color.WHITE);
+        chooseAuctionHouseButton.setBackground(new Background(GREY));
+        chooseAuctionHouseButton.setMinWidth(175);
+        chooseAuctionHouseButton.setMinHeight(50);
+        chooseAuctionHouseButton.setOnAction(e -> {
+            setAuctionHouseOnChoice();
+        });
+    }
+
     /**
      * Function to make the createAccountButton.
      */
@@ -122,15 +148,21 @@ public class AgentGUI extends Application {
      * Function to make the place bid button.
      */
     private void makePlaceBidButton() {
-        placeBid = new Button("Place Bid");
-        placeBid.setTextFill(Color.WHITE);
-        placeBid.setMaxWidth(175);
-        placeBid.setMaxHeight(HEIGHT * 0.1 - 5);
-        placeBid.setBackground(new Background(GREY));
-        placeBid.setOnAction(e -> {
+        placeBidButton = new Button("Place Bid");
+        placeBidButton.setTextFill(Color.WHITE);
+        placeBidButton.setMaxWidth(175);
+        placeBidButton.setMaxHeight(HEIGHT * 0.1 - 5);
+        placeBidButton.setBackground(new Background(GREY));
+        placeBidButton.setOnAction(e -> {
             if (!itemField.getText().isEmpty() &&
                 !bidField.getText().isEmpty()) {
-                System.out.println("placed bid");
+                Bid bid = new Bid(agent.getItem(),
+                                  agent.getKey(),
+                                  Double.parseDouble(bidField.getText()));
+                Message message = new Message(agent.getNAME(),
+                                              MessageTypes.BID,
+                                              bid);
+                agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
             }
         });
     }
@@ -139,12 +171,12 @@ public class AgentGUI extends Application {
      * Function to make the select item bid.
      */
     private void makeSelectItemButton() {
-        selectItem = new Button("Place Bid");
-        selectItem.setTextFill(Color.WHITE);
-        selectItem.setMaxWidth(175);
-        selectItem.setMaxHeight(HEIGHT * 0.1 - 5);
-        selectItem.setBackground(new Background(GREY));
-        selectItem.setOnAction(e -> {
+        selectItemButton = new Button("Place Bid");
+        selectItemButton.setTextFill(Color.WHITE);
+        selectItemButton.setMaxWidth(175);
+        selectItemButton.setMaxHeight(HEIGHT * 0.1 - 5);
+        selectItemButton.setBackground(new Background(GREY));
+        selectItemButton.setOnAction(e -> {
             System.out.println("select item");
         });
     }
@@ -289,7 +321,8 @@ public class AgentGUI extends Application {
         auctionContainer.setMinHeight(HEIGHT);
         auctionContainer.setSpacing(5);
         auctionContainer.getChildren().addAll(updateButton,
-                                              auctionHouses);
+                                              auctionHouses,
+                                              chooseAuctionHouseButton);
         // TODO:
         // Come back here to add the auction update button
         // choice box and list of the items
@@ -320,7 +353,7 @@ public class AgentGUI extends Application {
                                           idBox,
                                           itemBox,
                                           bidBox,
-                                          placeBid);
+                                          placeBidButton);
     }
 
     /**
@@ -329,7 +362,7 @@ public class AgentGUI extends Application {
     private void updateAuctionHouseChoices() {
         ArrayList<AuctionInfo> temp = agent.getHouseList();
         for (AuctionInfo s: temp) {
-            auctionHouses.getItems().add(s);
+            auctionHouses.getItems().add(s.getName());
         }
     }
 
@@ -339,10 +372,9 @@ public class AgentGUI extends Application {
     private void buildChoiceBox() {
         auctionHouses = new ChoiceBox<>();
         auctionHouses.setMinWidth(175);
-        auctionHouses.setMinHeight(HEIGHT * 0.1 - 5);
-        auctionHouses.setOnAction(e -> {
-            agent.setAuctionHouse(auctionHouses.getValue());
-        });
+        auctionHouses.setMinHeight(50);
+        auctionHouses.getItems().add("Choose Auction House");
+        auctionHouses.setValue("Choose Auction House");
     }
 
     /**
@@ -352,7 +384,7 @@ public class AgentGUI extends Application {
         updateButton = new Button("Update");
         updateButton.setTextFill(Color.WHITE);
         updateButton.setMinWidth(175);
-        updateButton.setMinHeight(HEIGHT * 0.05);
+        updateButton.setMinHeight(50);
         updateButton.setBackground(new Background(GREY));
         updateButton.setOnAction(e -> {
             updateAuctionHouseChoices();
@@ -390,6 +422,7 @@ public class AgentGUI extends Application {
         makePlaceBidButton();
         makeCreateAccountButton();
         makeSelectItemButton();
+        makeChooseAuctionHouseButton();
         makeLabels();
         makeTextFields();
         initializeHBoxes();
