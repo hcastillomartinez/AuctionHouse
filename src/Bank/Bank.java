@@ -21,9 +21,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Bank implements Runnable {
     private final String NAME = "bank";
     private LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>();
-    private ArrayList<AgentInfo> agents; //list of agent accounts
-    private ArrayList<AuctionInfo> auctionHouses; //list of auction house accounts
-    private ArrayList<Account> accounts;
+    private HashMap<Integer,AgentInfo> agents; //list of agent accounts
+    private HashMap<Integer,AuctionInfo> auctionHouses; //list of auction house accounts
+    private HashMap<Integer,Account> accounts;
     private HashMap<Integer,ServerThread> clients;
     private HashMap<Agent,HashMap<AuctionHouse, Integer>> secretKeys; //todo
     private int clientNumber = 0;
@@ -47,20 +47,7 @@ public class Bank implements Runnable {
      */
     
     public static void main(String[] args) throws Exception {
-        if(args.length >= 1){
-            portNumber = Integer.parseInt(args[0]);
-        }
-        else{
-            System.out.println("Error: Invalid program arguments. The first argument must be the bank port number.");
-            return;
-        }
-        
-        Bank bank = new Bank(address, portNumber);
-        Thread bankThread = new Thread(bank);
-        bankThread.start();
-
         BankGUI.launch(args);
-
     }
     
     /**
@@ -68,9 +55,9 @@ public class Bank implements Runnable {
      *
      */
     public Bank(String address, int portNumber){
-        agents = new ArrayList<AgentInfo>();
-        auctionHouses = new ArrayList<AuctionInfo>();
-        accounts = new ArrayList<Account>();
+        agents = new HashMap<Integer,AgentInfo>();
+        auctionHouses = new HashMap<Integer,AuctionInfo>();
+        accounts = new HashMap<Integer,Account>();
         clients = new HashMap<>();
         this.gui = new BankGUI();
     }
@@ -116,7 +103,7 @@ public class Bank implements Runnable {
 
                 Account account = makeAccount(auctionInfo.getName(),0);
 
-                addAuctionHouse(auctionInfo);
+                addAuctionHouse(auctionInfo,account);
 
                 return new Message(NAME, MessageTypes.ACCOUNT_INFO,account);
 
@@ -160,10 +147,11 @@ public class Bank implements Runnable {
                 //add agent to list
 
                 Account account = (Account) messageList.get(2);
+                accounts.put(account.getAccountNumber(),account);
 
 
                 AgentInfo agent = (AgentInfo) messageList.get(3);
-                addAgent(agent);
+                addAgent(agent,account);
 
                 return new Message(NAME,MessageTypes.ACCOUNT_INFO,account);
 
@@ -211,12 +199,12 @@ public class Bank implements Runnable {
     /**
      * Adds an auction house to the list of auction houses.
      */
-    public synchronized void addAuctionHouse(AuctionInfo house){
-        this.auctionHouses.add(house);
+    public synchronized void addAuctionHouse(AuctionInfo house,Account account){
+        this.auctionHouses.put(account.getAccountNumber(),house);
     }
 
-    public synchronized  void addAgent(AgentInfo agent){
-        this.agents.add(agent);
+    public synchronized  void addAgent(AgentInfo agent, Account account){
+        this.agents.put(account.getAccountNumber(),agent);
     }
 
     /**
@@ -233,7 +221,7 @@ public class Bank implements Runnable {
      * @return
      */
     public synchronized ArrayList<Account> getAccounts(){
-        return accounts;
+        return new ArrayList<Account>(accounts.values());
     }
 
     /**
@@ -248,7 +236,7 @@ public class Bank implements Runnable {
      * Gets list of agents for a auction house.
      */
     public synchronized ArrayList<AgentInfo> getAgents() {
-        return agents;
+        return new ArrayList<AgentInfo>(agents.values());
     }
 
 
@@ -256,7 +244,7 @@ public class Bank implements Runnable {
      * Gets list of auction houses for a agent.
      */
     public synchronized ArrayList<AuctionInfo> getAuctionHouses() {
-        return auctionHouses;
+        return new ArrayList<AuctionInfo>(auctionHouses.values());
     }
     
     
