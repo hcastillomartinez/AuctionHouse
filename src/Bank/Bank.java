@@ -30,7 +30,7 @@ public class Bank implements Runnable {
     static private String address;
     static private int portNumber;
 
-    private BankGUI gui;
+    //private BankGUI gui;
 
     
     /**
@@ -58,7 +58,6 @@ public class Bank implements Runnable {
         auctionHouses = new HashMap<Integer,AuctionInfo>();
         accounts = new HashMap<Integer,Account>();
         clients = new HashMap<>();
-        this.gui = new BankGUI();
     }
 
 
@@ -71,11 +70,14 @@ public class Bank implements Runnable {
      */
     @Override
     public void run(){
+        System.out.println("hello world");
 
         try{
             ServerSocket server = new ServerSocket(portNumber);
 
             while (true) {
+                System.out.println("bank is running");
+
                 Socket client = server.accept();
                 ServerThread bankClient = new ServerThread(client,clientNumber,this);
                 clientNumber++;

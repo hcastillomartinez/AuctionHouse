@@ -109,7 +109,6 @@ public class BankGUI extends Application {
         }
 
         bank = new Bank(address, portNumber);
-
         Thread bankThread = new Thread(bank);
         bankThread.start();
 
@@ -131,8 +130,7 @@ public class BankGUI extends Application {
         primaryStage.setResizable(false);
         primaryStage.show();
 
-        Thread bankThread = new Thread(bank);
-        bankThread.start();
+        System.out.println("here");
     }
 
 }
