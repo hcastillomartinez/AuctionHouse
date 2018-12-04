@@ -55,14 +55,11 @@ public class AuctionHouse implements Runnable {
         this.serverName = serverName;
         try {
 
-            System.out.println("attempt to connect");
             bankClient=new Socket(this.serverName,4444);
-            System.out.println("successful connect");
             objectOutputStream=
                     new ObjectOutputStream(bankClient.getOutputStream());
             objectInputStream=
                     new ObjectInputStream(bankClient.getInputStream());
-            System.out.println("sending message");
             sendToBank(new Message("auction house",
                     MessageTypes.CREATE_ACCOUNT,new AuctionInfo(type,
                     serverName,0,Integer.parseInt(port))));
@@ -413,7 +410,7 @@ public class AuctionHouse implements Runnable {
     public void sendToServer(int ID,Message m){
         for(Server server:serverThreads){
             if(ID==server.getID()){
-                System.out.println("Sending: "+m);
+                System.out.println("Sending to Agent: "+m);
                 server.placeMessage(m);
             }
         }
@@ -444,7 +441,7 @@ public class AuctionHouse implements Runnable {
      */
     public void sendToBank(Object m){
         try{
-            System.out.println("Sending: "+m);
+            System.out.println("Sending to bank: "+m);
             objectOutputStream.writeObject(m);
         }catch(IOException i){
             i.printStackTrace();
