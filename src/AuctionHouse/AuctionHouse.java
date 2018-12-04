@@ -54,11 +54,15 @@ public class AuctionHouse implements Runnable {
         this.port = Integer.parseInt(port);
         this.serverName = serverName;
         try {
-            bankClient=new Socket("localhost",4444);
+
+            System.out.println("attempt to connect");
+            bankClient=new Socket(this.serverName,4444);
+            System.out.println("successful connect");
             objectOutputStream=
                     new ObjectOutputStream(bankClient.getOutputStream());
             objectInputStream=
                     new ObjectInputStream(bankClient.getInputStream());
+            System.out.println("sending message");
             sendToBank(new Message("auction house",
                     MessageTypes.CREATE_ACCOUNT,new AuctionInfo(type,
                     serverName,0,Integer.parseInt(port))));
