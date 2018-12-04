@@ -114,7 +114,7 @@ public class Agent implements Runnable {
      * Setting the auction house for the agent.
      * @param auctionInfo house for functionality
      */
-    public void setAuctionHouse(AuctionInfo auctionInfo) {
+    public boolean setAuctionHouse(AuctionInfo auctionInfo) {
         System.out.println("AuctionInfo = " + auctionInfo.getPortNumber());
         if (!houseProxyMap.containsKey(auctionInfo)) {
             AuctionHouseProxy proxy = new AuctionHouseProxy(auctionInfo
@@ -128,6 +128,8 @@ public class Agent implements Runnable {
             aHProxy = houseProxyMap.get(auctionInfo);
             aHProxy.sendMessage(new Message(NAME, MessageTypes.GET_ITEMS));
         }
+        this.auctionInfo = auctionInfo;
+        return true;
     }
 
     /**
