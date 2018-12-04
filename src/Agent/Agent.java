@@ -320,7 +320,6 @@ public class Agent implements Runnable {
                 break;
             case HOUSES:
                 houseList = (ArrayList<AuctionInfo>) list.get(2);
-                System.out.println("HouseList = " + houseList);
                 break;
             case BID_REJECTED:
                 // TODO:
@@ -345,9 +344,11 @@ public class Agent implements Runnable {
             case UNBLOCK_FUNDS:
                 int aucID = (int) list.get(2);
                 double price = (double) list.get(3);
+                
                 bank.sendAgentMessage(new Message(NAME,
-                                                  MessageTypes.UNBLOCK_FUNDS,
-                                                  aucID));
+                                                  MessageTypes.TRANSFER_FUNDS,
+                                                  aucID,
+                                                  price));
                 break;
         }
     }

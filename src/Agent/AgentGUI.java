@@ -183,7 +183,10 @@ public class AgentGUI extends Application {
                 
                 String nam = firNameField.getText()+" "+lastNameField.getText();
                 Double balance = Double.parseDouble(acctBalanceField.getText());
-                Account account = new Account(nam, agent.getId(), balance, balance);
+                Account account = new Account(nam,
+                                              agent.getId(),
+                                              balance,
+                                              balance);
                 
                 if (agent.setAccount(account)) {
                     AgentInfo agInfo = new AgentInfo(agent.getNAME(),
