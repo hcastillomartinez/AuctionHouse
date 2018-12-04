@@ -123,7 +123,7 @@ public class Bank implements Runnable {
                 }catch(Exception e){
                     e.printStackTrace();
                 }
-                //todo refresh gui here
+                this.gui.refreshAccountInformation();
                 return new Message(NAME,MessageTypes.CONFIRMATION);
 
             case UNBLOCK_FUNDS:
@@ -138,9 +138,8 @@ public class Bank implements Runnable {
                 }catch(Exception e){
                     e.printStackTrace();
                 }
-                //todo refresh gui here
-                //return message here
-
+                this.gui.refreshAccountInformation();
+                return new Message(NAME,MessageTypes.CONFIRMATION);
 
             default: return new Message(NAME,MessageTypes.THANKS);
 
@@ -158,9 +157,6 @@ public class Bank implements Runnable {
         switch (type) {
 
             case CREATE_ACCOUNT:
-                //add agent to list
-                System.out.println(accounts);
-
                 Account account = (Account) messageList.get(2);
                 account.setAccountNumber(clientNumber - 1); //todo think of a way to do this differently
                 accounts.put(account.getAccountNumber(),account);
@@ -191,7 +187,7 @@ public class Bank implements Runnable {
                             MessageTypes.ACCOUNT_INFO,
                             accounts.get(agentAccountNumber)));
                 }catch(Exception e){ e.printStackTrace();}
-                //todo refresh gui here
+                this.gui.refreshAccountInformation();
                 return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(agentAccountNumber));
 
             default: return new Message(NAME,MessageTypes.THANKS);
