@@ -60,10 +60,10 @@ public class AgentGUI extends Application {
      * Launching the application.
      * @param args for the responses input
      */
-    public static void launch(Agent agentRef, String...args) {
+    public static void launch(String...args) {
         host = args[0];
         port = Integer.parseInt(args[1]);
-        agent = agentRef;
+        agent = new Agent(host, port);
         AgentGUI.launch(AgentGUI.class);
         agent.closeApplicationConnection();
     }
@@ -114,7 +114,7 @@ public class AgentGUI extends Application {
     private void buildChoiceBox() {
         auctionHouses = new ChoiceBox<>();
         auctionHouses.setMinWidth(175);
-        auctionHouses.setMinHeight(50);
+        auctionHouses.setMinHeight(25);
         auctionHouses.getItems().add("Choose Auction House");
         auctionHouses.setValue("Choose Auction House");
     }
@@ -127,11 +127,12 @@ public class AgentGUI extends Application {
         chooseAuctionHouseButton.setTextFill(Color.WHITE);
         chooseAuctionHouseButton.setBackground(new Background(GREY));
         chooseAuctionHouseButton.setMinWidth(175);
-        chooseAuctionHouseButton.setMinHeight(50);
+        chooseAuctionHouseButton.setMinHeight(25);
         chooseAuctionHouseButton.setOnAction(e -> {
             setAuctionHouseOnChoice();
             agent.sendMessageForUpdates();
             itemsFromHouse.getItems().clear();
+
             ArrayList<Item> list = agent.getItemList();
             for (Item i: list) {
                 itemsFromHouse.getItems().add(i.toString());
@@ -214,7 +215,7 @@ public class AgentGUI extends Application {
         selectItemButton = new Button("Select Item");
         selectItemButton.setTextFill(Color.WHITE);
         selectItemButton.setMaxWidth(175);
-        selectItemButton.setMaxHeight(HEIGHT * 0.1 - 5);
+        selectItemButton.setMaxHeight(25);
         selectItemButton.setBackground(new Background(GREY));
         selectItemButton.setOnAction(e -> {
             boolean set = false;
@@ -437,7 +438,7 @@ public class AgentGUI extends Application {
         updateButton = new Button("Update");
         updateButton.setTextFill(Color.WHITE);
         updateButton.setMinWidth(175);
-        updateButton.setMinHeight(50);
+        updateButton.setMinHeight(25);
         updateButton.setBackground(new Background(GREY));
         updateButton.setOnAction(e -> {
             updateAuctionHouseChoices();
@@ -467,12 +468,11 @@ public class AgentGUI extends Application {
      */
     @Override
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setOnCloseRequest(e ->
-                                       {
-                                           agent.setConnected();
-                                           primaryStage.close();
-                                           System.exit(3);
-                                       });
+        primaryStage.setOnCloseRequest(e -> {
+            agent.setConnected();
+            primaryStage.close();
+            System.exit(3);
+        });
         setupNumbersAndAgent();
         makePlaceBidButton();
         makeCreateAccountButton();

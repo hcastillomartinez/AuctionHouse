@@ -323,7 +323,7 @@ public class AuctionHouse implements Runnable {
             this.ID = id;
             out = new ObjectOutputStream(client.getOutputStream());
             in = new ObjectInputStream(client.getInputStream());
-            out.writeObject("connected to "+ID);
+//            out.writeObject("connected to "+ID);
         }
 
         /**
@@ -332,7 +332,7 @@ public class AuctionHouse implements Runnable {
          */
         public synchronized void placeMessage(Message m){
             try{
-             out.writeObject(m);
+                out.writeObject(m);
             }catch(IOException i){
                 i.printStackTrace();
             }
@@ -462,8 +462,8 @@ public class AuctionHouse implements Runnable {
             }catch(IOException i){
                 i.printStackTrace();
             }
-            closeAllSockets();
         }
+        closeAllSockets();
     }
 
 

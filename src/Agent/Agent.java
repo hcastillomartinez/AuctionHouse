@@ -86,10 +86,11 @@ public class Agent implements Runnable {
      * @return itemList for the ah
      */
     public ArrayList<Item> getItemList() {
+        System.out.println("itemList = " + itemList);
         return itemList;
     }
 
-/**
+    /**
      * Getting the correct auction house proxy to send the message.
      * @param info of the auction house
      * @return auctionHouseProxy to send the messages
@@ -295,7 +296,8 @@ public class Agent implements Runnable {
                                        int sender) {
         Message response;
         ArrayList<Object> list = message.getMessageList();
-        
+        System.out.println(message.getMessageList().get(1));
+
         switch (type) {
             case CONFIRMATION:
                 response = new Message(NAME, MessageTypes.THANKS);
@@ -331,10 +333,8 @@ public class Agent implements Runnable {
                 //TODO:
                 // remove the bid from the current bids
                 break;
-            case ITEMS:
-                if (list.get(2).equals(ArrayList.class)) {
-                    itemList = (ArrayList) list.get(2);
-                }
+            case GET_ITEMS:
+                System.out.println(list.get(2));
                 break;
             case ACCOUNT_INFO:
                 account = (Account) list.get(2);
@@ -356,8 +356,6 @@ public class Agent implements Runnable {
     public void sendMessageForUpdates() {
         bank.sendAgentMessage(new Message(NAME,
                                           MessageTypes.GET_HOUSES));
-        bank.sendAgentMessage(new Message(NAME,
-                                          MessageTypes.ACCOUNT_INFO));
         if (aHProxy != null) {
             aHProxy.sendMessage(new Message(NAME,
                                             MessageTypes.GET_ITEMS));
@@ -420,8 +418,7 @@ public class Agent implements Runnable {
      * Main method to start the program for the user/agent.
      */
     public static void main(String[] args) throws IOException {
-        Agent agent = new Agent(args[0], Integer.parseInt(args[1]));
-        AgentGUI.launch(agent, args);
+        AgentGUI.launch(args);
     }
 }
 
