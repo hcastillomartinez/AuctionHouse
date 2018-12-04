@@ -61,7 +61,7 @@ public class AgentGUI extends Application {
      * Launching the application.
      * @param args for the responses input
      */
-    public static void launch(String...args) {
+    public static void launch(Agent agent, String...args) {
         host = args[0];
         port = Integer.parseInt(args[1]);
         agent = new Agent(host, port);
@@ -70,12 +70,18 @@ public class AgentGUI extends Application {
     }
     
     /**
-     * Setting up the map to check against numbers.
+     * Starting the agent thread.
      */
     private void setupNumbersAndAgent() {
         (new Thread(agent)).start();
     }
 
+    /*****************************************************************/
+    /*                                                               */
+    /*               Functions For Making the AH choice box          */
+    /*                                                               */
+    /*****************************************************************/
+    
     /**
      * Function to choose the auction house.
      */
@@ -92,10 +98,31 @@ public class AgentGUI extends Application {
     }
 
     /**
+     * Filling the choice box with the auction house options.
+     */
+    private void updateAuctionHouseChoices() {
+        ArrayList<AuctionInfo> temp = agent.getHouseList();
+        for (AuctionInfo s: temp) {
+            auctionHouses.getItems().add(s.getName());
+        }
+    }
+    
+    /**
+     * Function to build the choice box containing the auction houses.
+     */
+    private void buildChoiceBox() {
+        auctionHouses = new ChoiceBox<>();
+        auctionHouses.setMinWidth(175);
+        auctionHouses.setMinHeight(50);
+        auctionHouses.getItems().add("Choose Auction House");
+        auctionHouses.setValue("Choose Auction House");
+    }
+
+    /**
      * Function to make the auction house selection button
      */
     private void makeChooseAuctionHouseButton() {
-        chooseAuctionHouseButton = new Button("Set House");
+        chooseAuctionHouseButton = new Button("Choose House");
         chooseAuctionHouseButton.setTextFill(Color.WHITE);
         chooseAuctionHouseButton.setBackground(new Background(GREY));
         chooseAuctionHouseButton.setMinWidth(175);
@@ -104,6 +131,12 @@ public class AgentGUI extends Application {
             setAuctionHouseOnChoice();
         });
     }
+
+    /*****************************************************************/
+    /*                                                               */
+    /*       Functions For Making the Bid and Account Buttons        */
+    /*                                                               */
+    /*****************************************************************/
 
     /**
      * Function to make the createAccountButton.
@@ -180,6 +213,12 @@ public class AgentGUI extends Application {
             System.out.println("select item");
         });
     }
+
+    /*****************************************************************/
+    /*                                                               */
+    /*              Functions For Making the Fields and Labels       */
+    /*                                                               */
+    /*****************************************************************/
     
     /**
      * Function to make the labels for testing.
@@ -208,6 +247,12 @@ public class AgentGUI extends Application {
         itemField = new TextField();
         bidField = new TextField();
     }
+
+    /*****************************************************************/
+    /*                                                               */
+    /*               Functions For Making New Account Box            */
+    /*                                                               */
+    /*****************************************************************/
 
     /**
      * Function to setup last name box.
@@ -255,9 +300,29 @@ public class AgentGUI extends Application {
     }
 
     /**
+     * Function to add fields to the accountBox container.
+     */
+    private void buildAccountContainer() {
+        accountBox = new VBox();
+        accountBox.setMinWidth(WIDTH * 0.5);
+        accountBox.setMinHeight(HEIGHT * 0.5);
+        accountBox.getChildren().addAll(firstNameBox,
+                                        lastNameBox,
+                                        accountBalance,
+                                        pendingBalanceBox,
+                                        createAccountButton);
+    }
+
+    /*****************************************************************/
+    /*                                                               */
+    /*          Functions For Making the Auction House VBox          */
+    /*                                                               */
+    /*****************************************************************/
+
+    /**
      * Function to setup auc house horizontal box.
      */
-    private void buildAuctionHoueHorizontalBox() {
+    private void buildAuctionHouseHBox() {
         aucHouseHBox = new HBox();
         aucHouseHBox.setMinWidth(WIDTH * 0.25);
         aucHouseHBox.setMinHeight(HEIGHT * 0.1);
@@ -299,6 +364,26 @@ public class AgentGUI extends Application {
     }
 
     /**
+     * Function to add fields to the bidBox container.
+     */
+    private void buildBidContainer() {
+        bidContainer = new VBox();
+        bidContainer.setMinWidth(WIDTH * 0.5);
+        bidContainer.setMinHeight(HEIGHT * 0.5);
+        bidContainer.getChildren().addAll(aucHouseHBox,
+                                          idBox,
+                                          itemBox,
+                                          bidBox,
+                                          placeBidButton);
+    }
+
+    /*****************************************************************/
+    /*                                                               */
+    /*          Functions For Making the Full GUI Containers         */
+    /*                                                               */
+    /*****************************************************************/
+
+    /**
      * Function to set up the boxes.
      */
     private void initializeHBoxes() {
@@ -306,7 +391,7 @@ public class AgentGUI extends Application {
         buildLastNameBox();
         buildAccountBalanceBox();
         buildPendingBalanceBox();
-        buildAuctionHoueHorizontalBox();
+        buildAuctionHouseHBox();
         buildIDBox();
         buildItemBox();
         buildBidBox();
@@ -326,55 +411,6 @@ public class AgentGUI extends Application {
         // TODO:
         // Come back here to add the auction update button
         // choice box and list of the items
-    }
-
-    /**
-     * Function to add fields to the accountBox container.
-     */
-    private void buildAccountContainer() {
-        accountBox = new VBox();
-        accountBox.setMinWidth(WIDTH * 0.5);
-        accountBox.setMinHeight(HEIGHT * 0.5);
-        accountBox.getChildren().addAll(firstNameBox,
-                                        lastNameBox,
-                                        accountBalance,
-                                        pendingBalanceBox,
-                                        createAccountButton);
-    }
-
-    /**
-     * Function to add fields to the bidBox container.
-     */
-    private void buildBidContainer() {
-        bidContainer = new VBox();
-        bidContainer.setMinWidth(WIDTH * 0.5);
-        bidContainer.setMinHeight(HEIGHT * 0.5);
-        bidContainer.getChildren().addAll(aucHouseHBox,
-                                          idBox,
-                                          itemBox,
-                                          bidBox,
-                                          placeBidButton);
-    }
-
-    /**
-     * Filling the choice box with the auction house options.
-     */
-    private void updateAuctionHouseChoices() {
-        ArrayList<AuctionInfo> temp = agent.getHouseList();
-        for (AuctionInfo s: temp) {
-            auctionHouses.getItems().add(s.getName());
-        }
-    }
-
-    /**
-     * Function to build the choice box containing the auction houses.
-     */
-    private void buildChoiceBox() {
-        auctionHouses = new ChoiceBox<>();
-        auctionHouses.setMinWidth(175);
-        auctionHouses.setMinHeight(50);
-        auctionHouses.getItems().add("Choose Auction House");
-        auctionHouses.setValue("Choose Auction House");
     }
 
     /**
@@ -410,14 +446,16 @@ public class AgentGUI extends Application {
 
     /**
      * Function to start running the application.
+     * @param primaryStage stage for the application
      */
     @Override
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setOnCloseRequest(e -> {
-            agent.setConnected();
-            primaryStage.close();
-            System.exit(3);
-        });
+        primaryStage.setOnCloseRequest(e ->
+                                       {
+                                           agent.setConnected();
+                                           primaryStage.close();
+                                           System.exit(3);
+                                       });
         setupNumbersAndAgent();
         makePlaceBidButton();
         makeCreateAccountButton();
@@ -438,11 +476,6 @@ public class AgentGUI extends Application {
         primaryStage.setResizable(false);
         primaryStage.show();
     }
-
-    // TODO:
-    /*
-        buttons and drop down box
-     */
 }
 
 

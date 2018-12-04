@@ -40,6 +40,7 @@ public class Auction implements Runnable{
         currentClientID=0;
         bidMaps=new HashMap<>();
         winningClientID=0;
+
         auctionHouse=a;
         item=i;
         time = 0;
@@ -176,6 +177,8 @@ public class Auction implements Runnable{
         }
     }
 
+
+
     /**
      * Gets the current winner of the auction
      * @return An int that is key of bidder that is winning.
@@ -190,6 +193,12 @@ public class Auction implements Runnable{
      */
     public Item getItem(){
         return item;
+    }
+
+    @Override
+    public String toString(){
+        return "Auction Status: "+auctionActive+" Item: "+item+
+                " Bid: "+bidToBeat;
     }
 
     /**

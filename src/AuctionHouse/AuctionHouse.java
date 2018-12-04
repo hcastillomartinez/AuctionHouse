@@ -54,7 +54,7 @@ public class AuctionHouse implements Runnable {
         this.port = Integer.parseInt(port);
         this.serverName = serverName;
         try {
-            bankClient=new Socket("b146-19",4444);
+            bankClient=new Socket("localhost",4444);
             objectOutputStream=
                     new ObjectOutputStream(bankClient.getOutputStream());
             objectInputStream=
