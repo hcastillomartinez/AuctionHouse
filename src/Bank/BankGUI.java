@@ -55,11 +55,8 @@ public class BankGUI extends Application {
      * Updates the observable lists to contain the most recent account information
      */
     void refreshAccountInformation(){
-        agentAccountList.removeAll();
-        agentAccountList.addAll(getAgentAccounts());
-
-        auctionHouseAccountList.removeAll();
-        auctionHouseAccountList.addAll(getHouseAccounts());
+        agentAccountList.setAll(getAgentAccounts());
+        auctionHouseAccountList.setAll(getHouseAccounts());
     }
 
     /**
@@ -68,7 +65,7 @@ public class BankGUI extends Application {
     private ArrayList<Account> getHouseAccounts(){
         ArrayList<Account> accounts = new ArrayList<>();
         for(AuctionInfo house : bank.getAuctionHousesAsList()){
-            Account account = bank.getAccountsAsList().get(house.getAccountNumber());
+            Account account = bank.getAccounts().get(house.getAccountNumber());
             accounts.add(account);
         }
         return accounts;
@@ -80,7 +77,7 @@ public class BankGUI extends Application {
     private ArrayList<Account> getAgentAccounts(){
         ArrayList<Account> accounts = new ArrayList<>();
         for(AgentInfo agent : bank.getAgentsAsList()){
-            Account account = bank.getAccountsAsList().get(agent.getAccountNumber());
+            Account account = bank.getAccounts().get(agent.getAccountNumber());
             accounts.add(account);
         }
         return accounts;

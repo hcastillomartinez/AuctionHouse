@@ -29,8 +29,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Bank implements Runnable {
     private final String NAME = "bank";
     private LinkedBlockingQueue<Message> messages = new LinkedBlockingQueue<>(); //message queue
-    private HashMap<Integer,AgentInfo> agents; //list of agent accounts
-    private HashMap<Integer,AuctionInfo> auctionHouses; //list of auction house accounts
+    private HashMap<Integer,AgentInfo> agents; //mapping of agent account numbers accounts
+    private HashMap<Integer,AuctionInfo> auctionHouses; //mapping of auction house account numbers accounts
     private HashMap<Integer,Account> accounts; //mapping of account numbers to bank accounts
     private HashMap<Integer,ServerThread> clients; //mapping of client number to client threads
     private HashMap<Agent,HashMap<AuctionHouse, Integer>> secretKeys; //todo
@@ -92,7 +92,7 @@ public class Bank implements Runnable {
      * @param type the type of the message
      * @return
      */
-    public synchronized  Message responseToAuctionHouse(Message message,
+    public synchronized  Message responseToAuctionHouse(int clientID,Message message,
                                                         MessageTypes type){
         ArrayList<Object> messageList = message.getMessageList();
         int agentAccountNumber;
@@ -105,7 +105,7 @@ public class Bank implements Runnable {
             case CREATE_ACCOUNT:
                 AuctionInfo auctionInfo = (AuctionInfo) messageList.get(2);
 
-                Account account = makeAccount(auctionInfo.getName(),0,clientNumber); //todo might be a bug if an agent starts a thread and doesn't create an account right away
+                Account account = makeAccount(auctionInfo.getName(),0,clientID); //todo might be a bug if an agent starts a thread and doesn't create an account right away
 
                 addAuctionHouse(auctionInfo,account);
                 gui.refreshAccountInformation();
@@ -150,7 +150,7 @@ public class Bank implements Runnable {
         }
     }
 
-    public synchronized Message responseToAgent(Message message,
+    public synchronized Message responseToAgent(int clientID, Message message,
                                          MessageTypes type) {
         ArrayList<Object> messageList = message.getMessageList();
         int agentAccountNumber;
@@ -162,7 +162,7 @@ public class Bank implements Runnable {
             //creates a bank account for an auction house
             case CREATE_ACCOUNT:
                 Account account = (Account) messageList.get(2);
-                account.setAccountNumber(clientNumber - 1); //todo think of a way to do this differently
+                account.setAccountNumber(clientID); //todo think of a way to do this differently
                 accounts.put(account.getAccountNumber(),account);
 
                 System.out.println(accounts);
@@ -311,6 +311,13 @@ public class Bank implements Runnable {
         agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
     }
 
+    /**
+     * Gets the accounts hashmap
+     */
+    public HashMap<Integer,Account> getAccounts(){
+        return accounts;
+    }
+
 
     /**
      * A nested class that acts as a server for a bank proxy client.
@@ -379,11 +386,11 @@ public class Bank implements Runnable {
 
                     Message response;
                     if(analyzer.analyze(message) == 1){
-                        response = bank.responseToAgent(message,
+                        response = bank.responseToAgent(idNumber,message,
                                                        (MessageTypes) message.getMessageList().get(1));
                     }
                     else{
-                        response = bank.responseToAuctionHouse(message,
+                        response = bank.responseToAuctionHouse(idNumber,message,
                                                               (MessageTypes) message.getMessageList().get(1));
                     }
 
