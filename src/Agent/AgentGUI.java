@@ -1,5 +1,6 @@
 package Agent;
 
+import AuctionHouse.Item;
 import Bank.Account;
 import Bank.AgentInfo;
 import Bank.AuctionInfo;
@@ -7,10 +8,7 @@ import MessageHandling.Message;
 import MessageHandling.MessageTypes;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
@@ -37,6 +35,7 @@ public class AgentGUI extends Application {
     // worker fields
     private static Agent agent;
     private ChoiceBox<String> auctionHouses;
+    private ListView<String> itemsFromHouse = new ListView<>();
 
     // filler variables for the boxes
     private Label firName, lastName, acctBalance, pendingBalanceLabel,
@@ -61,10 +60,10 @@ public class AgentGUI extends Application {
      * Launching the application.
      * @param args for the responses input
      */
-    public static void launch(Agent agent, String...args) {
+    public static void launch(Agent agentRef, String...args) {
         host = args[0];
         port = Integer.parseInt(args[1]);
-        agent = new Agent(host, port);
+        agent = agentRef;
         AgentGUI.launch(AgentGUI.class);
         agent.closeApplicationConnection();
     }
@@ -100,8 +99,10 @@ public class AgentGUI extends Application {
     /**
      * Filling the choice box with the auction house options.
      */
-    private void updateAuctionHouseChoices() {
+    private synchronized void updateAuctionHouseChoices() {
+        agent.sendMessageForUpdates();
         ArrayList<AuctionInfo> temp = agent.getHouseList();
+        auctionHouses.getItems().clear();
         for (AuctionInfo s: temp) {
             auctionHouses.getItems().add(s.getName());
         }
@@ -129,6 +130,12 @@ public class AgentGUI extends Application {
         chooseAuctionHouseButton.setMinHeight(50);
         chooseAuctionHouseButton.setOnAction(e -> {
             setAuctionHouseOnChoice();
+            agent.sendMessageForUpdates();
+            itemsFromHouse.getItems().clear();
+            ArrayList<Item> list = agent.getItemList();
+            for (Item i: list) {
+                itemsFromHouse.getItems().add(i.toString());
+            }
         });
     }
 
@@ -151,24 +158,24 @@ public class AgentGUI extends Application {
             if (!firNameField.getText().isEmpty() &&
                 !lastNameField.getText().isEmpty() &&
                 !acctBalanceField.getText().isEmpty()) {
-                String name
-                        = firNameField.getText() + " " + lastNameField.getText();
+                
+                String nam = firNameField.getText()+" "+lastNameField.getText();
                 Double balance = Double.parseDouble(acctBalanceField.getText());
-                Account account = new Account(name,
-                                              agent.getId(),
-                                              balance,
-                                              balance);
-                AgentInfo agInfo = new AgentInfo(agent.getNAME(),
-                                                 agent.getHostName(),
-                                                 agent.getCurrentAuctionID(),
-                                                 agent.getPortNumber(),
-                                                 agent.getId());
-                agent.getBank().sendAgentMessage(new Message(agent.getNAME(),
-                                                             MessageTypes.CREATE_ACCOUNT,
-                                                             account,
-                                                             agInfo));
+                Account account = new Account(nam, agent.getId(), balance, balance);
+                
+                if (agent.setAccount(account)) {
+                    AgentInfo agInfo = new AgentInfo(agent.getNAME(),
+                                                     agent.getHostName(),
+                                                     agent.getCurrentAuctionID(),
+                                                     agent.getPortNumber(),
+                                                     agent.getId());
+                    agent.getBank().sendAgentMessage(new Message(agent.getNAME(),
+                                                                 MessageTypes.CREATE_ACCOUNT,
+                                                                 account,
+                                                                 agInfo));
+                }
+                
                 pendingField.setText(balance.toString());
-                agent.setAccount(account);
                 firNameField.setEditable(false);
                 lastNameField.setEditable(false);
                 acctBalanceField.setEditable(false);
@@ -204,13 +211,21 @@ public class AgentGUI extends Application {
      * Function to make the select item bid.
      */
     private void makeSelectItemButton() {
-        selectItemButton = new Button("Place Bid");
+        selectItemButton = new Button("Select Item");
         selectItemButton.setTextFill(Color.WHITE);
         selectItemButton.setMaxWidth(175);
         selectItemButton.setMaxHeight(HEIGHT * 0.1 - 5);
         selectItemButton.setBackground(new Background(GREY));
         selectItemButton.setOnAction(e -> {
-            System.out.println("select item");
+            boolean set = false;
+            String temp = itemsFromHouse.getSelectionModel().getSelectedItem();
+            ArrayList<Item> items = agent.getItemList();
+            for (Item i: items) {
+                if (i.toString().equalsIgnoreCase(temp) && !set) {
+                    agent.setItem(i);
+                    set = true;
+                }
+            }
         });
     }
 
@@ -407,7 +422,9 @@ public class AgentGUI extends Application {
         auctionContainer.setSpacing(5);
         auctionContainer.getChildren().addAll(updateButton,
                                               auctionHouses,
-                                              chooseAuctionHouseButton);
+                                              chooseAuctionHouseButton,
+                                              itemsFromHouse,
+                                              selectItemButton);
         // TODO:
         // Come back here to add the auction update button
         // choice box and list of the items

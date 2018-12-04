@@ -72,8 +72,24 @@ public class Agent implements Runnable {
      * @return currentItem selected.
      */
     public Item getItem() { return item; }
-
+    
     /**
+     * Setting the item for the agent.
+     * @param item for the agent
+     */
+    public void setItem(Item item) {
+        this.item = item;
+    }
+    
+    /**
+     * Getting the item list for the specific auction house.
+     * @return itemList for the ah
+     */
+    public ArrayList<Item> getItemList() {
+        return itemList;
+    }
+
+/**
      * Getting the correct auction house proxy to send the message.
      * @param info of the auction house
      * @return auctionHouseProxy to send the messages
@@ -99,7 +115,19 @@ public class Agent implements Runnable {
      * @param auctionInfo house for functionality
      */
     public void setAuctionHouse(AuctionInfo auctionInfo) {
-        this.auctionInfo = auctionInfo;
+        auctionInfo.toString();
+        if (!houseProxyMap.containsKey(auctionInfo)) {
+            AuctionHouseProxy proxy = new AuctionHouseProxy(auctionInfo
+                                                                .getIPAddress(),
+                                                            auctionInfo
+                                                                .getPortNumber(),
+                                                            this);
+            houseProxyMap.put(auctionInfo, proxy);
+            aHProxy = houseProxyMap.get(auctionInfo);
+        } else {
+            aHProxy = houseProxyMap.get(auctionInfo);
+            aHProxy.sendMessage(new Message(NAME, MessageTypes.GET_ITEMS));
+        }
     }
 
     /**
@@ -166,7 +194,15 @@ public class Agent implements Runnable {
      * Setting the account of the agent.
      * @param account for the agent
      */
-    public void setAccount(Account account) { this.account = account; }
+    public boolean setAccount(Account account) {
+        synchronized(account) {
+            if (this.account == null) {
+                this.account = account;
+                return true;
+            }
+            return false;
+        }
+    }
 
     /**
      * Setting the connected status to not connected.
@@ -208,17 +244,6 @@ public class Agent implements Runnable {
     }
     
     /**
-     * Getting the user input for making a bid.
-     * @return bid from the user
-     */
-    private Bid makeBid() {
-        System.out.println("amount to bid");
-        double amount = scanner.nextDouble();
-        System.out.println();
-        return new Bid(item, getId(), amount);
-    }
-    
-    /**
      * Function to add to the list of messageQueue.
      */
     public void addMessage(Message message) {
@@ -226,19 +251,6 @@ public class Agent implements Runnable {
             messageQueue.put(message);
         } catch (InterruptedException ie) {
             ie.printStackTrace();
-        }
-    }
-    
-    /**
-     * Function to handle rebidding.
-     */
-    private void reBid(Message m) {
-        MessageTypes reject = (MessageTypes) m.getMessageList().get(1);
-        System.out.println(reject.getMessage()+ ". New bid?(y/n)");
-        String answer = scanner.next();
-        
-        if (answer.contains("y")) {
-            aHProxy.sendMessage(new Message(NAME, MessageTypes.BID, makeBid()));
         }
     }
     
@@ -308,14 +320,16 @@ public class Agent implements Runnable {
                 System.out.println(houseList);
                 break;
             case BID_REJECTED:
-                reBid(message);
+                // TODO:
+                // remove the bid from the current bids
                 break;
             case BID_ACCEPTED:
                 response = new Message(NAME, MessageTypes.THANKS);
                 respondToSender(sender, response, getAHProxy(auctionInfo));
                 break;
             case OUT_BID:
-                reBid(message);
+                //TODO:
+                // remove the bid from the current bids
                 break;
             case ITEMS:
                 if (list.get(2).equals(ArrayList.class)) {
@@ -339,11 +353,15 @@ public class Agent implements Runnable {
      * Function to send messages to get updates for the auction houses and the
      * bank account information.
      */
-    private void sendMessageForUpdates() {
+    public void sendMessageForUpdates() {
         bank.sendAgentMessage(new Message(NAME,
                                           MessageTypes.GET_HOUSES));
         bank.sendAgentMessage(new Message(NAME,
                                           MessageTypes.ACCOUNT_INFO));
+        if (aHProxy != null) {
+            aHProxy.sendMessage(new Message(NAME,
+                                            MessageTypes.GET_ITEMS));
+        }
     }
 
     /**
@@ -359,6 +377,21 @@ public class Agent implements Runnable {
     /*                                                               */
     /*****************************************************************/
 
+    /**
+     * Overriding toString() to print out the class.
+     * @return string for the class
+     */
+    @Override
+    public String toString() {
+        return "Agent{" + "NAME='" + NAME +
+            '\'' +
+            ", id=" + id +
+            ", accountNumber=" + accountNumber +
+            ", account=" + account +
+            ", aHProxy=" + aHProxy +
+            ", bank=" + bank + '}';
+    }
+    
     /**
      * Overrides run to perform specific tasks.
      */
@@ -387,7 +420,8 @@ public class Agent implements Runnable {
      * Main method to start the program for the user/agent.
      */
     public static void main(String[] args) throws IOException {
-        AgentGUI.launch(args);
+        Agent agent = new Agent(args[0], Integer.parseInt(args[1]));
+        AgentGUI.launch(agent, args);
     }
 }
 

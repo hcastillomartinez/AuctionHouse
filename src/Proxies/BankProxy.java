@@ -10,9 +10,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * Proxies.BankProxy.java is the class that is the mediary between the Bank and the
- * Agent. The class provides higher level functionality to interact with the
- * bank.
+ * Proxies.BankProxy.java is the class that is the intermediary between the
+ * Bank and the Agent. The class provides higher level functionality to
+ * interact with the bank.
  * @author Danan High, 11/21/2018
  */
 public class BankProxy implements Runnable {
@@ -118,7 +118,7 @@ public class BankProxy implements Runnable {
                         }
                     }
                 } catch (EOFException eof) {
-                    closeSocket();
+                    closeConnections();
                     break;
                 } catch (ClassNotFoundException cnf) {
                     cnf.printStackTrace();

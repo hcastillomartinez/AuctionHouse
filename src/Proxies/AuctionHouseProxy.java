@@ -12,9 +12,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Proxies.AuctionHouseProxy is the proxy for the auction house class. The proxy
- * provides high level functionality as a mediary between the actual auction
- * house and the agent.
- * Danan High, 11/15/2018
+ * provides high level functionality as a intermediary between the actual
+ * auction house and the agent.
+ * @author Danan High, 11/15/2018
  */
 public class AuctionHouseProxy implements Runnable {
 
@@ -45,6 +45,7 @@ public class AuctionHouseProxy implements Runnable {
      * Setting up the input and output streams for the client connection.
      */
     private void setupInputAndOutputStreams() {
+        System.out.println("here");
         try {
             if (client != null) {
                 out = new ObjectOutputStream(client.getOutputStream());
@@ -84,6 +85,25 @@ public class AuctionHouseProxy implements Runnable {
     }
     
     /**
+     * Function to stop the thread.
+     */
+    private void closeThread() {
+        connected = !connected;
+    }
+    
+    /**
+     * Function to close the connections.
+     */
+    private void closeSocket() {
+        try {
+            out.close();
+            in.close();
+        } catch (IOException ie) {
+            ie.printStackTrace();
+        }
+    }
+    
+    /**
      * Overriding the run method to perform specialized tasks.
      */
     @Override
@@ -92,13 +112,13 @@ public class AuctionHouseProxy implements Runnable {
         try {
             Message response = null, messageInput = null;
             
-            do {
+            while (connected) {
                 try {
                     messageInput = messageQueue.take();
                     if (messageInput != null) {
                         out.writeObject(messageInput);
                     }
-                    
+        
                     // testing code to read from the server
                     response = (Message) in.readObject();
                     if (agent != null) {
@@ -107,17 +127,15 @@ public class AuctionHouseProxy implements Runnable {
                         }
                     }
                 } catch (EOFException eof) {
-                    agent.setConnected();
-                    out.close();
-                    in.close();
-                    System.out.println("Server has been closed");
+                    closeThread();
                     break;
                 } catch (ClassNotFoundException cnf) {
                     cnf.printStackTrace();
                 } catch (InterruptedException ie) {
                     ie.printStackTrace();
                 }
-            } while (connected);
+            }
+            closeSocket();
         } catch (IOException io) {
             io.printStackTrace();
         }

@@ -20,9 +20,9 @@ import java.util.HashMap;
 public class TestBank implements Runnable {
     
     private ArrayList<Agent> agents; //list of agent accounts
-    private ArrayList<String> auctionHouses; //list of auction house accounts
+    private ArrayList<AuctionInfo> auctionHouses; //list of auction house
     private ArrayList<Account> accounts;
-    private HashMap<Integer, Account> userAccounts;
+    HashMap<AgentInfo, Account> userAccounts;
     private int currentAccountNumber = 0;
     static private String address;
     static private int portNumber;
@@ -58,7 +58,6 @@ public class TestBank implements Runnable {
         }
         
         TestBank bank = new TestBank(address, portNumber);
-        
         (new Thread(bank)).start();
     }
     
@@ -140,7 +139,7 @@ public class TestBank implements Runnable {
     /**
      * Gets list of auction houses for a agent.
      */
-    public ArrayList<String> getAuctionHouses() {
+    public ArrayList<AuctionInfo> getAuctionHouses() {
         return auctionHouses;
     }
     
@@ -240,28 +239,34 @@ public class TestBank implements Runnable {
                                            9);
                     break;
                 case REMOVE_FUNDS:
-                    int accountID = (int) list.get(2);
-                    double withdraw = (double) list.get(3);
-                    
-                    for (Integer i: bank.userAccounts.keySet()) {
-                        if (accountID == i) {
-                            Account account = bank.userAccounts.get(i);
-                            account.setBalance(account.getBalance() - withdraw);
-                        }
-                    }
+//                    int accountID = (int) list.get(2);
+//                    double withdraw = (double) list.get(3);
+//
+//                    for (Agent i: bank.userAccounts.keySet()) {
+//                        if (accountID == i) {
+//                            Account account = bank.userAccounts.get(i);
+//                            account.setBalance(account.getBalance() - withdraw);
+//                        }
+//                    }
                     response = new Message(NAME,
                                            MessageTypes.CONFIRMATION);
                     break;
                 case CREATE_ACCOUNT:
                     System.out.println(message);
-                    Account account = (Account) list.get(2);
-                    if (!bank.userAccounts.containsKey(account.getAccountNumber())) {
-                        bank.userAccounts.put(account.getAccountNumber(), account);
-                        response = new Message(NAME,
-                                               MessageTypes.CONFIRMATION);
+                    String name = (String) message.getMessageList().get(0);
+                    if (name.equalsIgnoreCase("auction house")) {
+                        AuctionInfo ai = (AuctionInfo) message.getMessageList()
+                                                              .get(2);
+                        if (!bank.getAuctionHouses().contains(ai)) {
+                            bank.getAuctionHouses().add(ai);
+                        }
                     } else {
-                        response = new Message(NAME,
-                                               MessageTypes.ACCOUNT_EXISTS);
+                        AgentInfo ai = (AgentInfo) message.getMessageList()
+                                                          .get(3);
+                        Account a = (Account) message.getMessageList().get(2);
+                        if (!bank.userAccounts.containsKey(ai)) {
+                            bank.userAccounts.put(ai, a);
+                        }
                     }
                     
                     break;
