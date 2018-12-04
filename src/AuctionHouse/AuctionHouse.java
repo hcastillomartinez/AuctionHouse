@@ -45,6 +45,7 @@ public class AuctionHouse implements Runnable {
         agentCount = 0;
         auctionOpen = true;
         safeToClose=true;
+        account=new Account(type,0,0,0);
         messageAnalyzer=new HouseMessageAnalyzer();
         makeItems = new MakeItems();
         messages = new LinkedBlockingQueue<>();
@@ -415,6 +416,7 @@ public class AuctionHouse implements Runnable {
     public void sendToServer(int ID,Message m){
         for(Server server:serverThreads){
             if(ID==server.getID()){
+                System.out.println("Sending to Agent: "+m);
                 server.placeMessage(m);
             }
         }

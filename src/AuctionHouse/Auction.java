@@ -221,7 +221,7 @@ public class Auction implements Runnable{
         //removes item from its list
         auctionHouse.getItemList().remove(item);
 
-        System.out.println("winner: "+ currentWinnerID);
+        System.out.println("Agent winner: "+ currentWinnerID);
     }
 
 //    public static void main(String[] args)throws Exception {
