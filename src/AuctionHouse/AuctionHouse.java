@@ -369,11 +369,12 @@ public class AuctionHouse implements Runnable {
         @Override
         public void run()  {
             while(!client.isConnected()){
+                System.out.println("witing");
                 try{
                     Message m = (Message) in.readObject();
                     if(m != null){
                         addID(m);
-                        System.out.println("Receiving: "+m);
+                        System.out.println("Receiving from "+ ID+" "+m);
                         auctionHouse.placeMessageForAnalyzing(m);
                     }
                 }catch(EOFException i){
@@ -410,7 +411,6 @@ public class AuctionHouse implements Runnable {
     public void sendToServer(int ID,Message m){
         for(Server server:serverThreads){
             if(ID==server.getID()){
-                System.out.println("Sending to Agent: "+m);
                 server.placeMessage(m);
             }
         }
@@ -456,9 +456,12 @@ public class AuctionHouse implements Runnable {
             try {
                 System.out.println("waiting for agents");
                 Socket agent = serverSocket.accept();
+                System.out.println("AGENT: "+agentCount);
                 agentCount++;
                 Server server = new Server(agent,agentCount,this);
                 serverThreads.add(server);
+                Thread t =new Thread(server);
+                t.start();
             }catch(IOException i){
                 i.printStackTrace();
             }
