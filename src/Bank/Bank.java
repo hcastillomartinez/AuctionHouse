@@ -75,6 +75,7 @@ public class Bank implements Runnable {
 
                 Socket client = server.accept();
                 ServerThread bankClient = new ServerThread(client,clientNumber,this);
+                System.out.println("clientNumber is " + clientNumber + "  id number is " + bankClient.idNumber);
                 clientNumber++;
                 getClients().put(bankClient.idNumber,bankClient);
                 (new Thread(bankClient)).start();
@@ -104,10 +105,13 @@ public class Bank implements Runnable {
             //creates a bank account for an auction house
             case CREATE_ACCOUNT:
                 AuctionInfo auctionInfo = (AuctionInfo) messageList.get(2);
+                auctionInfo.setAccountNumber(clientID);
+                auctionHouses.put(auctionInfo.getAccountNumber(),auctionInfo);
 
-                Account account = makeAccount(auctionInfo.getName(),0,clientID); //todo might be a bug if an agent starts a thread and doesn't create an account right away
+                //Account account = makeAccount(auctionInfo.getName(),0,clientID);
+                Account account = new Account(auctionInfo.getName(),clientID,0,0);
+                accounts.put(account.getAccountNumber(),account);
 
-                addAuctionHouse(auctionInfo,account);
                 gui.refreshAccountInformation();
                 return new Message(NAME, MessageTypes.ACCOUNT_INFO,account);
 
@@ -386,11 +390,11 @@ public class Bank implements Runnable {
 
                     Message response;
                     if(analyzer.analyze(message) == 1){
-                        response = bank.responseToAgent(idNumber,message,
+                        response = bank.responseToAgent(this.idNumber,message,
                                                        (MessageTypes) message.getMessageList().get(1));
                     }
                     else{
-                        response = bank.responseToAuctionHouse(idNumber,message,
+                        response = bank.responseToAuctionHouse(this.idNumber,message,
                                                               (MessageTypes) message.getMessageList().get(1));
                     }
 

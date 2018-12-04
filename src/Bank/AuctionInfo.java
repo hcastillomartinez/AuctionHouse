@@ -42,6 +42,8 @@ public class AuctionInfo implements Serializable{
         return accountNumber;
     }
 
+    public int setAccountNumber(int accountNumber){ return this.accountNumber = accountNumber; }
+
     /**
      * Gets the id of the house
      * @return

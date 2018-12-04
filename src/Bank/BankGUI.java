@@ -56,7 +56,10 @@ public class BankGUI extends Application {
      */
     void refreshAccountInformation(){
         agentAccountList.setAll(getAgentAccounts());
+        System.out.println("agents   " + agentAccountList);
         auctionHouseAccountList.setAll(getHouseAccounts());
+        System.out.println("houses   " + auctionHouseAccountList);
+
     }
 
     /**
