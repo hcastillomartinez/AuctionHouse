@@ -70,7 +70,7 @@ public class BankGUI extends Application {
 
     ArrayList<Account> getHouseAccounts(){
         ArrayList<Account> accounts = new ArrayList<>();
-        for(AuctionInfo house : bank.getAuctionHouses()){
+        for(AuctionInfo house : bank.getAuctionHousesAsList()){
 
             Account account = bank.getAccounts().get(house.getAccountNumber());
             accounts.add(account);
@@ -80,7 +80,7 @@ public class BankGUI extends Application {
 
     ArrayList<Account> getAgentAccounts(){
         ArrayList<Account> accounts = new ArrayList<>();
-        for(AgentInfo agent : bank.getAgents()){
+        for(AgentInfo agent : bank.getAgentsAsList()){
             Account account = bank.getAccounts().get(agent.getAccountNumber());
             accounts.add(account);
         }

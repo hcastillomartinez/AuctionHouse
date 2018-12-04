@@ -104,7 +104,8 @@ public class AgentGUI extends Application {
         agent.getBank().sendAgentMessage(new Message(agent.getNAME(),
                                                      MessageTypes.GET_HOUSES));
         ArrayList<AuctionInfo> temp = agent.getHouseList();
-        
+        auctionHouses.getItems().add("Choose Auction House");
+        auctionHouses.setValue("Choose Auction House");
         for (AuctionInfo s: temp) {
             auctionHouses.getItems().add(s.toString());
         }
@@ -125,7 +126,6 @@ public class AgentGUI extends Application {
      * Function to make the the values in the auction house match the selection.
      */
     private void addValuesToAucGui() {
-        System.out.println(agent.getAuctionInfo() + " AH info in the gui");
         if (agent.getAuctionInfo() != null) {
             ahField.setText(agent.getAuctionInfo().getName());
             idField.setText("" + agent.getAuctionInfo().getAuctionID() + "");
@@ -151,13 +151,13 @@ public class AgentGUI extends Application {
             if (setAuctionHouseOnChoice()) {
                 itemsFromHouse.getItems().clear();
                 ArrayList<Item> list = agent.getItemList();
-    
+                System.out.println(list);
+                
                 for (Item i: list) {
                     itemsFromHouse.getItems().add(i.toString());
                 }
                 addValuesToAucGui();
             }
-            
         });
     }
 
