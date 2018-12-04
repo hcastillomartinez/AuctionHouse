@@ -376,6 +376,7 @@ public class AuctionHouse implements Runnable {
                     Message m = (Message) in.readObject();
                     if(m != null){
                         addID(m);
+                        System.out.println("Receiving: "+m);
                         auctionHouse.placeMessageForAnalyzing(m);
                     }
                 }catch(EOFException i){
@@ -412,6 +413,7 @@ public class AuctionHouse implements Runnable {
     public void sendToServer(int ID,Message m){
         for(Server server:serverThreads){
             if(ID==server.getID()){
+                System.out.println("Sending: "+m);
                 server.placeMessage(m);
             }
         }
@@ -442,6 +444,7 @@ public class AuctionHouse implements Runnable {
      */
     public void sendToBank(Object m){
         try{
+            System.out.println("Sending: "+m);
             objectOutputStream.writeObject(m);
         }catch(IOException i){
             i.printStackTrace();
