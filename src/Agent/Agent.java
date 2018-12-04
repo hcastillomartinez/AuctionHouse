@@ -86,7 +86,6 @@ public class Agent implements Runnable {
      * @return itemList for the ah
      */
     public ArrayList<Item> getItemList() {
-        System.out.println("itemList = " + itemList);
         return itemList;
     }
 
@@ -116,7 +115,7 @@ public class Agent implements Runnable {
      * @param auctionInfo house for functionality
      */
     public void setAuctionHouse(AuctionInfo auctionInfo) {
-        auctionInfo.toString();
+        System.out.println("AuctionInfo = " + auctionInfo.getPortNumber());
         if (!houseProxyMap.containsKey(auctionInfo)) {
             AuctionHouseProxy proxy = new AuctionHouseProxy(auctionInfo
                                                                 .getIPAddress(),
@@ -135,7 +134,7 @@ public class Agent implements Runnable {
      * Getting the house list from the agent.
      * @return list of the houses
      */
-    public ArrayList<AuctionInfo> getHouseList() {
+    public synchronized ArrayList<AuctionInfo> getHouseList() {
         return houseList;
     }
 
@@ -319,7 +318,7 @@ public class Agent implements Runnable {
                 break;
             case HOUSES:
                 houseList = (ArrayList<AuctionInfo>) list.get(2);
-                System.out.println(houseList);
+                System.out.println("HouseList = " + houseList);
                 break;
             case BID_REJECTED:
                 // TODO:
@@ -334,7 +333,7 @@ public class Agent implements Runnable {
                 // remove the bid from the current bids
                 break;
             case GET_ITEMS:
-                System.out.println(list.get(2));
+                System.out.println("GetItems = " + list.get(2));
                 break;
             case ACCOUNT_INFO:
                 account = (Account) list.get(2);
