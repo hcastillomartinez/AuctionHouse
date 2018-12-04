@@ -45,6 +45,7 @@ public class AuctionHouse implements Runnable {
         agentCount = 0;
         auctionOpen = true;
         safeToClose=true;
+        messageAnalyzer=new HouseMessageAnalyzer();
         makeItems = new MakeItems();
         messages = new LinkedBlockingQueue<>();
         itemList = makeItems.getItems(Integer.parseInt(type));
@@ -201,6 +202,7 @@ public class AuctionHouse implements Runnable {
      * @param m Message that will be analyzed and responded to.
      */
     private synchronized void doAction(Message m){
+        System.out.println(m);
         int action = messageAnalyzer.analyzeMessage(m);
         if(action == 1){
            int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
@@ -368,8 +370,8 @@ public class AuctionHouse implements Runnable {
 
         @Override
         public void run()  {
-            while(!client.isConnected()){
-                System.out.println("witing");
+            System.out.println("enter");
+            while(true){
                 try{
                     Message m = (Message) in.readObject();
                     if(m != null){
@@ -386,6 +388,7 @@ public class AuctionHouse implements Runnable {
                     System.out.println(i);
                 }
             }
+//            System.out.println("exit");
         }
     }
 
