@@ -30,7 +30,7 @@ public class Bank implements Runnable {
     static private String address;
     static private int portNumber;
 
-    //private BankGUI gui;
+    static BankGUI gui;
 
     
     /**
@@ -54,6 +54,8 @@ public class Bank implements Runnable {
      *
      */
     public Bank(String address, int portNumber){
+        this.address = address;
+        this.portNumber = portNumber;
         agents = new HashMap<Integer,AgentInfo>();
         auctionHouses = new HashMap<Integer,AuctionInfo>();
         accounts = new HashMap<Integer,Account>();
@@ -62,11 +64,7 @@ public class Bank implements Runnable {
 
 
     /**
-     * Pseudocode
-     * while(true)
-     *      message = messageQueue.take()
-     *      analyze message
-     *      carry out action specified by message
+     *
      */
     @Override
     public void run(){
@@ -105,7 +103,7 @@ public class Bank implements Runnable {
                 Account account = makeAccount(auctionInfo.getName(),0,clientNumber); //todo might be a bug if an agent starts a thread and doesn't create an account right away
 
                 addAuctionHouse(auctionInfo,account);
-
+                this.gui.refreshAccountInformation();
                 return new Message(NAME, MessageTypes.ACCOUNT_INFO,account);
 
             case ACCOUNT_INFO:
@@ -125,6 +123,7 @@ public class Bank implements Runnable {
                 }catch(Exception e){
                     e.printStackTrace();
                 }
+                //todo refresh gui here
                 return new Message(NAME,MessageTypes.CONFIRMATION);
 
             case UNBLOCK_FUNDS:
@@ -139,6 +138,8 @@ public class Bank implements Runnable {
                 }catch(Exception e){
                     e.printStackTrace();
                 }
+                //todo refresh gui here
+                //return message here
 
 
             default: return new Message(NAME,MessageTypes.THANKS);
@@ -158,14 +159,21 @@ public class Bank implements Runnable {
 
             case CREATE_ACCOUNT:
                 //add agent to list
+                System.out.println(accounts);
 
                 Account account = (Account) messageList.get(2);
+                account.setAccountNumber(clientNumber - 1); //todo think of a way to do this differently
                 accounts.put(account.getAccountNumber(),account);
+
+                System.out.println(accounts);
 
 
                 AgentInfo agent = (AgentInfo) messageList.get(3);
+                agent.setAccountNumber(account.getAccountNumber());
                 addAgent(agent,account);
 
+                this.gui.refreshAccountInformation();
+                System.out.println(this.accounts);
                 return new Message(NAME,MessageTypes.ACCOUNT_INFO,account);
 
             //return list of HouseInfo objects
@@ -183,6 +191,7 @@ public class Bank implements Runnable {
                             MessageTypes.ACCOUNT_INFO,
                             accounts.get(agentAccountNumber)));
                 }catch(Exception e){ e.printStackTrace();}
+                //todo refresh gui here
                 return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(agentAccountNumber));
 
             default: return new Message(NAME,MessageTypes.THANKS);

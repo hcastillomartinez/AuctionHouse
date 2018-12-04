@@ -47,4 +47,8 @@ public class AgentInfo implements Serializable {
     public int getAccountNumber() {
         return accountNumber;
     }
+
+    public synchronized void setAccountNumber(int accountNumber) {
+        this.accountNumber = accountNumber;
+    }
 }

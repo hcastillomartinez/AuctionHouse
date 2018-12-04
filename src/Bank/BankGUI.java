@@ -7,8 +7,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TitledPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
@@ -40,37 +42,30 @@ public class BankGUI extends Application {
     private ListView<Account> agentAccountsListView;
     private ListView<Account> auctionHouseAccountsListView;
 
+    //titled panes for accounts
+    private TitledPane agentsPane;
+    private TitledPane housesPane;
+
     private final Background WHITE = new Background(new BackgroundFill(Color.WHITE,
                                                                   null,
                                                                  null));
 
     public BankGUI(){
         mainPane = new Pane();
-        //for debugging
-        mainPane.setBackground(WHITE);
 
-        //initialize ObservableLists
-        agentAccountList = FXCollections.observableArrayList(new ArrayList<Account>());
-        auctionHouseAccountList = FXCollections.observableArrayList(new ArrayList<Account>());
+        initializeObservableLists();
+        initializeListViews();
+        initializeTitledPanes();
 
-        //initialize listviews todo move to methods
-        agentAccountsListView = new ListView<>(agentAccountList);
-        agentAccountsListView.setEditable(true);
-        agentAccountsListView.setLayoutX(0);
-        agentAccountsListView.setLayoutY(0);
+        mainPane.getChildren().addAll(agentsPane, housesPane);
+    }
 
-        auctionHouseAccountsListView = new ListView<>(auctionHouseAccountList);
-        auctionHouseAccountsListView.setEditable(true);
-        auctionHouseAccountsListView.setLayoutX(WIDTH / 2);
-        auctionHouseAccountsListView.setLayoutY(0);
+    void refreshAccountInformation(){
+        agentAccountList.removeAll();
+        agentAccountList.addAll(getAgentAccounts());
 
-        mainPane.getChildren().addAll(agentAccountsListView,auctionHouseAccountsListView);
-
-
-
-
-
-
+        auctionHouseAccountList.removeAll();
+        auctionHouseAccountList.addAll(getHouseAccounts());
     }
 
     ArrayList<Account> getHouseAccounts(){
@@ -91,6 +86,37 @@ public class BankGUI extends Application {
         return accounts;
     }
 
+    private void initializeTitledPanes(){
+        agentsPane = new TitledPane("Agent Accounts",agentAccountsListView);
+        agentsPane.setPrefSize(WIDTH / 2,HEIGHT);
+        agentsPane.setLayoutX(0);
+        agentsPane.setLayoutY(0);
+
+        housesPane = new TitledPane("Auction House Accounts",auctionHouseAccountsListView);
+        housesPane.setPrefSize(WIDTH / 2,HEIGHT);
+        housesPane.setLayoutX(WIDTH / 2);
+        housesPane.setLayoutY(0);
+
+
+    }
+
+    private  void initializeListViews(){
+        agentAccountsListView = new ListView<>(agentAccountList);
+        agentAccountsListView.setEditable(true);
+        agentAccountsListView.setLayoutX(0);
+        agentAccountsListView.setLayoutY(0);
+
+        auctionHouseAccountsListView = new ListView<>(auctionHouseAccountList);
+        auctionHouseAccountsListView.setEditable(true);
+        agentAccountsListView.setLayoutX(0);
+        agentAccountsListView.setLayoutY(0);
+    }
+
+    private void initializeObservableLists(){
+        agentAccountList = FXCollections.observableArrayList();
+        auctionHouseAccountList = FXCollections.observableArrayList();
+    }
+
     /**
      * Launching the application.
      * @param args for the responses input
@@ -100,8 +126,8 @@ public class BankGUI extends Application {
         String address;
         int portNumber;
         if(args.length >= 1){
-             portNumber = Integer.parseInt(args[1]);
              address = args[0];
+             portNumber = Integer.parseInt(args[1]);
         }
         else{
             System.out.println("Error: Invalid program arguments. The first argument must be the bank port number.");
@@ -113,7 +139,6 @@ public class BankGUI extends Application {
         bankThread.start();
 
         BankGUI.launch(BankGUI.class);
-        //bank.closeApplicationConnection();
     }
 
     /**
@@ -122,7 +147,7 @@ public class BankGUI extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         BankGUI gui = new BankGUI();
-
+        bank.gui = gui;
 
         Scene scene = new Scene(gui.mainPane);
         primaryStage.setTitle("Bank");
@@ -130,7 +155,6 @@ public class BankGUI extends Application {
         primaryStage.setResizable(false);
         primaryStage.show();
 
-        System.out.println("here");
     }
 
 }

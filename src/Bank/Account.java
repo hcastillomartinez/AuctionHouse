@@ -29,19 +29,6 @@ public class Account implements Serializable{
         this.pendingBalance = pendingBalance;
     }
 
-    /**
-     * An overridden toString method for debugging purposes.
-     * @return
-     */
-    @Override
-    public synchronized String toString() {
-        return "Account{name="+ name +
-                ", accountNumber=" + accountNumber +
-                ", balance=" + balance +
-                ", pendingBalance=" + pendingBalance +
-                '}';
-    }
-
 
     /*****************************************/
     /**synchronized getters and setters here**/
@@ -66,7 +53,25 @@ public class Account implements Serializable{
         return accountNumber;
     }
 
+    public synchronized void setAccountNumber(int number) {
+        this.accountNumber = number;
+    }
+
+
     public String getName() {
         return name;
+    }
+
+    /**
+     * An overridden toString method for debugging purposes.
+     *
+     * @return
+     */
+    @Override
+    public String toString() {
+        return "accountNumber=" + accountNumber +
+                ", name='" + name + '\'' +
+                ", balance=" + balance +
+                ", pendingBalance=" + pendingBalance;
     }
 }
