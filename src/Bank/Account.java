@@ -1,7 +1,5 @@
 package Bank;
 
-import Agent.Agent;
-
 import java.io.Serializable;
 
 /**
@@ -33,39 +31,65 @@ public class Account implements Serializable{
     /*****************************************/
     /**synchronized getters and setters here**/
     /*****************************************/
+
+    /**
+     * Gets the balance of the account
+     * @return
+     */
     public synchronized double getBalance() {
         return balance;
     }
 
+    /**
+     * Sets the balance of the account
+     * @param balance
+     */
     public synchronized void setBalance(double balance) {
         this.balance = balance;
     }
 
+    /**
+     * Gets the pending balance of the account
+     * @return
+     */
     public synchronized double getPendingBalance() {
         return pendingBalance;
     }
 
+    /**
+     * Sets the pending balance of the account
+     * @param pendingBalance
+     */
     public synchronized void setPendingBalance(double pendingBalance) {
         this.pendingBalance = pendingBalance;
     }
 
+    /**
+     * Gets the account number
+     * @return
+     */
     public Integer getAccountNumber() {
         return accountNumber;
     }
 
+    /**
+     * Sets the account number
+     * @param number
+     */
     public synchronized void setAccountNumber(int number) {
         this.accountNumber = number;
     }
 
-
+    /**
+     * Gets the name of the account owner
+     * @return
+     */
     public String getName() {
         return name;
     }
 
     /**
-     * An overridden toString method for debugging purposes.
-     *
-     * @return
+     * An overridden toString method for debugging and display purposes.
      */
     @Override
     public String toString() {

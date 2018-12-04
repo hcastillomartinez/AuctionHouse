@@ -1,5 +1,5 @@
-# Project: NAME OF PROJECT
-## Student(s):  Name(s)
+# Project: Auction House
+## Student(s): Danan High, Hector Castillo-Martinez, Daniel Miller
 
 ## Introduction
 Generally describe the project/problem you are solving.
@@ -35,8 +35,18 @@ If you have tests, then explain how they work and how to use them.
 
 
 ## Daniel's Todo's
-Fix lookup of server threads
-    make client number and account number the same value
-When I create an account, I am assuming that agents and auction houses will send an
-    AgentInfo or AuctionInfo object to bank.
+Deal with closing of accounts. New message type?
+Issue with unsynchronized bidding and blocking of funds:
+    Solutions: Agent blocks funds in its copy of account after every bid
+    
+    Comments Completed:
+        All
+        
+    Class Diagrams todo:
+        Bank
+        BankGUI
+        Account
+        AgentInfo
+        AuctionInfo    
+        
     

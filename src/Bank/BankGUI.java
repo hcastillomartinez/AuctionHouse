@@ -1,32 +1,24 @@
 package Bank;
 
-import Agent.Agent;
-import Agent.AgentGUI;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TitledPane;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
 
 /**
+ * The GUI for Bank.
  * @author Daniel Miller
  */
 public class BankGUI extends Application {
     Pane mainPane;
-    static Bank bank;
-
-    private final BackgroundFill BLUE
-            = new BackgroundFill(Color.BLUE, null, null);//todo remove
+    static Bank bank; //reference to the static bank
 
     // final variables
     private final double WIDTH
@@ -34,22 +26,21 @@ public class BankGUI extends Application {
     private final double HEIGHT
             = Screen.getPrimary().getBounds().getHeight() * 0.75;
 
+    //observable lists for agent and auction house bank accounts
     private ObservableList<Account> agentAccountList = FXCollections.observableArrayList();
     private ObservableList<Account> auctionHouseAccountList = FXCollections.observableArrayList();
-
 
     //list views for displaying agent and auction house bank accounts
     private ListView<Account> agentAccountsListView;
     private ListView<Account> auctionHouseAccountsListView;
 
-    //titled panes for accounts
+    //titled panes to display accounts
     private TitledPane agentsPane;
     private TitledPane housesPane;
 
-    private final Background WHITE = new Background(new BackgroundFill(Color.WHITE,
-                                                                  null,
-                                                                 null));
-
+    /**
+     * Constructor for BankGUI
+     */
     public BankGUI(){
         mainPane = new Pane();
 
@@ -60,6 +51,9 @@ public class BankGUI extends Application {
         mainPane.getChildren().addAll(agentsPane, housesPane);
     }
 
+    /**
+     * Updates the observable lists to contain the most recent account information
+     */
     void refreshAccountInformation(){
         agentAccountList.removeAll();
         agentAccountList.addAll(getAgentAccounts());
@@ -68,24 +62,33 @@ public class BankGUI extends Application {
         auctionHouseAccountList.addAll(getHouseAccounts());
     }
 
-    ArrayList<Account> getHouseAccounts(){
+    /**
+     * @return a list of all auction house bank accounts
+     */
+    private ArrayList<Account> getHouseAccounts(){
         ArrayList<Account> accounts = new ArrayList<>();
-        for(AuctionInfo house : bank.getAuctionHouses()){
-            Account account = bank.getAccounts().get(house.getAccountNumber());
+        for(AuctionInfo house : bank.getAuctionHousesAsList()){
+            Account account = bank.getAccountsAsList().get(house.getAccountNumber());
             accounts.add(account);
         }
         return accounts;
     }
 
-    ArrayList<Account> getAgentAccounts(){
+    /**
+     * @return a list of all agent bank accounts
+     */
+    private ArrayList<Account> getAgentAccounts(){
         ArrayList<Account> accounts = new ArrayList<>();
-        for(AgentInfo agent : bank.getAgents()){
-            Account account = bank.getAccounts().get(agent.getAccountNumber());
+        for(AgentInfo agent : bank.getAgentsAsList()){
+            Account account = bank.getAccountsAsList().get(agent.getAccountNumber());
             accounts.add(account);
         }
         return accounts;
     }
 
+    /**
+     * Initializes the two titled panes used in the GUI.
+     */
     private void initializeTitledPanes(){
         agentsPane = new TitledPane("Agent Accounts",agentAccountsListView);
         agentsPane.setPrefSize(WIDTH / 2,HEIGHT);
@@ -96,10 +99,11 @@ public class BankGUI extends Application {
         housesPane.setPrefSize(WIDTH / 2,HEIGHT);
         housesPane.setLayoutX(WIDTH / 2);
         housesPane.setLayoutY(0);
-
-
     }
 
+    /**
+     * Initializes the two list views used by the GUI.
+     */
     private  void initializeListViews(){
         agentAccountsListView = new ListView<>(agentAccountList);
         agentAccountsListView.setEditable(true);
@@ -112,14 +116,17 @@ public class BankGUI extends Application {
         agentAccountsListView.setLayoutY(0);
     }
 
+    /**
+     * Initializes the two observable lists used by the GUI
+     */
     private void initializeObservableLists(){
         agentAccountList = FXCollections.observableArrayList();
         auctionHouseAccountList = FXCollections.observableArrayList();
     }
 
     /**
-     * Launching the application.
-     * @param args for the responses input
+     * Launches the application.
+     * @param args IP Address and Port Number
      */
     public static void launch(String...args) {
 
@@ -130,7 +137,7 @@ public class BankGUI extends Application {
              portNumber = Integer.parseInt(args[1]);
         }
         else{
-            System.out.println("Error: Invalid program arguments. The first argument must be the bank port number.");
+            System.out.println("Error: Invalid program arguments.");
             return;
         }
 
@@ -154,7 +161,5 @@ public class BankGUI extends Application {
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
-
     }
-
 }
