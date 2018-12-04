@@ -370,8 +370,8 @@ public class AuctionHouse implements Runnable {
 
         @Override
         public void run()  {
-            System.out.println("enter");
-            while(true){
+            boolean connected = true;
+            while(connected){
                 try{
                     Message m = (Message) in.readObject();
                     if(m != null){
@@ -380,6 +380,7 @@ public class AuctionHouse implements Runnable {
                         auctionHouse.placeMessageForAnalyzing(m);
                     }
                 }catch(EOFException i){
+                    connected = !connected;
                     closeClient();
                     i.printStackTrace();
                 }catch(ClassNotFoundException i){
