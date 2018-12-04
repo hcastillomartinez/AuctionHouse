@@ -119,9 +119,6 @@ public class AgentGUI extends Application {
         auctionHouses.setMinHeight(25);
         auctionHouses.getItems().add("Choose Auction House");
         auctionHouses.setValue("Choose Auction House");
-//        auctionHouses.setOnAction(e -> {
-//            updateAuctionHouseChoices();
-//        });
     }
 
     /**
@@ -251,6 +248,7 @@ public class AgentGUI extends Application {
                     set = true;
                 }
             }
+            addValuesToAucGui();
         });
     }
 

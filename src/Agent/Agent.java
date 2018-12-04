@@ -335,10 +335,12 @@ public class Agent implements Runnable {
                 // remove the bid from the current bids
                 break;
             case GET_ITEMS:
-                System.out.println("GetItems = " + list.get(2));
+                itemList = (ArrayList<Item>) list.get(2);
                 break;
             case ACCOUNT_INFO:
+                System.out.println(account + " = first account");
                 account = (Account) list.get(2);
+                System.out.println(account + " = second account");
                 break;
             case UNBLOCK_FUNDS:
                 int aucID = (int) list.get(2);
