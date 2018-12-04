@@ -61,7 +61,7 @@ public class BankGUI extends Application {
     }
 
     void refreshAccountInformation(){
-        agentAccountList.removeAll();
+        agentAccountList.clear();
         agentAccountList.addAll(getAgentAccounts());
 
         auctionHouseAccountList.removeAll();

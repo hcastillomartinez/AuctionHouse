@@ -87,9 +87,11 @@ public class AgentGUI extends Application {
     private void setAuctionHouseOnChoice() {
         String aucName = auctionHouses.getValue();
         ArrayList<AuctionInfo> tempList = agent.getHouseList();
+        System.out.println(aucName + " = aucName");
 
         for (AuctionInfo ai: tempList) {
-            if (ai.getName().equalsIgnoreCase(aucName)) {
+            if (ai.toString().equalsIgnoreCase(aucName)) {
+                System.out.println("here");
                 agent.setAuctionHouse(ai);
                 return;
             }
@@ -100,11 +102,13 @@ public class AgentGUI extends Application {
      * Filling the choice box with the auction house options.
      */
     private synchronized void updateAuctionHouseChoices() {
+        auctionHouses.getItems().clear();
+        System.out.println(agent.getHouseList() + " = 1");
         agent.sendMessageForUpdates();
         ArrayList<AuctionInfo> temp = agent.getHouseList();
-        auctionHouses.getItems().clear();
+        System.out.println(agent.getHouseList() + " = 2");
         for (AuctionInfo s: temp) {
-            auctionHouses.getItems().add(s.getName());
+            auctionHouses.getItems().add(s.toString());
         }
     }
     
@@ -130,10 +134,10 @@ public class AgentGUI extends Application {
         chooseAuctionHouseButton.setMinHeight(25);
         chooseAuctionHouseButton.setOnAction(e -> {
             setAuctionHouseOnChoice();
-            agent.sendMessageForUpdates();
             itemsFromHouse.getItems().clear();
 
             ArrayList<Item> list = agent.getItemList();
+            
             for (Item i: list) {
                 itemsFromHouse.getItems().add(i.toString());
             }

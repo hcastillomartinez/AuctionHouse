@@ -323,7 +323,7 @@ public class AuctionHouse implements Runnable {
             this.ID = id;
             out = new ObjectOutputStream(client.getOutputStream());
             in = new ObjectInputStream(client.getInputStream());
-//            out.writeObject("connected to "+ID);
+            System.out.println("connected to "+ID);
         }
 
         /**
