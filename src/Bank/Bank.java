@@ -47,7 +47,7 @@ public class Bank implements Runnable {
     public static void main(String[] args) throws Exception {
         BankGUI.launch(args);
     }
-    
+
     /**
      * Constructor for Bank
      */
@@ -141,10 +141,12 @@ public class Bank implements Runnable {
                 amount = (double) messageList.get(3);
                 unblockFunds(agentAccountNumber,amount);
 
-                try{
+                try{//todo send some confirmation so that auctionh can block
+                    // until getting this.
                     clients.get(agentAccountNumber).outputStream.writeObject(new Message(NAME,
                             MessageTypes.ACCOUNT_INFO,
                             accounts.get(agentAccountNumber)));
+
                 }catch(Exception e){ e.printStackTrace(); }
 
                 gui.refreshAccountInformation();
@@ -274,14 +276,14 @@ public class Bank implements Runnable {
     public synchronized boolean transferFunds(int auctionHouseAccountNumber,
                                            int agentAccountNumber,
                                            double amount){
-        
+
         Account houseAccount = accounts.get(auctionHouseAccountNumber);
         Account agentAccount = accounts.get(agentAccountNumber);
 
         //todo do I need synchronized blocks here? remove
         synchronized (houseAccount){
             synchronized (agentAccount){
-                
+
                 if(agentAccount.getPendingBalance() >= amount){
                     //transfer funds from agent to auction house
                     agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
@@ -357,7 +359,7 @@ public class Bank implements Runnable {
                 io.printStackTrace();
             }
         }
-        
+
         /**
          * Function to close the client from the server.
          */
