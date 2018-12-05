@@ -119,9 +119,10 @@ public class Auction implements Runnable{
             //bid is accepted
             if(winningClientID==-1){
                 //first bid that passes threshold
-                System.out.println("\n first bid ");
+                System.out.println("first bid ");
                 auctionHouse.sendToServer(currentClientID,new Message(
-                        "auction house", MessageTypes.BID_ACCEPTED));
+                        "auction house", MessageTypes.BID_ACCEPTED,
+                        new Bid(item,currentBidderID,bid)));
                 auctionHouse.sendToBank(new Message("auction house",
                         MessageTypes.BLOCK_FUNDS,currentBidderID,bid));
                 bidMaps.put(currentBidderID,bid);
@@ -129,7 +130,9 @@ public class Auction implements Runnable{
             else {
                 System.out.println("overtaking old winner");
                 auctionHouse.sendToServer(currentClientID,new Message(
-                        "auction house",MessageTypes.BID_ACCEPTED));
+                        "auction house",MessageTypes.BID_ACCEPTED,
+                        new Bid(item,currentBidderID,bid)));
+
                 if(bidMaps.get(currentBidderID)!=null){
                     //returning bidder
                     auctionHouse.sendToBank(new Message("auction house",
