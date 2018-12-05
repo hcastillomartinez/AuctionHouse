@@ -114,8 +114,7 @@ public class Agent implements Runnable {
      * Setting the auction house for the agent.
      * @param auctionInfo house for functionality
      */
-    public void setAuctionHouse(AuctionInfo auctionInfo) {
-        System.out.println("AuctionInfo = " + auctionInfo.getPortNumber());
+    public boolean setAuctionHouse(AuctionInfo auctionInfo) {
         if (!houseProxyMap.containsKey(auctionInfo)) {
             AuctionHouseProxy proxy = new AuctionHouseProxy(auctionInfo
                                                                 .getIPAddress(),
@@ -128,6 +127,8 @@ public class Agent implements Runnable {
             aHProxy = houseProxyMap.get(auctionInfo);
             aHProxy.sendMessage(new Message(NAME, MessageTypes.GET_ITEMS));
         }
+        this.auctionInfo = auctionInfo;
+        return true;
     }
 
     /**
@@ -318,7 +319,6 @@ public class Agent implements Runnable {
                 break;
             case HOUSES:
                 houseList = (ArrayList<AuctionInfo>) list.get(2);
-                System.out.println("HouseList = " + houseList);
                 break;
             case BID_REJECTED:
                 // TODO:
@@ -333,17 +333,21 @@ public class Agent implements Runnable {
                 // remove the bid from the current bids
                 break;
             case GET_ITEMS:
-                System.out.println("GetItems = " + list.get(2));
+                itemList = (ArrayList<Item>) list.get(2);
                 break;
             case ACCOUNT_INFO:
+                System.out.println(account + " = first account");
                 account = (Account) list.get(2);
+                System.out.println(account + " = second account");
                 break;
             case UNBLOCK_FUNDS:
                 int aucID = (int) list.get(2);
                 double price = (double) list.get(3);
+                
                 bank.sendAgentMessage(new Message(NAME,
-                                                  MessageTypes.UNBLOCK_FUNDS,
-                                                  aucID));
+                                                  MessageTypes.TRANSFER_FUNDS,
+                                                  aucID,
+                                                  price));
                 break;
         }
     }

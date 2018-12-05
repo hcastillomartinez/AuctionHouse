@@ -45,6 +45,8 @@ public class AuctionHouse implements Runnable {
         agentCount = 0;
         auctionOpen = true;
         safeToClose=true;
+        account=new Account(type,0,0,0);
+        messageAnalyzer=new HouseMessageAnalyzer();
         makeItems = new MakeItems();
         messages = new LinkedBlockingQueue<>();
         itemList = makeItems.getItems(Integer.parseInt(type));
@@ -55,14 +57,11 @@ public class AuctionHouse implements Runnable {
         this.serverName = serverName;
         try {
 
-            System.out.println("attempt to connect");
             bankClient=new Socket(this.serverName,4444);
-            System.out.println("successful connect");
             objectOutputStream=
                     new ObjectOutputStream(bankClient.getOutputStream());
             objectInputStream=
                     new ObjectInputStream(bankClient.getInputStream());
-            System.out.println("sending message");
             sendToBank(new Message("auction house",
                     MessageTypes.CREATE_ACCOUNT,new AuctionInfo(type,
                     serverName,0,Integer.parseInt(port))));
@@ -204,6 +203,7 @@ public class AuctionHouse implements Runnable {
      * @param m Message that will be analyzed and responded to.
      */
     private synchronized void doAction(Message m){
+        System.out.println(m);
         int action = messageAnalyzer.analyzeMessage(m);
         if(action == 1){
            int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
@@ -371,14 +371,17 @@ public class AuctionHouse implements Runnable {
 
         @Override
         public void run()  {
-            while(!client.isConnected()){
+            boolean connected = true;
+            while(connected){
                 try{
                     Message m = (Message) in.readObject();
                     if(m != null){
                         addID(m);
+                        System.out.println("Receiving from "+ ID+" "+m);
                         auctionHouse.placeMessageForAnalyzing(m);
                     }
                 }catch(EOFException i){
+                    connected = !connected;
                     closeClient();
                     i.printStackTrace();
                 }catch(ClassNotFoundException i){
@@ -387,6 +390,7 @@ public class AuctionHouse implements Runnable {
                     System.out.println(i);
                 }
             }
+//            System.out.println("exit");
         }
     }
 
@@ -412,6 +416,7 @@ public class AuctionHouse implements Runnable {
     public void sendToServer(int ID,Message m){
         for(Server server:serverThreads){
             if(ID==server.getID()){
+                System.out.println("Sending to Agent: "+m);
                 server.placeMessage(m);
             }
         }
@@ -442,6 +447,7 @@ public class AuctionHouse implements Runnable {
      */
     public void sendToBank(Object m){
         try{
+            System.out.println("Sending to bank: "+m);
             objectOutputStream.writeObject(m);
         }catch(IOException i){
             i.printStackTrace();
@@ -456,9 +462,12 @@ public class AuctionHouse implements Runnable {
             try {
                 System.out.println("waiting for agents");
                 Socket agent = serverSocket.accept();
+                System.out.println("AGENT: "+agentCount);
                 agentCount++;
                 Server server = new Server(agent,agentCount,this);
                 serverThreads.add(server);
+                Thread t =new Thread(server);
+                t.start();
             }catch(IOException i){
                 i.printStackTrace();
             }

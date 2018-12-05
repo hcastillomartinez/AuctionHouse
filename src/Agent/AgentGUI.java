@@ -84,18 +84,16 @@ public class AgentGUI extends Application {
     /**
      * Function to choose the auction house.
      */
-    private void setAuctionHouseOnChoice() {
+    private boolean setAuctionHouseOnChoice() {
         String aucName = auctionHouses.getValue();
         ArrayList<AuctionInfo> tempList = agent.getHouseList();
-        System.out.println(aucName + " = aucName");
 
         for (AuctionInfo ai: tempList) {
             if (ai.toString().equalsIgnoreCase(aucName)) {
-                System.out.println("here");
-                agent.setAuctionHouse(ai);
-                return;
+                return agent.setAuctionHouse(ai);
             }
         }
+        return false;
     }
 
     /**
@@ -103,10 +101,11 @@ public class AgentGUI extends Application {
      */
     private synchronized void updateAuctionHouseChoices() {
         auctionHouses.getItems().clear();
-        System.out.println(agent.getHouseList() + " = 1");
-        agent.sendMessageForUpdates();
+        agent.getBank().sendAgentMessage(new Message(agent.getNAME(),
+                                                     MessageTypes.GET_HOUSES));
         ArrayList<AuctionInfo> temp = agent.getHouseList();
-        System.out.println(agent.getHouseList() + " = 2");
+        auctionHouses.getItems().add("Choose Auction House");
+        auctionHouses.setValue("Choose Auction House");
         for (AuctionInfo s: temp) {
             auctionHouses.getItems().add(s.toString());
         }
@@ -124,6 +123,22 @@ public class AgentGUI extends Application {
     }
 
     /**
+     * Function to make the the values in the auction house match the selection.
+     */
+    private void addValuesToAucGui() {
+        if (agent.getAuctionInfo() != null) {
+            ahField.setText(agent.getAuctionInfo().getName());
+            idField.setText("" + agent.getAuctionInfo().getAuctionID() + "");
+            if (agent.getItem() != null) {
+                itemField.setText(agent.getItem().getItemName());
+            }
+            ahField.setEditable(false);
+            idField.setEditable(false);
+            itemField.setEditable(false);
+        }
+    }
+    
+    /**
      * Function to make the auction house selection button
      */
     private void makeChooseAuctionHouseButton() {
@@ -133,13 +148,15 @@ public class AgentGUI extends Application {
         chooseAuctionHouseButton.setMinWidth(175);
         chooseAuctionHouseButton.setMinHeight(25);
         chooseAuctionHouseButton.setOnAction(e -> {
-            setAuctionHouseOnChoice();
-            itemsFromHouse.getItems().clear();
-
-            ArrayList<Item> list = agent.getItemList();
-            
-            for (Item i: list) {
-                itemsFromHouse.getItems().add(i.toString());
+            if (setAuctionHouseOnChoice()) {
+                itemsFromHouse.getItems().clear();
+                ArrayList<Item> list = agent.getItemList();
+                System.out.println(list);
+                
+                for (Item i: list) {
+                    itemsFromHouse.getItems().add(i.toString());
+                }
+                addValuesToAucGui();
             }
         });
     }
@@ -166,7 +183,10 @@ public class AgentGUI extends Application {
                 
                 String nam = firNameField.getText()+" "+lastNameField.getText();
                 Double balance = Double.parseDouble(acctBalanceField.getText());
-                Account account = new Account(nam, agent.getId(), balance, balance);
+                Account account = new Account(nam,
+                                              agent.getId(),
+                                              balance,
+                                              balance);
                 
                 if (agent.setAccount(account)) {
                     AgentInfo agInfo = new AgentInfo(agent.getNAME(),
@@ -231,6 +251,7 @@ public class AgentGUI extends Application {
                     set = true;
                 }
             }
+            addValuesToAucGui();
         });
     }
 
