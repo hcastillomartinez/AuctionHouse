@@ -212,8 +212,8 @@ public class AuctionHouse implements Runnable {
             tryBid((Bid) m.getMessageList().get(2),id);
         }else if(action == 3){
             updateAccount((Account) m.getMessageList().get(2));
-//            if(auctionHouseGUI!=null)auctionHouseGUI.updateBalance();
-//            else System.out.println("here");
+            if(auctionHouseGUI!=null)auctionHouseGUI.updateBalance();
+            else System.out.println("here");
         }
 
     }
@@ -239,6 +239,9 @@ public class AuctionHouse implements Runnable {
             Thread t = new Thread(a);
             t.start();
         }
+        else{
+            System.out.println(b.getItem()+" sold already.");
+        }
     }
 
     /**
@@ -253,7 +256,13 @@ public class AuctionHouse implements Runnable {
                 break;
             }
         }
-        createAuction(b,serverThreadID);
+        if(b.getItem().getPrice()>b.getAmount()){
+            System.out.println("Blocking before starting");
+            sendToServer(serverThreadID,new Message("auction house",
+                    MessageTypes.BID_REJECTED));
+            return;
+        }
+        else createAuction(b,serverThreadID);
     }
 
     /******************************************************************/

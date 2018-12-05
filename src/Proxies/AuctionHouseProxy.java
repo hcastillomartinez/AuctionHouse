@@ -116,6 +116,7 @@ public class AuctionHouseProxy implements Runnable {
                 try {
                     messageInput = messageQueue.take();
                     if (messageInput != null) {
+                        System.out.println("writing to AH: "+messageInput);
                         out.writeObject(messageInput);
                     }
         
@@ -123,7 +124,6 @@ public class AuctionHouseProxy implements Runnable {
                     response = (Message) in.readObject();
                     if (agent != null) {
                         if (response != null) {
-                            System.out.println("writing to AH: "+response);
                             agent.addMessage(response);
                         }
                     }

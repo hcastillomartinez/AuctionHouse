@@ -69,6 +69,7 @@ public class Auction implements Runnable{
             public void run() {
                 if(time>= DURATION){
                     auctionActive = false;
+                    System.out.println(time);
                     t.cancel();
                     placeBid(new Bid(null,9,0),1);
                 }
