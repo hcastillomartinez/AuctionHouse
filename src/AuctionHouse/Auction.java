@@ -47,6 +47,7 @@ public class Auction implements Runnable{
         item=i;
         time = 0;
         item.setInBid(true);
+        i.setInBid(true);
         bids = new LinkedBlockingQueue<>();
         bidProtocol = new BidProtocol(item.getPrice());
         auctionActive = true;
@@ -111,8 +112,6 @@ public class Auction implements Runnable{
      */
     private synchronized void analyzeBid(double bid){
         if(!auctionActive){
-//            auctionHouse.sendToServer(currentClientID,new Message("auction " +
-//                    "house",MessageTypes.BID_REJECTED));
             System.out.println("Auction Over");
             return;
         }
@@ -177,7 +176,7 @@ public class Auction implements Runnable{
         try {
             if(b.getItem()!=null) breakDownBid(b);
             this.currentClientID=currentClientID;
-            breakDownBid(b);
+//            breakDownBid(b);
             bids.put(b);
         }catch(InterruptedException i){
             i.printStackTrace();

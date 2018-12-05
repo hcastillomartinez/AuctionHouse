@@ -236,7 +236,7 @@ public class AuctionHouse implements Runnable {
      */
     private synchronized void createAuction(Bid b,int serverThreadID){
         if(!b.getItem().isInBid()){
-            Auction a = new Auction(this,b.getItem(), b);
+            Auction a = new Auction(this,b.getItem(),b);
             a.placeBid(b,serverThreadID);
             auctions.add(a);
             auctionHouseGUI.updateLists();
