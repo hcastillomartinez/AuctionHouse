@@ -8,6 +8,9 @@ import MessageHandling.MessageTypes;
 import Proxies.AuctionHouseProxy;
 import Proxies.BankProxy;
 import javafx.application.Application;
+import javafx.scene.control.Button;
+import javafx.scene.layout.Background;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.*;
@@ -32,17 +35,18 @@ public class Agent implements Runnable {
     private AuctionHouse auctionHouse = null;
     private ArrayList<AuctionInfo> houseList;
     private ArrayList<Item> itemList;
+    private ArrayList<Item> wonItems;
     private ArrayList<Bid> bids;
     private BlockingQueue<Message> messageQueue;
     private HashMap<String, Integer> auctionHouseMap;
     private HashMap<AuctionInfo, AuctionHouseProxy> houseProxyMap;
     private boolean connected = true;
-    private Scanner scanner = new Scanner(System.in);
     private String hostName;
     private int portNumber;
+    private boolean itemListChange = false, aucHouseChange = false,
+        bidChange = false, itemsWonChange = false;
 
     // tester value for the auction house info
-    private HashMap<Item, Bid> itemBidMap;
     private HashMap<AuctionHouseProxy, ArrayList<Item>> auctionHouseItems;
     private AuctionInfo auctionInfo;
 
@@ -52,13 +56,13 @@ public class Agent implements Runnable {
      */
     public Agent(String hostName, int portNumber) {
         itemList = new ArrayList<>();
+        wonItems = new ArrayList<>();
         messageQueue = new LinkedBlockingQueue<>();
         auctionHouseMap = new HashMap<>();
         houseList = new ArrayList<>();
         houseProxyMap = new HashMap<>();
-        itemBidMap = new HashMap<>();
         auctionHouseItems = new HashMap<>();
-        bids = new ArrayList<Bid>();
+        bids = new ArrayList<>();
 
         this.bank = new BankProxy(hostName,
                                   portNumber,
@@ -70,6 +74,70 @@ public class Agent implements Runnable {
      * @return auctionInfo object
      */
     public AuctionInfo getAuctionInfo() { return auctionInfo; }
+
+    /**
+     * Getting if there has been a change in the item list.
+     * @return true if change, false otherwise
+     */
+    public boolean isItemListChange() {
+        return itemListChange;
+    }
+
+    /**
+     * Setting if there has been a change in the item list.
+     * @param itemListChange, setting to false
+     */
+    public void setItemListChange(boolean itemListChange) {
+        this.itemListChange = itemListChange;
+    }
+
+    /**
+     * Getting if there has been a change in the auction house list.
+     * @return true if change, false otherwise
+     */
+    public boolean isAucHouseChange() {
+        return aucHouseChange;
+    }
+
+    /**
+     * Getting if there has been a change in the auction house list.
+     * @param aucHouseChange, setting change to false
+     */
+    public void setAucHouseChange(boolean aucHouseChange) {
+        this.aucHouseChange = aucHouseChange;
+    }
+
+    /**
+     * Getting if there has been a change in the item list.
+     * @return true if change, false otherwise
+     */
+    public boolean isBidChange() {
+        return bidChange;
+    }
+    
+    /**
+     * Setting if there has been a change in the bid list.
+     * @param bidChange, setting bid change to false
+     */
+    public void setBidChange(boolean bidChange) {
+        this.bidChange = bidChange;
+    }
+
+    /**
+     * Getting if there has been a change in the items won list.
+     * @return true if change, false otherwise
+     */
+    public boolean isItemsWonChange() {
+        return itemsWonChange;
+    }
+
+    /**
+     * Setting if there has been a change in the items won list.
+     * @param itemsWonChange, changing to no change
+     */
+    public void setItemsWonChange(boolean itemsWonChange) {
+        this.itemsWonChange = itemsWonChange;
+    }
 
     /**
      * Getting the current item.
@@ -99,6 +167,14 @@ public class Agent implements Runnable {
      */
     public ArrayList<Item> getItemList() {
         return itemList;
+    }
+
+    /**
+     * Getting the item list for the specific auction house.
+     * @return itemList for the ah
+     */
+    public ArrayList<Item> getWonItems() {
+        return wonItems;
     }
 
     /**
@@ -364,12 +440,13 @@ public class Agent implements Runnable {
                 respondToSender(sender, response, getAHProxy(auctionInfo));
                 break;
             case TRANSFER_ITEM:
-                Item bidItem = (Item) list.get(2);
+                Bid bid = (Bid) list.get(2);
+                Item bidItem = bid.getItem();
                 response = new Message(NAME,
                                        MessageTypes.REMOVE_FUNDS,
                                        getId(),
                                        bidItem.getPrice());
-                respondToSender(sender, response, getAHProxy(auctionInfo));
+                bank.sendAgentMessage(response);
                 break;
             case BANK_ACCOUNT:
                 accountNumber = (int) list.get(2);
@@ -379,21 +456,25 @@ public class Agent implements Runnable {
                 break;
             case HOUSES:
                 houseList = (ArrayList<AuctionInfo>) list.get(2);
+                aucHouseChange = true;
                 break;
             case BID_REJECTED:
-                // TODO:
-                // remove the bid from the current bids
+                // TODO: Get bid from ah that was rejected
+                Bid bid1 = (Bid) list.get(2);
                 break;
             case BID_ACCEPTED:
                 response = new Message(NAME, MessageTypes.THANKS);
                 respondToSender(sender, response, getAHProxy(auctionInfo));
+                System.out.println(bids + " = bids in Bid_Accepted");
                 break;
             case OUT_BID:
-                //TODO:
-                // remove the bid from the current bids
+                //TODO: Get bid from ah that was rejected
+                Bid outbid = (Bid) list.get(2);
+                bids.remove(outbid);
                 break;
             case GET_ITEMS:
                 itemList = (ArrayList<Item>) list.get(2);
+                itemListChange = true;
                 break;
             case ACCOUNT_INFO:
                 account = (Account) list.get(2);
@@ -493,15 +574,6 @@ b146-34
 b146-22
 b146-19
 */
-
-
-
-
-
-
-
-
-
 
 
 

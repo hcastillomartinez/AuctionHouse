@@ -15,6 +15,8 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * AgentGUI.java displays the agent gui for user interactions.
@@ -24,38 +26,38 @@ public class AgentGUI extends Application {
 
     // final variables
     private final double WIDTH
-            = Screen.getPrimary().getBounds().getWidth() * 0.75;
+        = Screen.getPrimary().getBounds().getWidth() * 0.75;
     private final double HEIGHT
-            = Screen.getPrimary().getBounds().getHeight() * 0.75;
-
+        = Screen.getPrimary().getBounds().getHeight() * 0.75;
+    
     // static variables
     private static String host;
     private static int port;
-
+    
     // worker fields
     private static Agent agent;
     private ChoiceBox<String> auctionHouses;
     private ListView<String> itemsFromHouse = new ListView<>();
     private ListView<String> bids = new ListView<>();
-
+    
     // filler variables for the boxes
     private Label firName, lastName, acctBalance, pendingBalanceLabel,
         ahLabel, idLabel, itemLabel, bidLabel;
     private TextField firNameField, lastNameField, acctBalanceField,
         pendingField, ahField, idField, itemField, bidField;
     private Button createAccountButton, placeBidButton, selectItemButton,
-            updateButton, chooseAuctionHouseButton;
-
+        updateButton, chooseAuctionHouseButton;
+    
     // box variables
     private VBox accountBox, bidContainer, auctionContainer, appVertContainer;
     private HBox firstNameBox, lastNameBox, accountBalance, aucHouseHBox,
         idBox, itemBox, bidBox, appFullContainer, pendingBalanceBox;
-
+    
     // background fillers
     private final BackgroundFill BLUE
-            = new BackgroundFill(Color.BLUE, null, null);
+        = new BackgroundFill(Color.BLUE, null, null);
     private final BackgroundFill GREY
-            = new BackgroundFill(Color.GREY, new CornerRadii(10), null);
+        = new BackgroundFill(Color.GREY, new CornerRadii(10), null);
     
     /**
      * Launching the application.
@@ -75,11 +77,11 @@ public class AgentGUI extends Application {
     private void setupNumbersAndAgent() {
         (new Thread(agent)).start();
     }
-
+    
     /*****************************************************************/
-    /*                                                               */
-    /*               Functions For Making the AH choice box          */
-    /*                                                               */
+        /*                                                               */
+        /*               Functions For Making the AH choice box          */
+        /*                                                               */
     /*****************************************************************/
     
     /**
@@ -88,7 +90,7 @@ public class AgentGUI extends Application {
     private boolean setAuctionHouseOnChoice() {
         String aucName = auctionHouses.getValue();
         ArrayList<AuctionInfo> tempList = agent.getHouseList();
-
+        
         for (AuctionInfo ai: tempList) {
             if (ai.toString().equalsIgnoreCase(aucName)) {
                 return agent.setAuctionHouse(ai);
@@ -96,7 +98,7 @@ public class AgentGUI extends Application {
         }
         return false;
     }
-
+    
     /**
      * Filling the choice box with the auction house options.
      */
@@ -122,7 +124,7 @@ public class AgentGUI extends Application {
         auctionHouses.getItems().add("Choose Auction House");
         auctionHouses.setValue("Choose Auction House");
     }
-
+    
     /**
      * Function to make the the values in the auction house match the selection.
      */
@@ -163,13 +165,13 @@ public class AgentGUI extends Application {
             }
         });
     }
-
+    
     /*****************************************************************/
-    /*                                                               */
-    /*       Functions For Making the Bid and Account Buttons        */
-    /*                                                               */
+        /*                                                               */
+        /*       Functions For Making the Bid and Account Buttons        */
+        /*                                                               */
     /*****************************************************************/
-
+    
     /**
      * Function to update the fields for the user account.
      */
@@ -246,6 +248,16 @@ public class AgentGUI extends Application {
         agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
         agent.getBids().add(bid);
     }
+
+    TimerTask timerTask = new TimerTask() {
+        @Override
+        public void run() {
+            long past = System.currentTimeMillis();
+            while (System.currentTimeMillis() - past < 500) {
+            
+            }
+        }
+    };
     
     /**
      * Function to make the place bid button.
@@ -264,6 +276,7 @@ public class AgentGUI extends Application {
                     placeBid();
                     bidField.setText("");
                     itemField.setText("");
+                    timerTask.run();
                     updateBidList();
                     updateAccountFields();
                 }
@@ -293,11 +306,11 @@ public class AgentGUI extends Application {
             addValuesToAucGui();
         });
     }
-
+    
     /*****************************************************************/
-    /*                                                               */
-    /*              Functions For Making the Fields and Labels       */
-    /*                                                               */
+        /*                                                               */
+        /*              Functions For Making the Fields and Labels       */
+        /*                                                               */
     /*****************************************************************/
     
     /**
@@ -327,13 +340,13 @@ public class AgentGUI extends Application {
         itemField = new TextField();
         bidField = new TextField();
     }
-
+    
     /*****************************************************************/
-    /*                                                               */
-    /*               Functions For Making New Account Box            */
-    /*                                                               */
+        /*                                                               */
+        /*               Functions For Making New Account Box            */
+        /*                                                               */
     /*****************************************************************/
-
+    
     /**
      * Function to setup last name box.
      */
@@ -344,7 +357,7 @@ public class AgentGUI extends Application {
         lastNameBox.setSpacing(5);
         lastNameBox.getChildren().addAll(lastName, lastNameField);
     }
-
+    
     /**
      * Function to setup first name box.
      */
@@ -355,7 +368,7 @@ public class AgentGUI extends Application {
         firstNameBox.setSpacing(5);
         firstNameBox.getChildren().addAll(firName, firNameField);
     }
-
+    
     /**
      * Function to setup account balance box.
      */
@@ -366,7 +379,7 @@ public class AgentGUI extends Application {
         accountBalance.setSpacing(5);
         accountBalance.getChildren().addAll(acctBalance, acctBalanceField);
     }
-
+    
     /**
      * Function to setup pending balance box.
      */
@@ -378,7 +391,7 @@ public class AgentGUI extends Application {
         pendingBalanceBox.getChildren().addAll(pendingBalanceLabel,
                                                pendingField);
     }
-
+    
     /**
      * Function to add fields to the accountBox container.
      */
@@ -392,13 +405,13 @@ public class AgentGUI extends Application {
                                         pendingBalanceBox,
                                         createAccountButton);
     }
-
+    
     /*****************************************************************/
-    /*                                                               */
-    /*          Functions For Making the Auction House VBox          */
-    /*                                                               */
+        /*                                                               */
+        /*          Functions For Making the Auction House VBox          */
+        /*                                                               */
     /*****************************************************************/
-
+    
     /**
      * Function to setup auc house horizontal box.
      */
@@ -409,7 +422,7 @@ public class AgentGUI extends Application {
         aucHouseHBox.setSpacing(5);
         aucHouseHBox.getChildren().addAll(ahLabel, ahField);
     }
-
+    
     /**
      * Function to setup the idBox.
      */
@@ -420,7 +433,7 @@ public class AgentGUI extends Application {
         idBox.setSpacing(5);
         idBox.getChildren().addAll(idLabel, idField);
     }
-
+    
     /**
      * Function to setup the item box.
      */
@@ -431,7 +444,7 @@ public class AgentGUI extends Application {
         itemBox.setSpacing(5);
         itemBox.getChildren().addAll(itemLabel, itemField);
     }
-
+    
     /**
      * Function to setup the bid box.
      */
@@ -442,7 +455,7 @@ public class AgentGUI extends Application {
         bidBox.setSpacing(5);
         bidBox.getChildren().addAll(bidLabel, bidField);
     }
-
+    
     /**
      * Function to add fields to the bidBox container.
      */
@@ -457,13 +470,13 @@ public class AgentGUI extends Application {
                                           placeBidButton,
                                           bids);
     }
-
+    
     /*****************************************************************/
-    /*                                                               */
-    /*          Functions For Making the Full GUI Containers         */
-    /*                                                               */
+        /*                                                               */
+        /*          Functions For Making the Full GUI Containers         */
+        /*                                                               */
     /*****************************************************************/
-
+    
     /**
      * Function to set up the boxes.
      */
@@ -477,7 +490,7 @@ public class AgentGUI extends Application {
         buildItemBox();
         buildBidBox();
     }
-
+    
     /**
      * Function to initialize the vertical boxes
      */
@@ -495,7 +508,7 @@ public class AgentGUI extends Application {
         // Come back here to add the auction update button
         // choice box and list of the items
     }
-
+    
     /**
      * Function to make the update button.
      */
@@ -509,7 +522,7 @@ public class AgentGUI extends Application {
             updateAuctionHouseChoices();
         });
     }
-
+    
     /**
      * Function to combine the containers into the main view.
      */
@@ -519,14 +532,14 @@ public class AgentGUI extends Application {
         appVertContainer.setMinHeight(HEIGHT);
         appVertContainer.setSpacing(5);
         appVertContainer.getChildren().addAll(accountBox, bidContainer);
-
+        
         appFullContainer = new HBox();
         appFullContainer.setMinWidth(WIDTH);
         appFullContainer.setMinHeight(HEIGHT);
         appFullContainer.setSpacing(5);
         appFullContainer.getChildren().addAll(appVertContainer, auctionContainer);
     }
-
+    
     /**
      * Function to start running the application.
      * @param primaryStage stage for the application
@@ -552,41 +565,11 @@ public class AgentGUI extends Application {
         buildBidContainer();
         buildAccountContainer();
         fillContainers();
-    
+        
         Scene scene = new Scene(appFullContainer);
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -1,5 +1,6 @@
-package Agent;
+package TestPackage;
 
+import Agent.Agent;
 import AuctionHouse.*;
 import Bank.*;
 import MessageHandling.Message;

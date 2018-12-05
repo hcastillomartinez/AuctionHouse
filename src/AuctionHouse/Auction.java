@@ -28,6 +28,7 @@ public class Auction implements Runnable{
     private double bidToBeat;
     private Timer t;
     private boolean auctionActive;
+    private Bid currentBid;
 
 
 
@@ -36,11 +37,12 @@ public class Auction implements Runnable{
      * item.
      * @param a An Item
      */
-    public Auction(AuctionHouse a,Item i){
+    public Auction(AuctionHouse a,Item i, Bid currentBid){
         currentClientID=0;
         bidMaps=new HashMap<>();
         winningClientID=-1;
 
+        this.currentBid = currentBid;
         auctionHouse=a;
         item=i;
         time = 0;
@@ -122,7 +124,7 @@ public class Auction implements Runnable{
                 System.out.println("first bid ");
                 auctionHouse.sendToServer(currentClientID,new Message(
                         "auction house", MessageTypes.BID_ACCEPTED,
-                        new Bid(item,currentBidderID,bid)));
+                        currentBid));
                 auctionHouse.sendToBank(new Message("auction house",
                         MessageTypes.BLOCK_FUNDS,currentBidderID,bid));
                 bidMaps.put(currentBidderID,bid);
@@ -131,7 +133,7 @@ public class Auction implements Runnable{
                 System.out.println("overtaking old winner");
                 auctionHouse.sendToServer(currentClientID,new Message(
                         "auction house",MessageTypes.BID_ACCEPTED,
-                        new Bid(item,currentBidderID,bid)));
+                        currentBid));
 
                 if(bidMaps.get(currentBidderID)!=null){
                     //returning bidder
@@ -160,7 +162,7 @@ public class Auction implements Runnable{
         }
         else{
             auctionHouse.sendToServer(currentClientID,new Message("auction " +
-                    "house",MessageTypes.BID_REJECTED));
+                    "house",MessageTypes.BID_REJECTED, currentBid));
             //bid is rejected
             System.out.println(currentBidderID+" need to beat "+bidToBeat
                     +" ,you bid "+bid);
@@ -221,7 +223,7 @@ public class Auction implements Runnable{
         //wait for conformation
 
         auctionHouse.sendToServer(winningClientID,new Message("auction house",
-                MessageTypes.TRANSFER_ITEM,new Bid(item,currentWinnerID,bidToBeat)));
+                MessageTypes.TRANSFER_ITEM, currentBid));
 
         //removes item from its list
         auctionHouse.getItemList().remove(item);
