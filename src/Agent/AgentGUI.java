@@ -234,6 +234,20 @@ public class AgentGUI extends Application {
     }
     
     /**
+     * Function to place a bid.
+     */
+    private void placeBid() {
+        Bid bid = new Bid(agent.getItem(),
+                          agent.getKey(),
+                          Double.parseDouble(bidField.getText()));
+        Message message = new Message(agent.getNAME(),
+                                      MessageTypes.BID,
+                                      bid);
+        agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
+        agent.getBids().add(bid);
+    }
+    
+    /**
      * Function to make the place bid button.
      */
     private void makePlaceBidButton() {
@@ -247,16 +261,11 @@ public class AgentGUI extends Application {
                 !bidField.getText().isEmpty()) {
                 if (Integer.parseInt(bidField.getText()) <
                     agent.getAccount().getPendingBalance()) {
-                    Bid bid = new Bid(agent.getItem(),
-                                      agent.getKey(),
-                                      Double.parseDouble(bidField.getText()));
-                    Message message = new Message(agent.getNAME(),
-                                                  MessageTypes.BID,
-                                                  bid);
-                    agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
-                    agent.getBids().add(bid);
+                    placeBid();
                     bidField.setText("");
+                    itemField.setText("");
                     updateBidList();
+                    updateAccountFields();
                 }
             }
         });
