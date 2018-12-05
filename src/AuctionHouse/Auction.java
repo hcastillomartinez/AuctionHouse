@@ -39,7 +39,7 @@ public class Auction implements Runnable{
     public Auction(AuctionHouse a,Item i){
         currentClientID=0;
         bidMaps=new HashMap<>();
-        winningClientID=0;
+        winningClientID=-1;
 
         auctionHouse=a;
         item=i;
@@ -108,16 +108,17 @@ public class Auction implements Runnable{
      */
     private synchronized void analyzeBid(double bid){
         if(!auctionActive){
-            auctionHouse.sendToServer(currentClientID,new Message("auction " +
-                    "house",MessageTypes.BID_REJECTED));
+//            auctionHouse.sendToServer(currentClientID,new Message("auction " +
+//                    "house",MessageTypes.BID_REJECTED));
             System.out.println("Auction Over");
             return;
         }
         System.out.println(currentBidderID+" tries "+bid);
         if(bidProtocol.processBid(bid)!=0){
             //bid is accepted
-            if(winningClientID==0){
+            if(winningClientID==-1){
                 //first bid that passes threshold
+                System.out.println("\n first bid ");
                 auctionHouse.sendToServer(currentClientID,new Message(
                         "auction house", MessageTypes.BID_ACCEPTED));
                 auctionHouse.sendToBank(new Message("auction house",
@@ -125,7 +126,7 @@ public class Auction implements Runnable{
                 bidMaps.put(currentBidderID,bid);
             }
             else {
-
+                System.out.println("overtaking old winner");
                 auctionHouse.sendToServer(currentClientID,new Message(
                         "auction house",MessageTypes.BID_ACCEPTED));
                 if(bidMaps.get(currentBidderID)!=null){

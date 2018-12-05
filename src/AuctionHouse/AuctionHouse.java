@@ -11,6 +11,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -33,6 +34,7 @@ public class AuctionHouse implements Runnable {
     private BlockingQueue<Message> messages;
     private boolean auctionOpen;
     private Account account;
+    static AuctionHouseGUI auctionHouseGUI;
 
 
     /**
@@ -45,34 +47,31 @@ public class AuctionHouse implements Runnable {
         agentCount = 0;
         auctionOpen = true;
         safeToClose=true;
-        account=new Account(type,0,0,0);
+        account=new Account(type,10,0,0);
         messageAnalyzer=new HouseMessageAnalyzer();
         makeItems = new MakeItems();
         messages = new LinkedBlockingQueue<>();
         itemList = makeItems.getItems(Integer.parseInt(type));
+        Collections.shuffle(itemList);
         serverThreads = new ArrayList<>();
         auctions = new ArrayList<>();
         this.type = makeItems.getListType();
         this.port = Integer.parseInt(port);
         this.serverName = serverName;
         try {
-
             bankClient=new Socket(this.serverName,4444);
             objectOutputStream=
                     new ObjectOutputStream(bankClient.getOutputStream());
             objectInputStream=
                     new ObjectInputStream(bankClient.getInputStream());
             sendToBank(new Message("auction house",
-                    MessageTypes.CREATE_ACCOUNT,new AuctionInfo(type,
+                    MessageTypes.CREATE_ACCOUNT,new AuctionInfo(this.type,
                     serverName,0,Integer.parseInt(port))));
             handleMessagesFromBank();
             serverSocket = new ServerSocket(this.port);
         }catch(IOException i){
             i.printStackTrace();
         }
-//        catch(ClassNotFoundException i){
-//            i.printStackTrace();
-//        }
     }
 
 
@@ -203,7 +202,6 @@ public class AuctionHouse implements Runnable {
      * @param m Message that will be analyzed and responded to.
      */
     private synchronized void doAction(Message m){
-        System.out.println(m);
         int action = messageAnalyzer.analyzeMessage(m);
         if(action == 1){
            int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
@@ -214,6 +212,8 @@ public class AuctionHouse implements Runnable {
             tryBid((Bid) m.getMessageList().get(2),id);
         }else if(action == 3){
             updateAccount((Account) m.getMessageList().get(2));
+//            if(auctionHouseGUI!=null)auctionHouseGUI.updateBalance();
+//            else System.out.println("here");
         }
 
     }
@@ -271,7 +271,7 @@ public class AuctionHouse implements Runnable {
             public void run() {
                 while(true) {
                     try {
-                        System.out.println("waiting for message");
+//                        System.out.println("waiting for message");
                         doAction(messages.take());
                     } catch (InterruptedException i) {
                         i.printStackTrace();
@@ -397,7 +397,7 @@ public class AuctionHouse implements Runnable {
     /**
      * Closes all the server thread's clients and also the server socket.
      */
-    private void closeAllSockets(){
+    public void closeAllSockets(){
         for(Server s: serverThreads){
             s.closeClient();
         }
@@ -427,9 +427,12 @@ public class AuctionHouse implements Runnable {
             @Override
             public void run() {
                 try {
-                    while (!objectInputStream.readObject().equals(
-                            "close")){
-                        doAction((Message)objectInputStream.readObject());
+                    while(true) {
+                        Message m = (Message) objectInputStream.readObject();
+                        if (m != null) {
+                            System.out.println("Message from Bank: " + m);
+                            placeMessageForAnalyzing(m);
+                        }
                     }
                 }catch(IOException i){
                     i.printStackTrace();
@@ -445,7 +448,7 @@ public class AuctionHouse implements Runnable {
      * Writes out messages to the bank.
      * @param m Message to be passed to bank.
      */
-    public void sendToBank(Object m){
+    public synchronized void sendToBank(Object m){
         try{
             System.out.println("Sending to bank: "+m);
             objectOutputStream.writeObject(m);
