@@ -64,9 +64,10 @@ public class BankGUI extends Application {
      */
     private ArrayList<Account> getHouseAccounts(){
         ArrayList<Account> accounts = new ArrayList<>();
-        for(AuctionInfo house : bank.getAuctionHousesAsList()){
-            Account account = bank.getAccounts().get(house.getAccountNumber());
-            accounts.add(account);
+        for(Account account : bank.getAccountsAsList()){
+            if(!account.isAgent()){
+                accounts.add(account);
+            }
         }
         return accounts;
     }
@@ -76,9 +77,10 @@ public class BankGUI extends Application {
      */
     private ArrayList<Account> getAgentAccounts(){
         ArrayList<Account> accounts = new ArrayList<>();
-        for(AgentInfo agent : bank.getAgentsAsList()){
-            Account account = bank.getAccounts().get(agent.getAccountNumber());
-            accounts.add(account);
+        for(Account account : bank.getAccountsAsList()){
+            if(account.isAgent()){
+                accounts.add(account);
+            }
         }
         return accounts;
     }

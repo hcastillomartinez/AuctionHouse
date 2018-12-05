@@ -105,8 +105,9 @@ public class Bank implements Runnable {
             case CREATE_ACCOUNT:
                 AuctionInfo auctionInfo = (AuctionInfo) messageList.get(2);
 
-                Account account = makeAccount(auctionInfo.getName(),0,clientID); //todo might be a bug if an agent starts a thread and doesn't create an account right away
+                Account account = new Account(auctionInfo.getName(),clientID, 0,0,false);
 
+                accounts.put(account.getAccountNumber(),account);
                 addAuctionHouse(auctionInfo,account);
                 gui.refreshAccountInformation();
                 return new Message(NAME, MessageTypes.ACCOUNT_INFO,account);
@@ -132,20 +133,6 @@ public class Bank implements Runnable {
                 gui.refreshAccountInformation();
                 return new Message(NAME,MessageTypes.CONFIRMATION);
 
-            case UNBLOCK_FUNDS:
-                agentAccountNumber = (int) messageList.get(2);
-                amount = (double) messageList.get(3);
-                unblockFunds(agentAccountNumber,amount);
-
-                try{
-                    clients.get(agentAccountNumber).outputStream.writeObject(new Message(NAME,
-                            MessageTypes.ACCOUNT_INFO,
-                            accounts.get(agentAccountNumber)));
-                }catch(Exception e){ e.printStackTrace(); }
-
-                gui.refreshAccountInformation();
-                return new Message(NAME,MessageTypes.CONFIRMATION);
-
             default: return new Message(NAME,MessageTypes.THANKS);
         }
     }
@@ -162,7 +149,8 @@ public class Bank implements Runnable {
             //creates a bank account for an auction house
             case CREATE_ACCOUNT:
                 Account account = (Account) messageList.get(2);
-                account.setAccountNumber(clientID); //todo think of a way to do this differently
+                account.setAgent(true);
+                account.setAccountNumber(clientID);
                 accounts.put(account.getAccountNumber(),account);
 
                 System.out.println(accounts);
@@ -180,6 +168,20 @@ public class Bank implements Runnable {
             case GET_HOUSES:
                 return new Message(NAME,MessageTypes.HOUSES,this.getAuctionHousesAsList());
 
+            case UNBLOCK_FUNDS:
+                agentAccountNumber = (int) messageList.get(2);
+                amount = (double) messageList.get(3);
+                unblockFunds(agentAccountNumber,amount);
+
+                try{
+                    clients.get(agentAccountNumber).outputStream.writeObject(new Message(NAME,
+                            MessageTypes.ACCOUNT_INFO,
+                            accounts.get(agentAccountNumber)));
+                }catch(Exception e){ e.printStackTrace(); }
+
+                gui.refreshAccountInformation();
+                return new Message(NAME,MessageTypes.CONFIRMATION);
+
             //transfers funds from an agent account to an auction house account
             case TRANSFER_FUNDS:
                 auctionHouseAccountNumber = (int) messageList.get(0);
@@ -187,31 +189,47 @@ public class Bank implements Runnable {
                 amount = (double) messageList.get(2);
                 boolean success = transferFunds(auctionHouseAccountNumber,agentAccountNumber,amount);
 
+                if(!success){
+                    try{
+                        //send rejected message to auction house
+                        clients.get(auctionHouseAccountNumber).outputStream.writeObject(new Message(NAME,
+                                MessageTypes.TRANSFER_REJECTED));
+
+
+                    }catch(Exception e){ e.printStackTrace();}
+
+                }
+
                 try{
+                    //send confirmation and new account to auction house
+                    clients.get(auctionHouseAccountNumber).outputStream.writeObject(new Message(NAME,
+                            MessageTypes.CONFIRMATION));
+
                     clients.get(auctionHouseAccountNumber).outputStream.writeObject(new Message(NAME,
                             MessageTypes.ACCOUNT_INFO,
-                            accounts.get(agentAccountNumber)));
+                            accounts.get(auctionHouseAccountNumber)));
                 }catch(Exception e){ e.printStackTrace();}
 
                 gui.refreshAccountInformation();
+
                 return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(agentAccountNumber));
 
             default: return new Message(NAME,MessageTypes.THANKS);
         }
     }
 
-    /**
-     * Creates an account and adds it to the accounts map.
-     */
-    public synchronized Account makeAccount(String name, double startingBalance, int accountNumber) {
-        Account account = new Account(name,
-                                      assignAccountNumber(accountNumber),
-                                      startingBalance,
-                                      startingBalance);
-
-        this.accounts.put(account.getAccountNumber(), account);
-        return account;
-    }
+//    /**
+//     * Creates an account and adds it to the accounts map.
+//     */
+//    public synchronized Account makeAccount(String name, double startingBalance, int accountNumber) {
+//        Account account = new Account(name,
+//                                      assignAccountNumber(accountNumber),
+//                                      startingBalance,
+//                                      startingBalance);
+//
+//        this.accounts.put(account.getAccountNumber(), account);
+//        return account;
+//    }
 
     /**
      * Adds an auction house to the map of auction houses.
@@ -308,7 +326,7 @@ public class Bank implements Runnable {
      */
     public synchronized  void unblockFunds(int agentAccountNumber, double amount){
         Account agentAccount = accounts.get(agentAccountNumber);
-        agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
+        agentAccount.setPendingBalance(agentAccount.getPendingBalance() + amount);
     }
 
     /**

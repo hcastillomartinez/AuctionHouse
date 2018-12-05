@@ -12,6 +12,7 @@ public class Account implements Serializable{
     private Integer accountNumber;
     private double balance, pendingBalance;
     private String name;
+    private boolean isAgent;
 
     /**
      * Constructor for Account.
@@ -25,6 +26,22 @@ public class Account implements Serializable{
         this.accountNumber = accountNumber;
         this.balance = balance;
         this.pendingBalance = pendingBalance;
+    }
+
+    /**
+     * Constructor for Account.
+     *
+     * @param accountNumber the account number
+     * @param balance the account balance
+     * @param pendingBalance the pending account balance
+     * @param isAgent if it is an agent
+     */
+    public Account(String name, int accountNumber, double balance, double pendingBalance, boolean isAgent){
+        this.name = name;
+        this.accountNumber = accountNumber;
+        this.balance = balance;
+        this.pendingBalance = pendingBalance;
+        this.isAgent = isAgent;
     }
 
 
@@ -86,6 +103,20 @@ public class Account implements Serializable{
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Getter for isAgent
+     */
+    public boolean isAgent() {
+        return isAgent;
+    }
+
+    /**
+     * Setter for isAgent
+     */
+    public void setAgent(boolean agent) {
+        isAgent = agent;
     }
 
     /**
