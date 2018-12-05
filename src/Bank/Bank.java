@@ -109,7 +109,6 @@ public class Bank implements Runnable {
 
                 accounts.put(account.getAccountNumber(),account);
                 addAuctionHouse(auctionInfo,account);
-                gui.refreshAccountInformation();
                 return new Message(NAME, MessageTypes.ACCOUNT_INFO,account);
 
             //sends current account information back to the auction house
@@ -118,19 +117,21 @@ public class Bank implements Runnable {
                 return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(auctionHouseAccountNumber));
 
             //blocks funds in an agent's account per auction house's request and sends updated account back to the agent
-            case REMOVE_FUNDS:
+            case BLOCK_FUNDS:
                 agentAccountNumber = (int) messageList.get(2);
                 amount = (double) messageList.get(3);
 
                 blockFunds(agentAccountNumber, amount);
 
+                //todo unable to block funds code here?
                 try{
                 clients.get(agentAccountNumber).outputStream.writeObject(new Message(NAME,
                                                                          MessageTypes.ACCOUNT_INFO,
                                                                          accounts.get(agentAccountNumber)));
                 }catch(Exception e){ e.printStackTrace(); }
 
-                gui.refreshAccountInformation();
+                System.out.println("here in block_funds");
+
                 return new Message(NAME,MessageTypes.CONFIRMATION);
 
             default: return new Message(NAME,MessageTypes.THANKS);
@@ -160,7 +161,6 @@ public class Bank implements Runnable {
                 agent.setAccountNumber(account.getAccountNumber());
                 addAgent(agent,account);
 
-                gui.refreshAccountInformation();
                 System.out.println(this.accounts);
                 return new Message(NAME,MessageTypes.ACCOUNT_INFO,account);
 
@@ -179,14 +179,13 @@ public class Bank implements Runnable {
                             accounts.get(agentAccountNumber)));
                 }catch(Exception e){ e.printStackTrace(); }
 
-                gui.refreshAccountInformation();
                 return new Message(NAME,MessageTypes.CONFIRMATION);
 
             //transfers funds from an agent account to an auction house account
             case TRANSFER_FUNDS:
-                auctionHouseAccountNumber = (int) messageList.get(0);
-                agentAccountNumber = (int) messageList.get(1);
-                amount = (double) messageList.get(2);
+                agentAccountNumber = clientID;
+                auctionHouseAccountNumber = (int) messageList.get(2);
+                amount = (double) messageList.get(3);
                 boolean success = transferFunds(auctionHouseAccountNumber,agentAccountNumber,amount);
 
                 if(!success){
@@ -210,7 +209,6 @@ public class Bank implements Runnable {
                             accounts.get(auctionHouseAccountNumber)));
                 }catch(Exception e){ e.printStackTrace();}
 
-                gui.refreshAccountInformation();
 
                 return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(agentAccountNumber));
 

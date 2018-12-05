@@ -1,8 +1,10 @@
 package Bank;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TitledPane;
@@ -11,6 +13,14 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * The GUI for Bank.
@@ -41,7 +51,7 @@ public class BankGUI extends Application {
     /**
      * Constructor for BankGUI
      */
-    public BankGUI(){
+    public BankGUI() {
         mainPane = new Pane();
 
         initializeObservableLists();
@@ -49,6 +59,29 @@ public class BankGUI extends Application {
         initializeTitledPanes();
 
         mainPane.getChildren().addAll(agentsPane, housesPane);
+
+
+//        Task<Void> task = new Task<Void>() {
+//
+//            @Override protected Void call() throws Exception {
+//
+//                ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+//
+//                final Runnable refreshScreen = new Runnable() {
+//                    public void run() {
+//                        refreshAccountInformation();
+//                        //System.out.println("inside refreshScreen 182");
+//                    }
+//                };
+//                final ScheduledFuture<?> refreshHandle =
+//                        scheduler.scheduleAtFixedRate(refreshScreen, 1000, 1000, MILLISECONDS);
+//                return null;
+//            }
+//        };
+//
+//        Thread taskThread = new Thread(task);
+//        taskThread.run();
+
     }
 
     /**
@@ -153,12 +186,89 @@ public class BankGUI extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         BankGUI gui = new BankGUI();
-        bank.gui = gui;
+        //bank.gui = gui;
 
         Scene scene = new Scene(gui.mainPane);
         primaryStage.setTitle("Bank");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
+
+//        Task<Void> task = new Task<Void>() {
+//
+//            @Override protected Void call() throws Exception {
+//
+//                ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+//
+//                final Runnable refreshScreen = new Runnable() {
+//                    public void run() {
+//                        Platform.runLater(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                            gui.refreshAccountInformation();
+//
+//                            }
+//                        });
+//                        //System.out.println("inside refreshScreen 182");
+//                    }
+//                };
+//                final ScheduledFuture<?> refreshHandle =
+//                        scheduler.scheduleAtFixedRate(refreshScreen, 1000, 1000, MILLISECONDS);
+//                return null;
+//            }
+//        };
+//
+//        Thread taskThread = new Thread(task);
+//        taskThread.start();
+
+
+
+//        Thread refreshThread = new Thread(new Runnable() {
+//            @Override public void run() {
+//
+//                Platform.runLater(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        bar.setProgress(counter / 1000000.0);
+//                    }
+//                });
+//            }
+//        });
+//
+//        refreshThread.start();
+
+
+        Timer timer = new Timer();
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        gui.refreshAccountInformation();
+                    }
+                });
+            }
+        }, 0, 1000);
+
+
+//        Task<Void> task = new Task<Void>() {
+//
+//            @Override
+//            protected Void call() throws Exception {
+//
+//                ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+//
+//                final Runnable refreshScreen = new Runnable() {
+//                    public void run() {
+//                        gui.refreshAccountInformation();
+//                    }
+//                };
+//                return null;
+//            };
+//        };
+//
+//        task.run();
     }
 }

@@ -53,7 +53,7 @@ public class Account implements Serializable{
      * Gets the balance of the account
      * @return
      */
-    public synchronized double getBalance() {
+    public double getBalance() {
         return balance;
     }
 
@@ -69,7 +69,7 @@ public class Account implements Serializable{
      * Gets the pending balance of the account
      * @return
      */
-    public synchronized double getPendingBalance() {
+    public double getPendingBalance() {
         return pendingBalance;
     }
 
