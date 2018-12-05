@@ -123,6 +123,7 @@ public class AuctionHouseProxy implements Runnable {
                     response = (Message) in.readObject();
                     if (agent != null) {
                         if (response != null) {
+                            System.out.println("writing to AH: "+response);
                             agent.addMessage(response);
                         }
                     }

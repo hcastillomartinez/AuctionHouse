@@ -217,7 +217,7 @@ public class Auction implements Runnable{
         //wait for conformation
 
         auctionHouse.sendToServer(winningClientID,new Message("auction house",
-                MessageTypes.TRANSFER_ITEM,item));
+                MessageTypes.TRANSFER_ITEM,new Bid(item,currentWinnerID,bidToBeat)));
 
         //removes item from its list
         auctionHouse.getItemList().remove(item);
