@@ -45,7 +45,6 @@ public class AuctionHouseProxy implements Runnable {
      * Setting up the input and output streams for the client connection.
      */
     private void setupInputAndOutputStreams() {
-        System.out.println("here");
         try {
             if (client != null) {
                 out = new ObjectOutputStream(client.getOutputStream());

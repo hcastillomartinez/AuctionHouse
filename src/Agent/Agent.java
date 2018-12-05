@@ -32,6 +32,7 @@ public class Agent implements Runnable {
     private AuctionHouse auctionHouse = null;
     private ArrayList<AuctionInfo> houseList;
     private ArrayList<Item> itemList;
+    private ArrayList<Bid> bids;
     private BlockingQueue<Message> messageQueue;
     private HashMap<String, Integer> auctionHouseMap;
     private HashMap<AuctionInfo, AuctionHouseProxy> houseProxyMap;
@@ -42,6 +43,7 @@ public class Agent implements Runnable {
 
     // tester value for the auction house info
     private HashMap<Item, Bid> itemBidMap;
+    private HashMap<AuctionHouseProxy, ArrayList<Item>> auctionHouseItems;
     private AuctionInfo auctionInfo;
 
     
@@ -55,6 +57,8 @@ public class Agent implements Runnable {
         houseList = new ArrayList<>();
         houseProxyMap = new HashMap<>();
         itemBidMap = new HashMap<>();
+        auctionHouseItems = new HashMap<>();
+        bids = new ArrayList<Bid>();
 
         this.bank = new BankProxy(hostName,
                                   portNumber,
@@ -85,6 +89,14 @@ public class Agent implements Runnable {
      * Getting the item list for the specific auction house.
      * @return itemList for the ah
      */
+    private ArrayList<Item> getItemList(AuctionInfo ai) {
+        return auctionHouseItems.get(houseProxyMap.get(ai));
+    }
+
+    /**
+     * Getting the item list for the specific auction house.
+     * @return itemList for the ah
+     */
     public ArrayList<Item> getItemList() {
         return itemList;
     }
@@ -103,18 +115,67 @@ public class Agent implements Runnable {
      * @return portNumber for the client
      */
     public int getPortNumber() { return portNumber; }
+    
+    /**
+     * Function to get the pending balance of the agent account.
+     * @return pending balance
+     */
+    public Double getPendingBalance() {
+        synchronized (account) {
+            return account.getPendingBalance();
+        }
+    }
+    
+    /**
+     * Function to return the agent account.
+     * @return account for the agent.
+     */
+    public Account getAccount() {
+        return account;
+    }
+    
+    /**
+     * Function to get the bids.
+     */
+    public ArrayList<Bid> getBids() {
+        synchronized (bids) {
+            return bids;
+        }
+    }
 
     /**
      * Getting the host name.
      * @return host name for the client.
      */
     public String getHostName() { return hostName; }
+    
+    /**
+     * Taking in messages until the item list message has been returned.
+     */
+    private synchronized void searchForItemResponse() {
+        System.out.println("searchForItemResponse() method");
+    
+        Message in;
+        MessageAnalyzer analyzer = new MessageAnalyzer();
+        while (!MessageTypes.GET_ITEMS.getMessage()
+                                      .equalsIgnoreCase("get items")) {
+            try {
+                in = messageQueue.take();
+                response(in,
+                         (MessageTypes) in.getMessageList().get(1),
+                         analyzer.analyze(in));
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
+        }
+    }
 
     /**
      * Setting the auction house for the agent.
      * @param auctionInfo house for functionality
      */
-    public boolean setAuctionHouse(AuctionInfo auctionInfo) {
+    public synchronized boolean setAuctionHouse(AuctionInfo auctionInfo) {
+        System.out.println("setAuctionHouse() method");
         if (!houseProxyMap.containsKey(auctionInfo)) {
             AuctionHouseProxy proxy = new AuctionHouseProxy(auctionInfo
                                                                 .getIPAddress(),
@@ -122,12 +183,12 @@ public class Agent implements Runnable {
                                                                 .getPortNumber(),
                                                             this);
             houseProxyMap.put(auctionInfo, proxy);
-            aHProxy = houseProxyMap.get(auctionInfo);
-        } else {
-            aHProxy = houseProxyMap.get(auctionInfo);
-            aHProxy.sendMessage(new Message(NAME, MessageTypes.GET_ITEMS));
+            auctionHouseItems.put(proxy, new ArrayList<Item>());
         }
         this.auctionInfo = auctionInfo;
+        aHProxy = houseProxyMap.get(auctionInfo);
+        aHProxy.sendMessage(new Message(NAME, MessageTypes.GET_ITEMS));
+        searchForItemResponse();
         return true;
     }
 
@@ -154,8 +215,8 @@ public class Agent implements Runnable {
     }
     
     /**
-     * Returning the list of auction house infos.
-     * @return list of the auction house infos
+     * Returning the list of auction house info.
+     * @return list of the auction house info
      */
     public Integer getCurrentAuctionID() {
         if (auctionInfo != null) {
@@ -215,34 +276,34 @@ public class Agent implements Runnable {
     /*               Functions For Actions Based On Input            */
     /*                                                               */
     /*****************************************************************/
-
-    /**
-     * Getting and setting the new account information from the bank.
-     */
-    private synchronized Account openNewBankAccount() {
-        if (account == null) {
-            // getting the account first name
-            System.out.print("First Name: ");
-            String firstName = scanner.next();
-    
-            // getting the account last name
-            System.out.print("Last Name: ");
-            String lastName = scanner.next();
-
-            // getting the account starting amount
-            System.out.print("staring balance: ");
-            double amount = scanner.nextDouble();
-            System.out.println();
-            
-            return new Account(firstName + " " + lastName,
-                               getId(),
-                               amount,
-                               amount);
-        } else {
-            System.out.println("Account is already created");
-        }
-        return null;
-    }
+//
+//    /**
+//     * Getting and setting the new account information from the bank.
+//     */
+//    private synchronized Account openNewBankAccount() {
+//        if (account == null) {
+//            // getting the account first name
+//            System.out.print("First Name: ");
+//            String firstName = scanner.next();
+//
+//            // getting the account last name
+//            System.out.print("Last Name: ");
+//            String lastName = scanner.next();
+//
+//            // getting the account starting amount
+//            System.out.print("staring balance: ");
+//            double amount = scanner.nextDouble();
+//            System.out.println();
+//
+//            return new Account(firstName + " " + lastName,
+//                               getId(),
+//                               amount,
+//                               amount);
+//        } else {
+//            System.out.println("Account is already created");
+//        }
+//        return null;
+//    }
     
     /**
      * Function to add to the list of messageQueue.
@@ -296,7 +357,6 @@ public class Agent implements Runnable {
                                        int sender) {
         Message response;
         ArrayList<Object> list = message.getMessageList();
-        System.out.println(message.getMessageList().get(1));
 
         switch (type) {
             case CONFIRMATION:
@@ -304,11 +364,11 @@ public class Agent implements Runnable {
                 respondToSender(sender, response, getAHProxy(auctionInfo));
                 break;
             case TRANSFER_ITEM:
-                Bid bid = (Bid) list.get(2);
+                Item bidItem = (Item) list.get(2);
                 response = new Message(NAME,
                                        MessageTypes.REMOVE_FUNDS,
                                        getId(),
-                                       bid.getAmount());
+                                       bidItem.getPrice());
                 respondToSender(sender, response, getAHProxy(auctionInfo));
                 break;
             case BANK_ACCOUNT:
@@ -336,9 +396,7 @@ public class Agent implements Runnable {
                 itemList = (ArrayList<Item>) list.get(2);
                 break;
             case ACCOUNT_INFO:
-                System.out.println(account + " = first account");
                 account = (Account) list.get(2);
-                System.out.println(account + " = second account");
                 break;
             case UNBLOCK_FUNDS:
                 int aucID = (int) list.get(2);
@@ -400,6 +458,7 @@ public class Agent implements Runnable {
     public void run() {
         Message in;
         MessageAnalyzer analyzer = new MessageAnalyzer();
+        long pastTime = System.currentTimeMillis(), presentTime;
 
         try {
             while (connected) {

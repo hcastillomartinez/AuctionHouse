@@ -51,4 +51,9 @@ public class Bid implements Serializable {
     public double getAmount() {
         return amount;
     }
+
+    @Override
+    public String toString() {
+        return "Item: " + item.getItemName() + ", amount: " + amount;
+    }
 }

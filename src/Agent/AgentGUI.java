@@ -36,6 +36,7 @@ public class AgentGUI extends Application {
     private static Agent agent;
     private ChoiceBox<String> auctionHouses;
     private ListView<String> itemsFromHouse = new ListView<>();
+    private ListView<String> bids = new ListView<>();
 
     // filler variables for the boxes
     private Label firName, lastName, acctBalance, pendingBalanceLabel,
@@ -99,7 +100,7 @@ public class AgentGUI extends Application {
     /**
      * Filling the choice box with the auction house options.
      */
-    private synchronized void updateAuctionHouseChoices() {
+    private void updateAuctionHouseChoices() {
         auctionHouses.getItems().clear();
         agent.getBank().sendAgentMessage(new Message(agent.getNAME(),
                                                      MessageTypes.GET_HOUSES));
@@ -149,9 +150,11 @@ public class AgentGUI extends Application {
         chooseAuctionHouseButton.setMinHeight(25);
         chooseAuctionHouseButton.setOnAction(e -> {
             if (setAuctionHouseOnChoice()) {
+                agent.getAHProxy(agent.getAuctionInfo())
+                     .sendMessage(new Message(agent.getNAME(),
+                                              MessageTypes.GET_ITEMS));
                 itemsFromHouse.getItems().clear();
                 ArrayList<Item> list = agent.getItemList();
-                System.out.println(list);
                 
                 for (Item i: list) {
                     itemsFromHouse.getItems().add(i.toString());
@@ -167,6 +170,15 @@ public class AgentGUI extends Application {
     /*                                                               */
     /*****************************************************************/
 
+    /**
+     * Function to update the fields for the user account.
+     */
+    private void updateAccountFields() {
+        Account account = agent.getAccount();
+        acctBalanceField.setText("" + account.getBalance() + "");
+        pendingField.setText("" + account.getPendingBalance() + "");
+    }
+    
     /**
      * Function to make the createAccountButton.
      */
@@ -210,6 +222,18 @@ public class AgentGUI extends Application {
     }
     
     /**
+     * Function for updating the list view to contain the current bids.
+     */
+    private void updateBidList() {
+        ArrayList<Bid> bidList = agent.getBids();
+        bids.getItems().clear();
+        
+        for (Bid b: bidList) {
+            bids.getItems().add(b.toString());
+        }
+    }
+    
+    /**
      * Function to make the place bid button.
      */
     private void makePlaceBidButton() {
@@ -221,13 +245,19 @@ public class AgentGUI extends Application {
         placeBidButton.setOnAction(e -> {
             if (!itemField.getText().isEmpty() &&
                 !bidField.getText().isEmpty()) {
-                Bid bid = new Bid(agent.getItem(),
-                                  agent.getKey(),
-                                  Double.parseDouble(bidField.getText()));
-                Message message = new Message(agent.getNAME(),
-                                              MessageTypes.BID,
-                                              bid);
-                agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
+                if (Integer.parseInt(bidField.getText()) <
+                    agent.getAccount().getPendingBalance()) {
+                    Bid bid = new Bid(agent.getItem(),
+                                      agent.getKey(),
+                                      Double.parseDouble(bidField.getText()));
+                    Message message = new Message(agent.getNAME(),
+                                                  MessageTypes.BID,
+                                                  bid);
+                    agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
+                    agent.getBids().add(bid);
+                    bidField.setText("");
+                    updateBidList();
+                }
             }
         });
     }
@@ -415,7 +445,8 @@ public class AgentGUI extends Application {
                                           idBox,
                                           itemBox,
                                           bidBox,
-                                          placeBidButton);
+                                          placeBidButton,
+                                          bids);
     }
 
     /*****************************************************************/
