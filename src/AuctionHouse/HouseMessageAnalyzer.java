@@ -40,6 +40,11 @@ public class HouseMessageAnalyzer {
             }
 
         }
+        else if(sender.equals("auction")){
+            if(type.equals(MessageTypes.UPDATE)){
+                return 4;
+            }
+        }
         return 0;
     }
 }

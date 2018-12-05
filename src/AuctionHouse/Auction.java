@@ -69,7 +69,7 @@ public class Auction implements Runnable{
             public void run() {
                 if(time>= DURATION){
                     auctionActive = false;
-                    System.out.println(time);
+//                    System.out.println(time);
                     t.cancel();
                     placeBid(new Bid(null,9,0),1);
                 }
@@ -222,7 +222,8 @@ public class Auction implements Runnable{
 
         //removes item from its list
         auctionHouse.getItemList().remove(item);
-
+        auctionHouse.placeMessageForAnalyzing(new Message("auction",
+                MessageTypes.UPDATE));
         System.out.println("Agent winner: "+ currentWinnerID);
     }
 

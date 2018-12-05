@@ -3,6 +3,8 @@ package AuctionHouse;
 import Bank.Account;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -24,12 +26,14 @@ public class AuctionHouseGUI extends Application {
     private AnchorPane root;
     private static AuctionHouse auctionHouse;
     private Account auctionAccount;
-    private List<Item> auctionItems;
+//    private List<Item> auctionItems;
     private int bankAccount;
     private double balance;
     private ListView<Item> displayItems;
-    private List<Auction> auctions;
+    private ObservableList<Item> itemObservableList;
+//    private List<Auction> auctions;
     private ListView<Auction> auctionListView;
+    private ObservableList<Auction> auctionObservableList;
     private Timeline timeline;
     private Timer timer;
     private boolean auctionOpen;
@@ -58,17 +62,17 @@ public class AuctionHouseGUI extends Application {
      * Starts a thread that will be updating the item the item list until the
      * GUI is exited via red x.
      */
-    public void updateItemList(){
+    public void updateLists(){
         System.out.println("item list");
-        displayItems.getItems().clear();
-        displayItems.getItems().addAll(auctionItems);
+        //todo fix the illegalstateexception
+        auctionObservableList.setAll(auctionHouse.getAuctions());
+        itemObservableList.setAll(auctionHouse.getItemList());
     }
 
-    public void updateAuctionList(){
-        System.out.println("auction list");
-        auctionListView.getItems().clear();
-        auctionListView.getItems().addAll(auctions);
-    }
+//    public void updateAuctionList(){
+//        System.out.println("auction list");
+//        itemObservableList.setAll(auctionHouse.getItemList());
+//    }
 
     void updateBalance(){
         balance=auctionAccount.getBalance();
@@ -77,10 +81,16 @@ public class AuctionHouseGUI extends Application {
 
     private void createGUI(){
         root.setStyle("-fx-background-color: lightblue");
-        displayItems=new ListView<>();
-        auctionItems=auctionHouse.getItemList();
-        auctions=auctionHouse.getAuctions();
-        auctionListView=new ListView<>();
+//        auctionItems=auctionHouse.getItemList();
+//        auctions=auctionHouse.getAuctions();
+
+        itemObservableList= FXCollections.observableArrayList();
+        auctionObservableList=FXCollections.observableArrayList();
+        itemObservableList.setAll(auctionHouse.getItemList());
+        auctionObservableList.setAll(auctionHouse.getAuctions());
+
+        displayItems=new ListView<>(itemObservableList);
+        auctionListView=new ListView<>(auctionObservableList);
 
         accountNumberLabel=new Label("ACCOUNT NUMBER: ");
         accountNumberLabel.setStyle("-fx-font-size: 18");
@@ -120,7 +130,7 @@ public class AuctionHouseGUI extends Application {
         auctionListView.setLayoutY(30);
         auctionListView.setLayoutX(300);
         auctionListView.setPrefSize(300,250);
-        displayItems.getItems().addAll(auctionItems);
+//        displayItems.getItems().addAll(auctionItems);
     }
 
 

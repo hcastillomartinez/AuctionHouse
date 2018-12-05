@@ -31,6 +31,7 @@ public enum MessageTypes {
     BANK_ACCOUNT("account number"),
     OUT_BID("out bid"),
     ITEMS("items"),
+    UPDATE("update"),
     HOUSES("houses"),
     ID_FOR_HOUSE("id for house");
 

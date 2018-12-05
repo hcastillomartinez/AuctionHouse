@@ -212,8 +212,11 @@ public class AuctionHouse implements Runnable {
             tryBid((Bid) m.getMessageList().get(2),id);
         }else if(action == 3){
             updateAccount((Account) m.getMessageList().get(2));
-            if(auctionHouseGUI!=null)auctionHouseGUI.updateBalance();
-            else System.out.println("here");
+            if(auctionHouseGUI!=null)auctionHouseGUI.updateLists();
+        }else if(action==4){
+            if(auctionHouseGUI!=null){
+               auctionHouseGUI.updateLists();
+            }
         }
 
     }
@@ -236,6 +239,7 @@ public class AuctionHouse implements Runnable {
             Auction a = new Auction(this,b.getItem());
             a.placeBid(b,serverThreadID);
             auctions.add(a);
+            auctionHouseGUI.updateLists();
             Thread t = new Thread(a);
             t.start();
         }
@@ -253,6 +257,7 @@ public class AuctionHouse implements Runnable {
         for(Auction a: auctions){
             if(a.getItem().equals(b.getItem())){
                 a.placeBid(b,serverThreadID);
+                auctionHouseGUI.updateLists();
                 break;
             }
         }
