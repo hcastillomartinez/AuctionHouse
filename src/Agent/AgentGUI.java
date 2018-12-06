@@ -260,7 +260,7 @@ public class AgentGUI extends Application {
      */
     private void placeBid() {
         Bid bid = new Bid(agent.getItem(),
-                          agent.getKeyForHouse(),
+                          agent.getId(),// look here
                           Double.parseDouble(bidField.getText()));
         Message message = new Message(agent.getNAME(),
                                       MessageTypes.BID,
