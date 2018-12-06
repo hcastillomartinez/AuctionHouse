@@ -331,7 +331,7 @@ public class Bank implements Runnable {
      */
     public synchronized  void unblockFunds(int agentAccountNumber, double amount){
         Account agentAccount = accounts.get(agentAccountNumber);
-        agentAccount.setPendingBalance(agentAccount.getPendingBalance() + amount);
+        agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
     }
 
     /**

@@ -401,7 +401,6 @@ public class Agent implements Runnable {
                 respondToSender(sender, response, getAHProxy(auctionInfo));
                 break;
             case TRANSFER_ITEM:
-                System.out.println("here");
                 Bid bid = (Bid) list.get(2);
                 Item bidItem = bid.getItem();
                 
