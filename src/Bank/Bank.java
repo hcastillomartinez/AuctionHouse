@@ -106,6 +106,7 @@ public class Bank implements Runnable {
             //creates a bank account for an auction house
             case CREATE_ACCOUNT:
                 AuctionInfo auctionInfo = (AuctionInfo) messageList.get(2);
+                auctionInfo.setAccountNumber(clientID);
 
                 Account account = new Account(auctionInfo.getName(),clientID, 0,0,false);
 
@@ -199,6 +200,9 @@ public class Bank implements Runnable {
             case TRANSFER_FUNDS:
                 agentAccountNumber = clientID;
                 auctionHouseAccountNumber = (int) messageList.get(2);
+
+                System.out.println("inside TRANSFER_FUNDS");
+                System.out.println("Agent account: " + agentAccountNumber + ". Auction account: " + auctionHouseAccountNumber);
                 amount = (double) messageList.get(3);
                 boolean success = transferFunds(auctionHouseAccountNumber,agentAccountNumber,amount);
 

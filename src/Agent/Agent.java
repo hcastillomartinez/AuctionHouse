@@ -454,7 +454,7 @@ public class Agent implements Runnable {
                 double price = (double) list.get(3);
                 bank.sendAgentMessage(new Message(NAME,
                                                   MessageTypes.TRANSFER_FUNDS,
-                                                  id,
+                                                  this.getAuctionInfo().getAccountNumber(),
                                                   price));
                 break;
         }
