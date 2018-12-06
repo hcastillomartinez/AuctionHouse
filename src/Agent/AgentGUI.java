@@ -47,13 +47,13 @@ public class AgentGUI extends Application {
     private TextField firNameField, lastNameField, acctBalanceField,
         pendingField, ahField, idField, itemField, bidField;
     private Button createAccountButton, placeBidButton, selectItemButton,
-        updateButton, chooseAuctionHouseButton;
+        updateButton, chooseAuctionHouseButton, updateWonItemsButton;
     
     // box variables
     private VBox accountBox, bidContainer, auctionContainer, appVertContainer;
     private HBox firstNameBox, lastNameBox, accountBalance, aucHouseHBox,
         idBox, itemBox, bidBox, appFullContainer, pendingBalanceBox,
-        itemAndBidBox, labelItemAndBidBox;
+        itemAndBidBox, labelItemAndBidBox, aucHBox, bidAndUpdateBox;
     
     // background fillers
     private final BackgroundFill BLUE
@@ -66,7 +66,7 @@ public class AgentGUI extends Application {
         @Override
         public void run() {
             long past = System.currentTimeMillis();
-            while (System.currentTimeMillis() - past < 500) {}
+            while (System.currentTimeMillis() - past < 100) {}
         }
     };
     
@@ -99,11 +99,12 @@ public class AgentGUI extends Application {
      * Function to choose the auction house.
      */
     private boolean setAuctionHouseOnChoice() {
-        String aucName = auctionHouses.getValue();
+        String aucName = auctionHouses.getValue(), check;
         ArrayList<AuctionInfo> tempList = agent.getHouseList();
         
         for (AuctionInfo ai: tempList) {
-            if (ai.toString().equalsIgnoreCase(aucName)) {
+            check = ai.getName() + " " + ai.getPortNumber();
+            if (check.equalsIgnoreCase(aucName)) {
                 return agent.setAuctionHouse(ai);
             }
         }
@@ -122,7 +123,7 @@ public class AgentGUI extends Application {
         auctionHouses.getItems().add("Choose Auction House");
         auctionHouses.setValue("Choose Auction House");
         for (AuctionInfo s: temp) {
-            auctionHouses.getItems().add(s.toString());
+            auctionHouses.getItems().add(s.getName() + " " + s.getPortNumber());
         }
     }
     
@@ -265,7 +266,7 @@ public class AgentGUI extends Application {
                                       MessageTypes.BID,
                                       bid);
         agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
-        agent.getBids().add(bid);
+//        agent.getBids().add(bid);
     }
     
     /**
@@ -491,18 +492,53 @@ public class AgentGUI extends Application {
     }
     
     /**
+     * Function to make the bid and update box
+     */
+    private void buildBidAndUpdateBox() {
+        bidAndUpdateBox = new HBox();
+        bidAndUpdateBox.setMaxHeight(28);
+        bidAndUpdateBox.setSpacing(10);
+        bidAndUpdateBox.setMaxWidth(WIDTH * 0.5);
+        bidAndUpdateBox.getChildren().addAll(placeBidButton,
+                                             updateWonItemsButton);
+    }
+    
+    /**
+     * Function to build the won items button update.
+     */
+    private void buildItemUpdateButton() {
+        updateWonItemsButton = new Button("Update Items Won");
+        updateWonItemsButton.setTextFill(Color.WHITE);
+        updateWonItemsButton.setMaxWidth(175);
+        updateWonItemsButton.setMaxHeight(25);
+        updateWonItemsButton.setBackground(new Background(GREY));
+        updateWonItemsButton.setOnAction(e -> {
+            ArrayList<Item> tempWin = agent.getWonItems();
+            wonItems.getItems().clear();
+            
+            for (Item item: tempWin) {
+                wonItems.getItems()
+                        .add(item.getItemName() + " " + item.getPrice());
+            }
+        });
+    }
+    
+    /**
      * Function to add fields to the bidBox container.
      */
     private void buildBidContainer() {
         bidContainer = new VBox();
         bidContainer.setMinWidth(WIDTH * 0.5);
         bidContainer.setMinHeight(HEIGHT * 0.5);
+        buildItemUpdateButton();
+        buildLabelItemAndBidBox();
         buildItemAndBidBox();
+        buildBidAndUpdateBox();
         bidContainer.getChildren().addAll(aucHouseHBox,
                                           idBox,
                                           itemBox,
                                           bidBox,
-                                          placeBidButton,
+                                          bidAndUpdateBox,
                                           labelItemAndBidBox,
                                           itemAndBidBox);
     }
@@ -528,6 +564,19 @@ public class AgentGUI extends Application {
     }
     
     /**
+     * Function to build the horizontal box for the update and select
+     * buttons and the drop down box.
+     */
+    private void buildAucHBox() {
+        aucHBox = new HBox();
+        aucHBox.setSpacing(10);
+        aucHBox.setMaxWidth(WIDTH * 0.5);
+        aucHBox.setMaxHeight(HEIGHT * 0.85);
+        aucHBox.getChildren().addAll(auctionHouses,
+                                     chooseAuctionHouseButton);
+    }
+    
+    /**
      * Function to initialize the vertical boxes
      */
     private void buildAuctionBox() {
@@ -535,9 +584,12 @@ public class AgentGUI extends Application {
         auctionContainer.setMinWidth(WIDTH * 0.5);
         auctionContainer.setMinHeight(HEIGHT);
         auctionContainer.setSpacing(5);
+        buildAucHBox();
+        Label chooseAuctionHouseBox = new Label("Choose House from Dropdown " +
+                                                    "Box Below: ");
         auctionContainer.getChildren().addAll(updateButton,
-                                              auctionHouses,
-                                              chooseAuctionHouseButton,
+                                              chooseAuctionHouseBox,
+                                              aucHBox,
                                               itemsFromHouse,
                                               selectItemButton);
         // TODO:

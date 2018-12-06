@@ -401,8 +401,13 @@ public class Agent implements Runnable {
                 respondToSender(sender, response, getAHProxy(auctionInfo));
                 break;
             case TRANSFER_ITEM:
+                System.out.println("here");
                 Bid bid = (Bid) list.get(2);
                 Item bidItem = bid.getItem();
+                
+                bids.remove(bid);
+                wonItems.add(bidItem);
+                
                 response = new Message(NAME,
                                        MessageTypes.REMOVE_FUNDS,
                                        getId(),
@@ -424,17 +429,14 @@ public class Agent implements Runnable {
                 houseList = (ArrayList<AuctionInfo>) list.get(2);
                 break;
             case BID_REJECTED:
-                // TODO: Get bid from ah that was rejected
-                Bid bid1 = (Bid) list.get(2);
                 break;
             case BID_ACCEPTED:
+                bids.add((Bid) list.get(2));
                 response = new Message(NAME, MessageTypes.THANKS);
                 respondToSender(sender, response, getAHProxy(auctionInfo));
                 break;
             case OUT_BID:
-                //TODO: Get bid from ah that was rejected
-                Bid outbid = (Bid) list.get(2);
-                bids.remove(outbid);
+                bids.remove((Bid) list.get(2));
                 break;
             case GET_ITEMS:
                 itemList = (ArrayList<Item>) list.get(2);
@@ -443,9 +445,7 @@ public class Agent implements Runnable {
                 account = (Account) list.get(2);
                 break;
             case UNBLOCK_FUNDS:
-                int aucID = (int) list.get(2);
                 double price = (double) list.get(3);
-                
                 bank.sendAgentMessage(new Message(NAME,
                                                   MessageTypes.TRANSFER_FUNDS,
                                                   id,
