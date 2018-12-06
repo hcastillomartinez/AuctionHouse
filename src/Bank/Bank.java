@@ -38,6 +38,7 @@ public class Bank implements Runnable {
     static private String address; //IP address
     static private int portNumber; //port number
     static BankGUI gui; //gui for bank
+    private Integer keyForClient = 0;
 
     /**
      * The main method for the Bank application.
@@ -167,6 +168,12 @@ public class Bank implements Runnable {
             //return list of HouseInfo objects
             case GET_HOUSES:
                 return new Message(NAME,MessageTypes.HOUSES,this.getAuctionHousesAsList());
+                
+            case GET_AGENT_ID_FOR_HOUSE:
+                return new Message(NAME,
+                                   MessageTypes.ID_FOR_HOUSE,
+                                   (AuctionInfo) message.getMessageList().get(2),
+                                   new Integer(keyForClient += 1));
 
             case UNBLOCK_FUNDS:
                 agentAccountNumber = (int) messageList.get(2);
