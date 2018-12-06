@@ -66,7 +66,7 @@ public class AgentGUI extends Application {
         @Override
         public void run() {
             long past = System.currentTimeMillis();
-            while (System.currentTimeMillis() - past < 100) {}
+            while (System.currentTimeMillis() - past < 300) {}
         }
     };
     
@@ -266,7 +266,7 @@ public class AgentGUI extends Application {
                                       MessageTypes.BID,
                                       bid);
         agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
-//        agent.getBids().add(bid);
+        System.out.println("placing bid now");
     }
     
     /**
@@ -513,6 +513,7 @@ public class AgentGUI extends Application {
         updateWonItemsButton.setMaxHeight(25);
         updateWonItemsButton.setBackground(new Background(GREY));
         updateWonItemsButton.setOnAction(e -> {
+            System.out.println("here in the update items");
             ArrayList<Item> tempWin = agent.getWonItems();
             wonItems.getItems().clear();
             
