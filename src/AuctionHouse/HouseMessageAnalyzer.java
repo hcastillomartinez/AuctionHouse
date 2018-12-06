@@ -41,6 +41,8 @@ public class HouseMessageAnalyzer {
         else if(sender.equals("auction")){
             if(type.equals(MessageTypes.UPDATE)){
                 return 4;
+            }else if(type.equals(MessageTypes.UPDATE_ITEM)){
+                return 5;
             }
         }
         return 0;

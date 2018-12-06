@@ -205,12 +205,17 @@ public class AuctionHouse implements Runnable {
             int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
             tryBid((Bid) m.getMessageList().get(2),id);
         }else if(action == 3){
+            System.out.println("New: "+m.getMessageList().get(2));
+            System.out.println("OLD: "+getAccount());
             updateAccount((Account) m.getMessageList().get(2));
             setUpdateGUI(true);
         }else if(action==4){
             if(auctionHouseGUI!=null){
                setUpdateGUI(true);
             }
+        }else if(action==5){
+            updateItemList((Item)m.getMessageList().get(2));
+            setUpdateGUI(true);
         }
 
     }
@@ -221,7 +226,18 @@ public class AuctionHouse implements Runnable {
      */
     private void updateAccount(Account account) {
         this.account = account;
-        System.out.println("AH bal: "+this.account.getBalance());
+    }
+
+    /**
+     * Updates the internal item to have updated price.
+     * @param item
+     */
+    private void updateItemList(Item item){
+        for(Item i: itemList){
+            if(item.getItemName().equals(i.getItemName())){
+                i.updatePrice(item.getPrice());
+            }
+        }
     }
 
     /**

@@ -172,6 +172,8 @@ public class Auction implements Runnable{
             currentWinnerID = currentBidderID;
             winningBid=currentBid;
             item.updatePrice(bid);
+            auctionHouse.placeMessageForAnalyzing(new Message("auction"
+                    ,MessageTypes.UPDATE_ITEM,item));
             bidToBeat = bid;
             System.out.println("current winner " + currentWinnerID);
         }
@@ -232,11 +234,11 @@ public class Auction implements Runnable{
         }
         auctionHouse.sendToServer(winningClientID,
                 new Message("auction house",MessageTypes.UNBLOCK_FUNDS,
-                        auctionHouse.getHouseID(),item.getPrice()));
+                        currentWinnerID,item.getPrice()));
         //wait for conformation
 
         auctionHouse.sendToServer(winningClientID,new Message("auction house",
-                MessageTypes.TRANSFER_ITEM, currentBid));
+                MessageTypes.TRANSFER_ITEM, winningBid));
 
         //removes item from its list
 //        System.out.println(auctionHouse.getItemList().remove(item));
