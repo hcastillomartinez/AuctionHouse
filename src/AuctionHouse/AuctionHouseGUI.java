@@ -63,9 +63,9 @@ public class AuctionHouseGUI extends Application {
 
    public void updateBankInfo(){
        auctionAccount=auctionHouse.getAccount();
-
-        balance=auctionAccount.getBalance();
-        balLabel.setText(""+balance);
+       accLabel.setText(""+auctionAccount.getAccountNumber());
+       balance=auctionAccount.getBalance();
+       balLabel.setText(""+balance);
     }
 
     private void createGUI(){
@@ -144,6 +144,7 @@ public class AuctionHouseGUI extends Application {
 
         typeT.setText("furniture");
         portT.setText("5555");
+        //64.106.21.151
         serverNam.setText("localhost");
 
         Button add=new Button("Launch");
