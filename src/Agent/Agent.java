@@ -468,7 +468,7 @@ public class Agent implements Runnable {
                 int accntNum = (int) list.get(4);
                 account.setBalance(bal);
                 account.setPendingBalance(pend);
-                account.setAccountNumber(accntNum);
+//                account.setAccountNumber(accntNum);
                 System.out.println(account + " = after");
                 accountChange = true;
                 break;

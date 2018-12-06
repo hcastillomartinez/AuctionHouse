@@ -120,7 +120,10 @@ public class Bank implements Runnable {
             //sends current account information back to the auction house
             case ACCOUNT_INFO:
                 auctionHouseAccountNumber = clientID;
-                return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(auctionHouseAccountNumber));
+                return new Message(NAME, MessageTypes.ACCOUNT_INFO,
+                                   accounts.get(auctionHouseAccountNumber).getBalance(),
+                                   accounts.get(auctionHouseAccountNumber).getPendingBalance(),
+                                   accounts.get(auctionHouseAccountNumber).getAccountNumber());
 
             //blocks funds in an agent's account per auction house's request and sends updated account back to the agent
             case BLOCK_FUNDS:
@@ -129,6 +132,8 @@ public class Bank implements Runnable {
 
                 if(blockFunds(agentAccountNumber, amount)){
                     try{
+                        Account account1 = accounts.get(agentAccountNumber);
+                        account1.setPendingBalance(account1.getPendingBalance() - amount);
                         clients.get(agentAccountNumber)
                                 .outputStream
                                 .writeObject(new Message(NAME,
@@ -179,7 +184,7 @@ public class Bank implements Runnable {
                 System.out.println(this.accounts);
                 return new Message(NAME,MessageTypes.ACCOUNT_INFO,
                                    accounts.get(agent.getAccountNumber()).getBalance(),
-                                   accounts.get(agent.getAccountNumber()).getBalance(),
+                                   accounts.get(agent.getAccountNumber()).getPendingBalance(),
                                    accounts.get(agent.getAccountNumber()).getAccountNumber());
 
             //return list of HouseInfo objects
@@ -251,8 +256,13 @@ public class Bank implements Runnable {
 
                 }catch(Exception e){ e.printStackTrace();}
 
+                accounts.get(agentAccountNumber).setBalance(accounts.get(agentAccountNumber).getBalance() - amount);
 
-                return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(agentAccountNumber));
+                return new Message(NAME,
+                                   MessageTypes.ACCOUNT_INFO,
+                                   accounts.get(agentAccountNumber).getBalance(),
+                                   accounts.get(agentAccountNumber).getPendingBalance(),
+                                   accounts.get(agentAccountNumber).getAccountNumber());
 
             default: return new Message(NAME,MessageTypes.THANKS);
         }
@@ -325,7 +335,7 @@ public class Bank implements Runnable {
                 if(agentAccount.getBalance() >= amount){
                     //transfer funds from agent to auction house
                     //agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
-                    agentAccount.setBalance(agentAccount.getBalance() - amount);
+//                    agentAccount.setBalance(agentAccount.getBalance() - amount);
                     houseAccount.setBalance(houseAccount.getBalance() + amount);
                     houseAccount.setPendingBalance(houseAccount.getPendingBalance() + amount);
                     return true;
@@ -345,7 +355,6 @@ public class Bank implements Runnable {
     public synchronized boolean blockFunds(int agentAccountNumber, double amount){
         Account agentAccount = accounts.get(agentAccountNumber);
         if(agentAccount.getPendingBalance() - amount >= 0){
-            agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
             return true;
         }
         return false;
