@@ -7,15 +7,14 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import java.util.Timer;
@@ -165,7 +164,6 @@ public class AuctionHouseGUI extends Application {
 
                 timeline=new Timeline(new KeyFrame(Duration.millis(1),
                         event -> {
-                    if(auctionHouse.isSafeToClose())timeline.stop();
                     if(auctionHouse.isUpdateGUI()){
                         System.out.println("updating GUI");
                         updateLists();
@@ -178,13 +176,23 @@ public class AuctionHouseGUI extends Application {
 
 
                 Scene scene1=new Scene(root);
-                primaryStage.setTitle("Auction House");
+                primaryStage.setTitle("Auction House "+portT.getText());
                 primaryStage.setResizable(false);
                 primaryStage.setScene(scene1);
                 primaryStage.show();
                 nestStage.close();
             }
         });
+
+//        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+//            @Override
+//            public void handle(WindowEvent windowEvent) {
+//                Alert alert=new Alert(Alert.AlertType.INFORMATION);
+//                alert.setTitle("Not Safe To Close");
+//                alert.setHeaderText("Processes Still Running");
+//                alert.show();
+//            }
+//        });
         Scene scene = new Scene(pane);
         nestStage.setTitle("Auction Info");
         nestStage.setScene(scene);
@@ -195,9 +203,14 @@ public class AuctionHouseGUI extends Application {
     @Override
     public void stop(){
 //        auctionHouse.sendToBank("close");
+//        if(!auctionHouse.isSafeToClose()){
+//
+//
+//        }
         System.out.println("GUI closed");
+        timeline.stop();
         System.exit(1);
-        timer.cancel();
+//        timer.cancel();
         auctionOpen=false;
     }
 }

@@ -5,7 +5,6 @@ import Bank.Account;
 import Bank.AuctionInfo;
 import MessageHandling.Message;
 import MessageHandling.MessageTypes;
-import javafx.application.Application;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -205,9 +204,12 @@ public class AuctionHouse implements Runnable {
             int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
             tryBid((Bid) m.getMessageList().get(2),id);
         }else if(action == 3){
-            System.out.println("New: "+m.getMessageList().get(2));
+            Account temp=(Account)m.getMessageList().get(2);
+            System.out.println("New: "+temp);
             System.out.println("OLD: "+getAccount());
-            updateAccount((Account) m.getMessageList().get(2));
+            this.account.setAccountNumber(temp.getAccountNumber());
+            this.account.setBalance(temp.getBalance());
+//            updateAccount(temp);
             setUpdateGUI(true);
         }else if(action==4){
             if(auctionHouseGUI!=null){
@@ -225,7 +227,8 @@ public class AuctionHouse implements Runnable {
      * @param account double that is funds to be added
      */
     private void updateAccount(Account account) {
-        this.account = account;
+//        this.account.setBalance(account.getBalance());
+//        this.account = account;
     }
 
     /**
@@ -270,7 +273,6 @@ public class AuctionHouse implements Runnable {
             if(a.getItem().equals(b.getItem())){
                 a.placeBid(b,serverThreadID);
                 setUpdateGUI(true);
-//                auctionHouseGUI.updateLists();
                 break;
             }
         }
@@ -403,7 +405,7 @@ public class AuctionHouse implements Runnable {
                     Message m = (Message) in.readObject();
                     if(m != null){
                         addID(m);
-                        System.out.println("Receiving from "+ ID+" "+m);
+//                        System.out.println("Receiving from "+ ID+" "+m);
                         auctionHouse.placeMessageForAnalyzing(m);
                     }
                 }catch(EOFException i){
