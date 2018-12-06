@@ -23,12 +23,12 @@ public class MakeItems {
      * @param typeID An int
      * @return A List
      */
-    public List<Item> getItems(int typeID){
-        if(typeID==1){
+    public List<Item> getItems(String typeID){
+        if(typeID.equals("furniture")){
             makeFurnitureList();
             return items;
         }
-        else if(typeID==2){
+        else if(typeID.equals("tech")){
             makeTechList();
             return items;
         }

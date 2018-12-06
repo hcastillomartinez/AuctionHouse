@@ -1,37 +1,37 @@
 package AuctionHouse;
 
 import Bank.Account;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * GUI for the auction house, testing currently.
  */
 public class AuctionHouseGUI extends Application {
 
-    private AnchorPane root;
+    private AnchorPane root=new AnchorPane();
     private static AuctionHouse auctionHouse;
     private Account auctionAccount;
-//    private List<Item> auctionItems;
     private int bankAccount;
     private double balance;
     private ListView<Item> displayItems;
     private ObservableList<Item> itemObservableList;
-//    private List<Auction> auctions;
     private ListView<Auction> auctionListView;
     private ObservableList<Auction> auctionObservableList;
     private Timeline timeline;
@@ -40,20 +40,11 @@ public class AuctionHouseGUI extends Application {
     private Text itemsText,auctionsText;
     private Label accountNumberLabel,balanceLabel,accLabel,balLabel;
 
-    public AuctionHouseGUI(){
-        root=new AnchorPane();
-        createGUI();
-        root.getChildren().addAll(displayItems,auctionListView,balanceLabel,
-                balLabel,itemsText,auctionsText,accLabel,accountNumberLabel);
-    }
 
     /**
      * Used to launch the GUI from another class.
      */
-    public static void launch(String[] args){
-        auctionHouse=new AuctionHouse(args[0],args[1],args[2]);
-        Thread t=new Thread(auctionHouse);
-        t.start();
+    public static void launch(){
         AuctionHouseGUI.launch(AuctionHouseGUI.class);
     }
 
@@ -70,14 +61,16 @@ public class AuctionHouseGUI extends Application {
     }
 
 
-   public void updateBalance(){
+   public void updateBankInfo(){
        auctionAccount=auctionHouse.getAccount();
+
         balance=auctionAccount.getBalance();
         balLabel.setText(""+balance);
     }
 
     private void createGUI(){
         root.setStyle("-fx-background-color: lightblue");
+        timeline=new Timeline();
         timer=new Timer();
 
         itemObservableList= FXCollections.observableArrayList();
@@ -133,27 +126,69 @@ public class AuctionHouseGUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        AuctionHouseGUI ah=new AuctionHouseGUI();
-        auctionHouse.auctionHouseGUI=ah;
+        final Stage nestStage=new Stage();
+        nestStage.setResizable(false);
+        Pane pane=new Pane();
+        TextField typeT=new TextField();
+        TextField portT=new TextField();
+        TextField serverNam=new TextField();
+        typeT.setLayoutX(0);
+        typeT.setLayoutY(0);
+        typeT.setPrefSize(80,20);
+        portT.setLayoutX(0);
+        portT.setLayoutY(25);
+        portT.setPrefSize(80,20);
+        serverNam.setLayoutX(0);
+        serverNam.setLayoutY(50);
+        serverNam.setPrefSize(80,20);
 
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if(auctionHouse.isSafeToClose())timer.cancel();
-                if(auctionHouse.isUpdateGUI()){
-                    System.out.println("updating GUI");
-                    updateLists();
-                    updateBalance();
-                    auctionHouse.setUpdateGUI(false);
-                }
+        typeT.setText("furniture");
+        portT.setText("5555");
+        serverNam.setText("localhost");
+
+        Button add=new Button("Launch");
+        add.setLayoutX(100);
+        pane.getChildren().addAll(portT,typeT,serverNam,add);
+        add.setOnMousePressed(el->{
+            if(!portT.getText().equals("") && !typeT.getText().equals("")
+                    && !serverNam.getText().equals("") ) {
+
+                auctionHouse=new AuctionHouse(typeT.getText(),portT.getText() ,
+                        serverNam.getText());
+                Thread t=new Thread(auctionHouse);
+                t.start();
+                createGUI();
+
+                root.getChildren().addAll(displayItems,auctionListView,balanceLabel,
+                        balLabel,itemsText,auctionsText,accLabel,accountNumberLabel);
+
+                timeline=new Timeline(new KeyFrame(Duration.millis(1),
+                        event -> {
+                    if(auctionHouse.isSafeToClose())timeline.stop();
+                    if(auctionHouse.isUpdateGUI()){
+                        System.out.println("updating GUI");
+                        updateLists();
+                        updateBankInfo();
+                        auctionHouse.setUpdateGUI(false);
+                    }
+                }));
+                timeline.setCycleCount(Animation.INDEFINITE);
+                timeline.play();
+
+
+                Scene scene1=new Scene(root);
+                primaryStage.setTitle("Auction House");
+                primaryStage.setResizable(false);
+                primaryStage.setScene(scene1);
+                primaryStage.show();
+                nestStage.close();
             }
-        },1,1);
+        });
+        Scene scene = new Scene(pane);
+        nestStage.setTitle("Auction Info");
+        nestStage.setScene(scene);
+        nestStage.show();
 
-        Scene scene=new Scene(ah.root);
-        primaryStage.setTitle("Auction House");
-        primaryStage.setResizable(false);
-        primaryStage.setScene(scene);
-        primaryStage.show();
     }
 
     @Override

@@ -52,7 +52,7 @@ public class AuctionHouse implements Runnable {
         messageAnalyzer=new HouseMessageAnalyzer();
         makeItems = new MakeItems();
         messages = new LinkedBlockingQueue<>();
-        itemList = makeItems.getItems(Integer.parseInt(type));
+        itemList = makeItems.getItems(type);
         Collections.shuffle(itemList);
         serverThreads = new ArrayList<>();
         auctions = new ArrayList<>();
@@ -268,7 +268,8 @@ public class AuctionHouse implements Runnable {
             Auction a = new Auction(this,b.getItem(),b,serverThreadID);
 //            a.placeBid(b,serverThreadID);
             auctions.add(a);
-            auctionHouseGUI.updateLists();
+            setUpdateGUI(true);
+//            auctionHouseGUI.updateLists();
             Thread t = new Thread(a);
             t.start();
         }
@@ -286,7 +287,8 @@ public class AuctionHouse implements Runnable {
         for(Auction a: auctions){
             if(a.getItem().equals(b.getItem())){
                 a.placeBid(b,serverThreadID);
-                auctionHouseGUI.updateLists();
+                setUpdateGUI(true);
+//                auctionHouseGUI.updateLists();
                 break;
             }
         }
@@ -522,6 +524,6 @@ public class AuctionHouse implements Runnable {
 
 
     public static void main(String[] args){
-        AuctionHouseGUI.launch(args);
+        AuctionHouseGUI.launch();
     }
 }

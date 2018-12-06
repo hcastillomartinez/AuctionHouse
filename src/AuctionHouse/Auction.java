@@ -227,6 +227,7 @@ public class Auction implements Runnable{
         //removes item from its list
 //        System.out.println(auctionHouse.getItemList().remove(item));
         System.out.println(auctionHouse.removeItem(item));
+
         auctionHouse.placeMessageForAnalyzing(new Message("auction",
                 MessageTypes.UPDATE));
 
