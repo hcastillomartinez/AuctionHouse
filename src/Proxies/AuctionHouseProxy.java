@@ -76,7 +76,6 @@ public class AuctionHouseProxy implements Runnable {
      */
     @SuppressWarnings("unchecked")
     public void sendMessage(Message inMessage) {
-        System.out.println(inMessage + " being put in the queue.");
         try {
             messageQueue.put(inMessage);
         } catch (InterruptedException ie) {
@@ -114,7 +113,6 @@ public class AuctionHouseProxy implements Runnable {
             
             while (connected) {
                 try {
-                    System.out.println("here");
                     out.writeObject(messageQueue.take());
         
                     response = (Message) in.readObject();

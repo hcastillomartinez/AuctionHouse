@@ -88,6 +88,7 @@ public class BankProxy implements Runnable {
      * Adding a message to the banks input stream.
      */
     public void sendAgentMessage(Message inMessage) {
+        System.out.println(inMessage + " from the agent");
         try {
             messageQueue.put(inMessage);
         } catch (InterruptedException ie) {

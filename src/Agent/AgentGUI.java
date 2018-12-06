@@ -7,6 +7,7 @@ import Bank.AuctionInfo;
 import MessageHandling.Message;
 import MessageHandling.MessageTypes;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -44,7 +45,7 @@ public class AgentGUI extends Application {
     // filler variables for the boxes
     private Label firName, lastName, acctBalance, pendingBalanceLabel,
         ahLabel, idLabel, itemLabel, bidLabel, bidListLabel, itemListLabel;
-    private TextField firNameField, lastNameField, acctBalanceField,
+    private static TextField firNameField, lastNameField, acctBalanceField,
         pendingField, ahField, idField, itemField, bidField;
     private Button createAccountButton, placeBidButton, selectItemButton,
         updateButton, chooseAuctionHouseButton, updateWonItemsButton;
@@ -62,7 +63,7 @@ public class AgentGUI extends Application {
         = new BackgroundFill(Color.GREY, new CornerRadii(10), null);
 
     // timer for updating the lists
-    TimerTask timerTask = new TimerTask() {
+    static TimerTask timerTask = new TimerTask() {
         @Override
         public void run() {
             long past = System.currentTimeMillis();
@@ -141,7 +142,7 @@ public class AgentGUI extends Application {
     /**
      * Function to make the the values in the auction house match the selection.
      */
-    private void addValuesToAucGui() {
+    private static void addValuesToAucGui() {
         if (agent.getAuctionInfo() != null) {
             ahField.setText(agent.getAuctionInfo().getName());
             idField.setText("" + agent.getAuctionInfo().getAuctionID() + "");
@@ -173,15 +174,8 @@ public class AgentGUI extends Application {
                     agent.getBank().sendAgentMessage(new Message(agent.getNAME(),
                                                                  MessageTypes.GET_AGENT_ID_FOR_HOUSE,
                                                                  ai));
+                    updateGUI();
                 }
-                timerTask.run();
-                itemsFromHouse.getItems().clear();
-                ArrayList<Item> list = agent.getItemList();
-                
-                for (Item i: list) {
-                    itemsFromHouse.getItems().add(i.toString());
-                }
-                addValuesToAucGui();
             }
         });
     }
@@ -195,7 +189,7 @@ public class AgentGUI extends Application {
     /**
      * Function to update the fields for the user account.
      */
-    private void updateAccountFields() {
+    private static void updateAccountFields() {
         Account account = agent.getAccount();
         acctBalanceField.setText("" + account.getBalance() + "");
         pendingField.setText("" + account.getPendingBalance() + "");
@@ -627,6 +621,30 @@ public class AgentGUI extends Application {
         appFullContainer.setSpacing(5);
         appFullContainer.getChildren().addAll(appVertContainer, auctionContainer);
     }
+
+    /*
+     *
+     */
+    public void updateGUI() {
+        if (agent.getAccountChange() && agent.getAccount() != null) {
+            updateAccountFields();
+            agent.setAccountChange(false);
+        }
+
+        if (agent.getAuctionInfo() != null) {
+            Message message  = new Message(agent.getNAME(),
+                                           MessageTypes.GET_ITEMS);
+            agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
+            timerTask.run();
+            itemsFromHouse.getItems().clear();
+            ArrayList<Item> list = agent.getItemList();
+
+            for (Item i: list) {
+                itemsFromHouse.getItems().add(i.toString());
+            }
+            addValuesToAucGui();
+        }
+    }
     
     /**
      * Function to start running the application.
@@ -639,6 +657,7 @@ public class AgentGUI extends Application {
             primaryStage.close();
             System.exit(3);
         });
+        AgentGUI agui = new AgentGUI();
         setupNumbersAndAgent();
         makePlaceBidButton();
         makeCreateAccountButton();
@@ -659,6 +678,19 @@ public class AgentGUI extends Application {
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
+
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        agui.updateGUI();
+                    }
+                });
+            }
+        }, 0, 1000);
     }
 }
 

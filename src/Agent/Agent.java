@@ -7,14 +7,8 @@ import MessageHandling.MessageAnalyzer;
 import MessageHandling.MessageTypes;
 import Proxies.AuctionHouseProxy;
 import Proxies.BankProxy;
-import javafx.application.Application;
-import javafx.scene.control.Button;
-import javafx.scene.layout.Background;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -24,9 +18,9 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author Danan High, 11/13/2018
  */
 public class Agent implements Runnable {
-    
+
     private final String NAME = "agent";
- 
+
     private int id, key, accountNumber;
     private Account account = null;
     private AuctionHouseProxy aHProxy;
@@ -45,13 +39,14 @@ public class Agent implements Runnable {
     private String hostName;
     private int portNumber;
     private boolean itemListChange = false, aucHouseChange = false,
-        bidChange = false, itemsWonChange = false;
+            bidChange = false, itemsWonChange = false;
 
     // tester value for the auction house info
     private HashMap<AuctionHouseProxy, ArrayList<Item>> auctionHouseItems;
     private AuctionInfo auctionInfo;
+    private boolean accountChange = false;
 
-    
+
     /**
      * Constructor for the Agent.
      */
@@ -69,6 +64,22 @@ public class Agent implements Runnable {
         this.bank = new BankProxy(hostName,
                                   portNumber,
                                   this);
+    }
+
+    /**
+     * Getting account change.
+     * @return account change
+     */
+    public boolean getAccountChange() {
+        return accountChange;
+    }
+
+    /**
+     * Setting account change.
+     * @param accountChange change
+     */
+    public void setAccountChange(boolean accountChange){
+        this.accountChange = accountChange;
     }
 
     /**
@@ -92,7 +103,7 @@ public class Agent implements Runnable {
     public void setItemListChange(boolean itemListChange) {
         this.itemListChange = itemListChange;
     }
-    
+
     /**
      * Getting the auction house info keys
      * @return auctionHouseKeys
@@ -131,7 +142,7 @@ public class Agent implements Runnable {
     public boolean isBidChange() {
         return bidChange;
     }
-    
+
     /**
      * Setting if there has been a change in the bid list.
      * @param bidChange, setting bid change to false
@@ -161,7 +172,7 @@ public class Agent implements Runnable {
      * @return currentItem selected.
      */
     public Item getItem() { return item; }
-    
+
     /**
      * Setting the item for the agent.
      * @param item for the agent
@@ -169,7 +180,7 @@ public class Agent implements Runnable {
     public void setItem(Item item) {
         this.item = item;
     }
-    
+
     /**
      * Getting the item list for the specific auction house.
      * @return itemList for the ah
@@ -208,7 +219,7 @@ public class Agent implements Runnable {
      * @return portNumber for the client
      */
     public int getPortNumber() { return portNumber; }
-    
+
     /**
      * Function to get the pending balance of the agent account.
      * @return pending balance
@@ -218,7 +229,7 @@ public class Agent implements Runnable {
             return account.getPendingBalance();
         }
     }
-    
+
     /**
      * Function to return the agent account.
      * @return account for the agent.
@@ -226,7 +237,7 @@ public class Agent implements Runnable {
     public Account getAccount() {
         return account;
     }
-    
+
     /**
      * Function to get the bids.
      */
@@ -241,7 +252,7 @@ public class Agent implements Runnable {
      * @return host name for the client.
      */
     public String getHostName() { return hostName; }
-    
+
     /**
      * Taking in messages until the item list message has been returned.
      */
@@ -249,7 +260,7 @@ public class Agent implements Runnable {
         Message in;
         MessageAnalyzer analyzer = new MessageAnalyzer();
         while (!MessageTypes.GET_ITEMS.getMessage()
-                                      .equalsIgnoreCase("get items")) {
+                .equalsIgnoreCase("get items")) {
             try {
                 in = messageQueue.take();
                 response(in,
@@ -268,9 +279,9 @@ public class Agent implements Runnable {
     public synchronized boolean setAuctionHouse(AuctionInfo auctionInfo) {
         if (!houseProxyMap.containsKey(auctionInfo)) {
             AuctionHouseProxy proxy = new AuctionHouseProxy(auctionInfo
-                                                                .getIPAddress(),
+                                                                    .getIPAddress(),
                                                             auctionInfo
-                                                                .getPortNumber(),
+                                                                    .getPortNumber(),
                                                             this);
             houseProxyMap.put(auctionInfo, proxy);
             auctionHouseItems.put(proxy, new ArrayList<Item>());
@@ -303,7 +314,7 @@ public class Agent implements Runnable {
     public BankProxy getBank() {
         return bank;
     }
-    
+
     /**
      * Returning the list of auction house info.
      * @return list of the auction house info
@@ -361,7 +372,7 @@ public class Agent implements Runnable {
     /*               Functions For Actions Based On Input            */
     /*                                                               */
     /*****************************************************************/
-    
+
     /**
      * Function to add to the list of messageQueue.
      */
@@ -372,7 +383,7 @@ public class Agent implements Runnable {
             ie.printStackTrace();
         }
     }
-    
+
     /**
      * Responding to the sender of the message.
      */
@@ -410,9 +421,15 @@ public class Agent implements Runnable {
             case TRANSFER_ITEM:
                 Bid bid = (Bid) list.get(2);
                 Item bidItem = bid.getItem();
-                
+
                 bids.remove(bid);
                 wonItems.add(bidItem);
+
+                response = new Message(NAME,
+                                       MessageTypes.REMOVE_FUNDS,
+                                       getAccountNumber(),
+                                       bidItem.getPrice());
+                bank.sendAgentMessage(response);
                 break;
             case BANK_ACCOUNT:
                 accountNumber = (int) list.get(2);
@@ -435,6 +452,7 @@ public class Agent implements Runnable {
                 Bid b = (Bid) list.get(2);
                 for (Bid b1: bids) {
                     if (b1.getItem().equals(b.getItem())) {
+                        System.out.println("here");
                         removeList.add(b1);
                     }
                 }
@@ -451,6 +469,7 @@ public class Agent implements Runnable {
                 break;
             case ACCOUNT_INFO:
                 account = (Account) list.get(2);
+                accountChange = true;
                 break;
             case UNBLOCK_FUNDS:
                 double price = (double) list.get(3);
@@ -495,14 +514,14 @@ public class Agent implements Runnable {
     @Override
     public String toString() {
         return "Agent{" + "NAME='" + NAME +
-            '\'' +
-            ", id=" + id +
-            ", accountNumber=" + accountNumber +
-            ", account=" + account +
-            ", aHProxy=" + aHProxy +
-            ", bank=" + bank + '}';
+               '\'' +
+               ", id=" + id +
+               ", accountNumber=" + accountNumber +
+               ", account=" + account +
+               ", aHProxy=" + aHProxy +
+               ", bank=" + bank + '}';
     }
-    
+
     /**
      * Overrides run to perform specific tasks.
      */
@@ -527,7 +546,7 @@ public class Agent implements Runnable {
         }
         bank.closeConnections();
     }
-    
+
     /**
      * Main method to start the program for the user/agent.
      */
