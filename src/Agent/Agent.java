@@ -437,9 +437,17 @@ public class Agent implements Runnable {
             case BID_REJECTED:
                 break;
             case BID_ACCEPTED:
-                bids.add((Bid) list.get(2));
-                response = new Message(NAME, MessageTypes.THANKS);
-                respondToSender(sender, response, getAHProxy(auctionInfo));
+                ArrayList<Bid> removeList = new ArrayList<>();
+                Bid b = (Bid) list.get(2);
+                for (Bid b1: bids) {
+                    if (b1.getItem().equals(b.getItem())) {
+                        removeList.add(b1);
+                    }
+                }
+                for (Bid b2: removeList) {
+                    bids.remove(b2);
+                }
+                bids.add(b);
                 break;
             case OUT_BID:
                 bids.remove((Bid) list.get(2));
@@ -454,7 +462,7 @@ public class Agent implements Runnable {
                 double price = (double) list.get(3);
                 bank.sendAgentMessage(new Message(NAME,
                                                   MessageTypes.TRANSFER_FUNDS,
-                                                  this.getAuctionInfo().getAccountNumber(),
+                                                  getAccountNumber(),
                                                   price));
                 break;
         }

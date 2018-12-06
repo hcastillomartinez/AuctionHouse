@@ -266,7 +266,6 @@ public class AgentGUI extends Application {
                                       MessageTypes.BID,
                                       bid);
         agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
-        System.out.println("placing bid now");
     }
     
     /**
@@ -654,7 +653,8 @@ public class AgentGUI extends Application {
         buildBidContainer();
         buildAccountContainer();
         fillContainers();
-        
+
+        primaryStage.setTitle("Agent " + agent.getAccountNumber());
         Scene scene = new Scene(appFullContainer);
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
