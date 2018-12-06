@@ -31,8 +31,6 @@ public class HouseMessageAnalyzer {
             }
         }
         else if( sender.equals("bank")){
-           //what things is the bank going to send? Also what will they look
-            // like?
             if(type.equals(MessageTypes.ACCOUNT_INFO)){
                 return 3;
             }else if(type.equals(MessageTypes.TRANSFER_FUNDS)){

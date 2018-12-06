@@ -63,26 +63,22 @@ public class AuctionHouseGUI extends Application {
      * GUI is exited via red x.
      */
     public void updateLists(){
-        System.out.println("item list");
-        //todo fix the illegalstateexception
         auctionObservableList.setAll(auctionHouse.getAuctions());
+//        System.out.println(auctionHouse.getAuctions());
         itemObservableList.setAll(auctionHouse.getItemList());
+//        System.out.println(auctionHouse.getItemList());
     }
 
-//    public void updateAuctionList(){
-//        System.out.println("auction list");
-//        itemObservableList.setAll(auctionHouse.getItemList());
-//    }
 
-    void updateBalance(){
+   public void updateBalance(){
+       auctionAccount=auctionHouse.getAccount();
         balance=auctionAccount.getBalance();
         balLabel.setText(""+balance);
     }
 
     private void createGUI(){
         root.setStyle("-fx-background-color: lightblue");
-//        auctionItems=auctionHouse.getItemList();
-//        auctions=auctionHouse.getAuctions();
+        timer=new Timer();
 
         itemObservableList= FXCollections.observableArrayList();
         auctionObservableList=FXCollections.observableArrayList();
@@ -140,7 +136,18 @@ public class AuctionHouseGUI extends Application {
         AuctionHouseGUI ah=new AuctionHouseGUI();
         auctionHouse.auctionHouseGUI=ah;
 
-
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if(auctionHouse.isSafeToClose())timer.cancel();
+                if(auctionHouse.isUpdateGUI()){
+                    System.out.println("updating GUI");
+                    updateLists();
+                    updateBalance();
+                    auctionHouse.setUpdateGUI(false);
+                }
+            }
+        },1,1);
 
         Scene scene=new Scene(ah.root);
         primaryStage.setTitle("Auction House");

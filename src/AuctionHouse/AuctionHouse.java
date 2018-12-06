@@ -24,6 +24,7 @@ public class AuctionHouse implements Runnable {
     private List<Auction> auctions;
     private List<Server> serverThreads;
     private boolean safeToClose;
+    private boolean updateGUI;
     private MakeItems makeItems;
     private ServerSocket serverSocket;
     private Socket bankClient;
@@ -46,7 +47,7 @@ public class AuctionHouse implements Runnable {
     public  AuctionHouse(String type,String port,String serverName){
         agentCount = 0;
         auctionOpen = true;
-        safeToClose=true;
+        safeToClose=false;
         account=new Account(type,10,0,0);
         messageAnalyzer=new HouseMessageAnalyzer();
         makeItems = new MakeItems();
@@ -80,6 +81,22 @@ public class AuctionHouse implements Runnable {
     /*                Getters and Setters                             */
     /*                                                                */
     /******************************************************************/
+
+    /**
+     * Used to update as a flag to update the GUI.
+     * @param updateGUI
+     */
+    public void setUpdateGUI(boolean updateGUI) {
+        this.updateGUI = updateGUI;
+    }
+
+    /**
+     * Used to check if gui needs to be updated
+     * @return A boolean
+     */
+    public boolean isUpdateGUI() {
+        return updateGUI;
+    }
 
     /**
      * Checks if auction house taking in anything else.
@@ -136,6 +153,17 @@ public class AuctionHouse implements Runnable {
      */
     public int getPort(){
         return port;
+    }
+
+    public boolean removeItem(Item item){
+        for(Item i:itemList){
+            if(item.getItemName().equals(i.getItemName())){
+                itemList.remove(i);
+                setUpdateGUI(true);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -212,10 +240,10 @@ public class AuctionHouse implements Runnable {
             tryBid((Bid) m.getMessageList().get(2),id);
         }else if(action == 3){
             updateAccount((Account) m.getMessageList().get(2));
-            if(auctionHouseGUI!=null)auctionHouseGUI.updateLists();
+            setUpdateGUI(true);
         }else if(action==4){
             if(auctionHouseGUI!=null){
-               auctionHouseGUI.updateLists();
+               setUpdateGUI(true);
             }
         }
 
@@ -227,6 +255,7 @@ public class AuctionHouse implements Runnable {
      */
     private void updateAccount(Account account) {
         this.account = account;
+        System.out.println("AH bal: "+this.account.getBalance());
     }
 
     /**
@@ -236,8 +265,8 @@ public class AuctionHouse implements Runnable {
      */
     private synchronized void createAuction(Bid b,int serverThreadID){
         if(!b.getItem().isInBid()){
-            Auction a = new Auction(this,b.getItem(),b);
-            a.placeBid(b,serverThreadID);
+            Auction a = new Auction(this,b.getItem(),b,serverThreadID);
+//            a.placeBid(b,serverThreadID);
             auctions.add(a);
             auctionHouseGUI.updateLists();
             Thread t = new Thread(a);
@@ -262,9 +291,8 @@ public class AuctionHouse implements Runnable {
             }
         }
         if(b.getItem().getPrice()>b.getAmount()){
-            System.out.println("Blocking before starting");
             sendToServer(serverThreadID,new Message("auction house",
-                    MessageTypes.BID_REJECTED));
+                    MessageTypes.BID_REJECTED,b));
             return;
         }
         else createAuction(b,serverThreadID);

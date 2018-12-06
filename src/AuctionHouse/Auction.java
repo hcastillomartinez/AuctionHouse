@@ -37,11 +37,10 @@ public class Auction implements Runnable{
      * item.
      * @param a An Item
      */
-    public Auction(AuctionHouse a,Item i, Bid currentBid){
-        currentClientID=0;
+    public Auction(AuctionHouse a,Item i, Bid currentBid,int currentClientID){
+        this.currentClientID=currentClientID;
         bidMaps=new HashMap<>();
         winningClientID=-1;
-
         this.currentBid = currentBid;
         auctionHouse=a;
         item=i;
@@ -53,6 +52,7 @@ public class Auction implements Runnable{
         auctionActive = true;
         bidToBeat = item.getPrice();
         t = new Timer();
+        placeBid(currentBid,currentClientID);
     }
 
     /**
@@ -225,9 +225,11 @@ public class Auction implements Runnable{
                 MessageTypes.TRANSFER_ITEM, currentBid));
 
         //removes item from its list
-        auctionHouse.getItemList().remove(item);
+//        System.out.println(auctionHouse.getItemList().remove(item));
+        System.out.println(auctionHouse.removeItem(item));
         auctionHouse.placeMessageForAnalyzing(new Message("auction",
                 MessageTypes.UPDATE));
+
         System.out.println("Agent winner: "+ currentWinnerID);
     }
 
