@@ -118,6 +118,13 @@ public class Agent implements Runnable {
     }
 
     /**
+     * Getting the account number for sending to the bank.
+     */
+    public int getAccountNumber() {
+        return accountNumber;
+    }
+
+    /**
      * Getting if there has been a change in the item list.
      * @return true if change, false otherwise
      */
@@ -409,7 +416,7 @@ public class Agent implements Runnable {
                 
                 response = new Message(NAME,
                                        MessageTypes.REMOVE_FUNDS,
-                                       getId(),
+                                       getAccountNumber(),
                                        bidItem.getPrice());
                 bank.sendAgentMessage(response);
                 break;
@@ -421,7 +428,7 @@ public class Agent implements Runnable {
                 int keyForHouse = (int) message.getMessageList().get(3);
                 if (!auctionHouseKeys.containsKey(ai)) {
                     auctionHouseKeys.put(ai.getPortNumber(),
-                                         new Integer(keyForHouse));
+                                         keyForHouse);
                 }
                 break;
             case HOUSES:

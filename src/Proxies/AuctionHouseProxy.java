@@ -113,12 +113,7 @@ public class AuctionHouseProxy implements Runnable {
             
             while (connected) {
                 try {
-                    System.out.println(messageQueue);
-                    messageInput = messageQueue.take();
-                    if (messageInput != null) {
-                        System.out.println("writing to AH: " + messageInput);
-                        out.writeObject(messageInput);
-                    }
+                    out.writeObject(messageQueue.take());
         
                     // testing code to read from the server
                     response = (Message) in.readObject();
