@@ -20,6 +20,7 @@ public class Auction implements Runnable{
     private int currentClientID;
     private int winningClientID;
     private int currentBidderID;
+    private Bid winningBid;
     private BlockingQueue<Bid> bids;
     private BidProtocol bidProtocol;
     private int currentWinnerID;
@@ -41,6 +42,7 @@ public class Auction implements Runnable{
         this.currentClientID=currentClientID;
         bidMaps=new HashMap<>();
         winningClientID=-1;
+        winningBid=null;
         this.currentBid = currentBid;
         auctionHouse=a;
         item=i;
@@ -110,6 +112,8 @@ public class Auction implements Runnable{
      * else returns 1 and sets winning bid.
      * @param bid Double that is the bid amount.
      */
+
+    //todo rethink this auction methods
     private synchronized void analyzeBid(double bid){
         if(!auctionActive){
             System.out.println("Auction Over");
@@ -136,25 +140,37 @@ public class Auction implements Runnable{
 
                 if(bidMaps.get(currentBidderID)!=null){
                     //returning bidder
-                    auctionHouse.sendToBank(new Message("auction house",
-                            MessageTypes.BLOCK_FUNDS,currentBidderID,
-                            bid-bidToBeat));
+                    if(currentBidderID==currentWinnerID){
+                        auctionHouse.sendToBank(new Message(
+                                "auction " +
+                                        "house",
+                                MessageTypes.BLOCK_FUNDS,currentBidderID,
+                                bid-bidToBeat));
+                    }
+                    else{
+                        auctionHouse.sendToBank(new Message("auction house",
+                                MessageTypes.BLOCK_FUNDS,currentBidderID,bid));
+                        auctionHouse.sendToServer(winningClientID,new Message(
+                                "auction house",MessageTypes.OUT_BID,
+                                winningBid));
+                    }
                 }
                 else{
                     //someone new entering bidding
                     auctionHouse.sendToBank(new Message("auction house",
                             MessageTypes.BLOCK_FUNDS,currentBidderID, bid));
+                    auctionHouse.sendToBank(new Message("auction house",
+                            MessageTypes.UNBLOCK_FUNDS,currentWinnerID,bidToBeat));
                 }
 
                 bidMaps.put(currentBidderID,bid);
-                auctionHouse.sendToServer(winningClientID,new Message(
-                        "auction house",MessageTypes.OUT_BID));
 
-                auctionHouse.sendToBank(new Message("auction house",
-                        MessageTypes.UNBLOCK_FUNDS,currentWinnerID,bidToBeat));
+//                auctionHouse.sendToBank(new Message("auction house",
+//                        MessageTypes.UNBLOCK_FUNDS,currentWinnerID,bidToBeat));
             }
             winningClientID = currentClientID;
             currentWinnerID = currentBidderID;
+            winningBid=currentBid;
             item.updatePrice(bid);
             bidToBeat = bid;
             System.out.println("current winner " + currentWinnerID);
@@ -163,8 +179,6 @@ public class Auction implements Runnable{
             auctionHouse.sendToServer(currentClientID,new Message("auction " +
                     "house",MessageTypes.BID_REJECTED, currentBid));
             //bid is rejected
-            System.out.println(currentBidderID+" need to beat "+bidToBeat
-                    +" ,you bid "+bid);
         }
     }
 
