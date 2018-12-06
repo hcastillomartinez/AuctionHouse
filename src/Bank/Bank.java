@@ -9,6 +9,7 @@ import MessageHandling.MessageTypes;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -72,9 +73,9 @@ public class Bank implements Runnable {
             ServerSocket server = new ServerSocket(portNumber);
 
             while (true) {
-                System.out.println("bank is running");
 
                 Socket client = server.accept();
+                System.out.println("accepting a new socket connection");
                 ServerThread bankClient = new ServerThread(client,clientNumber,this);
                 clientNumber++;
                 getClients().put(bankClient.idNumber,bankClient);
@@ -297,13 +298,12 @@ public class Bank implements Runnable {
         Account houseAccount = accounts.get(auctionHouseAccountNumber);
         Account agentAccount = accounts.get(agentAccountNumber);
 
-        //todo do I need synchronized blocks here? remove
         synchronized (houseAccount){
             synchronized (agentAccount){
                 
                 if(agentAccount.getPendingBalance() >= amount){
                     //transfer funds from agent to auction house
-                    agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
+                    //agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
                     agentAccount.setBalance(agentAccount.getBalance() - amount);
                     houseAccount.setBalance(houseAccount.getBalance() + amount);
                     houseAccount.setPendingBalance(houseAccount.getPendingBalance() + amount);
@@ -407,6 +407,8 @@ public class Bank implements Runnable {
                     Message message = messages.take();
                     System.out.println(message);
 
+                    //close account here
+
                     Message response;
                     if(analyzer.analyze(message) == 1){
                         response = bank.responseToAgent(idNumber,message,
@@ -422,15 +424,18 @@ public class Bank implements Runnable {
                 }catch(InterruptedException e){
                     e.printStackTrace();
                 } catch (EOFException e) {
-                    connected = !connected; //todo fix exception when agent closes connection
-                } catch(IOException e){
+                    connected = false;
+                } catch (SocketException e) {
+                    connected = false;
+                }catch(IOException e){
                     e.printStackTrace();
                 }catch(ClassNotFoundException e){
                     e.printStackTrace();
                 }
             }
             closeClient();
-            System.out.println("ServerThread is stopping");
+            System.out.println("removing account: " + bank.getAccounts().get(idNumber));
+            bank.getAccounts().remove(idNumber);
         }
     }
 }
