@@ -183,40 +183,6 @@ public class AuctionHouse implements Runnable {
         return itemList;
     }
 
-    /**
-     * Finds the most expensive item
-     * in auction is and gets the price.
-     * @return An int that is max price
-     */
-    public double maxPrice(){
-        double max = 0;
-        for(Item t:itemList){
-            if(t.getPrice() > max) max = t.getPrice();
-        }
-        return max;
-    }
-
-    /**
-     * Gets the type of items sold at an
-     * auction.
-     * @return A string that is type.
-     */
-    public String getType() {
-        return type;
-    }
-
-    /**
-     * Finds the cheapest item in auction
-     * and gets its price.
-     * @return An int that is the lowest price.
-     */
-    public double lowestPrice(){
-        double min = 10000;
-        for(Item t:itemList){
-            if(t.getPrice() < min) min = t.getPrice();
-        }
-        return min;
-    }
 
 
     /******************************************************************/
