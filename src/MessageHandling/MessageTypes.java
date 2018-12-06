@@ -22,6 +22,7 @@ public enum MessageTypes {
     BLOCK_FUNDS("block funds"),
     BID_REJECTED("bid rejected"),
     TRANSFER_ITEM("transfer item"),
+    UPDATE_ITEM("update item"),
     GET_ID_FROM_AGENT("id number"),
     BALANCE("get balance"),
     ACCOUNT_INFO("account information"),

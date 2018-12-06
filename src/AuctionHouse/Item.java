@@ -33,6 +33,10 @@ public class Item implements Serializable {
         this.inBid = inBid;
     }
 
+    public void updateItemPrice(double price){
+        this.price=price;
+    }
+
     /**
      * Updates the price of item according to the current bid
      * on it.
