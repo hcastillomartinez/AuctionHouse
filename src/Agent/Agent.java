@@ -413,12 +413,6 @@ public class Agent implements Runnable {
                 
                 bids.remove(bid);
                 wonItems.add(bidItem);
-                
-                response = new Message(NAME,
-                                       MessageTypes.REMOVE_FUNDS,
-                                       getAccountNumber(),
-                                       bidItem.getPrice());
-                bank.sendAgentMessage(response);
                 break;
             case BANK_ACCOUNT:
                 accountNumber = (int) list.get(2);
