@@ -112,7 +112,10 @@ public class Bank implements Runnable {
 
                 accounts.put(account.getAccountNumber(),account);
                 addAuctionHouse(auctionInfo,account);
-                return new Message(NAME, MessageTypes.ACCOUNT_INFO,account);
+                return new Message(NAME, MessageTypes.ACCOUNT_INFO,
+                                   accounts.get(account.getAccountNumber()).getBalance(),
+                                   accounts.get(account.getAccountNumber()).getPendingBalance(),
+                                   accounts.get(account.getAccountNumber()).getAccountNumber());
 
             //sends current account information back to the auction house
             case ACCOUNT_INFO:
@@ -126,9 +129,13 @@ public class Bank implements Runnable {
 
                 if(blockFunds(agentAccountNumber, amount)){
                     try{
-                        clients.get(agentAccountNumber).outputStream.writeObject(new Message(NAME,
-                                                                                             MessageTypes.ACCOUNT_INFO,
-                                                                                             accounts.get(agentAccountNumber)));
+                        clients.get(agentAccountNumber)
+                                .outputStream
+                                .writeObject(new Message(NAME,
+                                                         MessageTypes.ACCOUNT_INFO,
+                                                         accounts.get(agentAccountNumber).getBalance(),
+                                                         accounts.get(agentAccountNumber).getPendingBalance(),
+                                                         accounts.get(agentAccountNumber).getAccountNumber()));
                         System.out.println("here in block_funds");
                         return new Message(NAME,MessageTypes.CONFIRMATION);
                     }catch(Exception e){ e.printStackTrace(); }
@@ -170,7 +177,10 @@ public class Bank implements Runnable {
                 addAgent(agent,account);
 
                 System.out.println(this.accounts);
-                return new Message(NAME,MessageTypes.ACCOUNT_INFO,account);
+                return new Message(NAME,MessageTypes.ACCOUNT_INFO,
+                                   accounts.get(agent.getAccountNumber()).getBalance(),
+                                   accounts.get(agent.getAccountNumber()).getBalance(),
+                                   accounts.get(agent.getAccountNumber()).getAccountNumber());
 
             //return list of HouseInfo objects
             case GET_HOUSES:
@@ -188,9 +198,13 @@ public class Bank implements Runnable {
                 unblockFunds(agentAccountNumber,amount);
 
                 try{
-                    clients.get(agentAccountNumber).outputStream.writeObject(new Message(NAME,
-                            MessageTypes.ACCOUNT_INFO,
-                            accounts.get(agentAccountNumber)));
+                    clients.get(agentAccountNumber)
+                            .outputStream
+                            .writeObject(new Message(NAME,
+                                                     MessageTypes.ACCOUNT_INFO,
+                                                     accounts.get(agentAccountNumber).getBalance(),
+                                                     accounts.get(agentAccountNumber).getPendingBalance(),
+                                                     accounts.get(agentAccountNumber).getAccountNumber()));
                 }catch(Exception e){ e.printStackTrace(); }
 
                 return new Message(NAME,MessageTypes.CONFIRMATION);
@@ -219,14 +233,20 @@ public class Bank implements Runnable {
 
                 try{
                     //send confirmation and new account to auction house
-                    clients.get(auctionHouseAccountNumber).outputStream.writeObject(new Message(NAME,
-                            MessageTypes.CONFIRMATION));
+                    clients.get(auctionHouseAccountNumber)
+                            .outputStream
+                            .writeObject(new Message(NAME,
+                                                     MessageTypes.CONFIRMATION));
 
                     System.out.println("AuctionHouse account number is " +auctionHouseAccountNumber);
                     System.out.println("AH account is: " +accounts.get(auctionHouseAccountNumber));
-                    clients.get(auctionHouseAccountNumber).outputStream.writeObject(new Message(NAME,
-                            MessageTypes.ACCOUNT_INFO,
-                            accounts.get(auctionHouseAccountNumber)));
+                    clients.get(auctionHouseAccountNumber)
+                            .outputStream
+                            .writeObject(new Message(NAME,
+                                                     MessageTypes.ACCOUNT_INFO,
+                                                     accounts.get(auctionHouseAccountNumber).getBalance(),
+                                                     accounts.get(auctionHouseAccountNumber).getPendingBalance(),
+                                                     accounts.get(auctionHouseAccountNumber).getAccountNumber()));
                     System.out.println("AH account is: after sending: " +accounts.get(auctionHouseAccountNumber));
 
                 }catch(Exception e){ e.printStackTrace();}

@@ -281,7 +281,6 @@ public class AgentGUI extends Application {
                     itemField.setText("");
                     timerTask.run();
                     updateBidList();
-                    updateAccountFields();
                 }
             }
         });

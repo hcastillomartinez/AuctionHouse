@@ -5,6 +5,7 @@ import Bank.Account;
 import Bank.AuctionInfo;
 import MessageHandling.Message;
 import MessageHandling.MessageTypes;
+import javafx.application.Application;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -204,12 +205,11 @@ public class AuctionHouse implements Runnable {
             int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
             tryBid((Bid) m.getMessageList().get(2),id);
         }else if(action == 3){
-            Account temp=(Account)m.getMessageList().get(2);
-            System.out.println("New: "+temp);
+            System.out.println("New: "+m.getMessageList().get(2));
             System.out.println("OLD: "+getAccount());
-            this.account.setAccountNumber(temp.getAccountNumber());
-            this.account.setBalance(temp.getBalance());
-//            updateAccount(temp);
+            updateAccount((double) m.getMessageList().get(2),
+                          (double) m.getMessageList().get(3),
+                          (int) m.getMessageList().get(4));
             setUpdateGUI(true);
         }else if(action==4){
             if(auctionHouseGUI!=null){
@@ -226,9 +226,10 @@ public class AuctionHouse implements Runnable {
      * Used to add money to the funds of house from bank.
      * @param account double that is funds to be added
      */
-    private void updateAccount(Account account) {
-//        this.account.setBalance(account.getBalance());
-//        this.account = account;
+    private void updateAccount(double bal, double penBal, int acntNum) {
+        this.account.setBalance(bal);
+        this.account.setPendingBalance(penBal);
+        this.account.setAccountNumber(acntNum);
     }
 
     /**
@@ -273,6 +274,7 @@ public class AuctionHouse implements Runnable {
             if(a.getItem().equals(b.getItem())){
                 a.placeBid(b,serverThreadID);
                 setUpdateGUI(true);
+//                auctionHouseGUI.updateLists();
                 break;
             }
         }
@@ -405,7 +407,7 @@ public class AuctionHouse implements Runnable {
                     Message m = (Message) in.readObject();
                     if(m != null){
                         addID(m);
-//                        System.out.println("Receiving from "+ ID+" "+m);
+                        System.out.println("Receiving from "+ ID+" "+m);
                         auctionHouse.placeMessageForAnalyzing(m);
                     }
                 }catch(EOFException i){

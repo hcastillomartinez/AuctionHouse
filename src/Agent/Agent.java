@@ -462,7 +462,14 @@ public class Agent implements Runnable {
                 itemList = (ArrayList<Item>) list.get(2);
                 break;
             case ACCOUNT_INFO:
-                account = (Account) list.get(2);
+                System.out.println(account + " = before");
+                double bal = (double) list.get(2);
+                double pend = (double) list.get(3);
+                int accntNum = (int) list.get(4);
+                account.setBalance(bal);
+                account.setPendingBalance(pend);
+                account.setAccountNumber(accntNum);
+                System.out.println(account + " = after");
                 accountChange = true;
                 break;
             case UNBLOCK_FUNDS:
