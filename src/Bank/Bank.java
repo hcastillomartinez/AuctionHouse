@@ -129,11 +129,10 @@ public class Bank implements Runnable {
                         clients.get(agentAccountNumber).outputStream.writeObject(new Message(NAME,
                                                                                              MessageTypes.ACCOUNT_INFO,
                                                                                              accounts.get(agentAccountNumber)));
+                        System.out.println("here in block_funds");
+                        return new Message(NAME,MessageTypes.CONFIRMATION);
                     }catch(Exception e){ e.printStackTrace(); }
 
-                    System.out.println("here in block_funds");
-
-                    return new Message(NAME,MessageTypes.CONFIRMATION);
                 }
                 else{
                     System.out.println("block failed");
@@ -215,6 +214,7 @@ public class Bank implements Runnable {
 
                     }catch(Exception e){ e.printStackTrace();}
 
+                    return new Message(NAME,MessageTypes.TRANSFER_REJECTED);
                 }
 
                 try{
