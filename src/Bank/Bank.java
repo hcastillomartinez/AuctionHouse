@@ -222,6 +222,8 @@ public class Bank implements Runnable {
                     clients.get(auctionHouseAccountNumber).outputStream.writeObject(new Message(NAME,
                             MessageTypes.CONFIRMATION));
 
+                    System.out.println("AuctionHouse account number is " +auctionHouseAccountNumber);
+                    System.out.println("AH account is: " +accounts.get(auctionHouseAccountNumber));
                     clients.get(auctionHouseAccountNumber).outputStream.writeObject(new Message(NAME,
                             MessageTypes.ACCOUNT_INFO,
                             accounts.get(auctionHouseAccountNumber)));
