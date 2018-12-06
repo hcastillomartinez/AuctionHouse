@@ -115,7 +115,7 @@ public class Bank implements Runnable {
 
             //sends current account information back to the auction house
             case ACCOUNT_INFO:
-                auctionHouseAccountNumber = (int) messageList.get(0);
+                auctionHouseAccountNumber = clientID;
                 return new Message(NAME, MessageTypes.ACCOUNT_INFO,accounts.get(auctionHouseAccountNumber));
 
             //blocks funds in an agent's account per auction house's request and sends updated account back to the agent
@@ -123,20 +123,26 @@ public class Bank implements Runnable {
                 agentAccountNumber = (int) messageList.get(2);
                 amount = (double) messageList.get(3);
 
-                blockFunds(agentAccountNumber, amount);
+                if(blockFunds(agentAccountNumber, amount)){
+                    try{
+                        clients.get(agentAccountNumber).outputStream.writeObject(new Message(NAME,
+                                                                                             MessageTypes.ACCOUNT_INFO,
+                                                                                             accounts.get(agentAccountNumber)));
+                    }catch(Exception e){ e.printStackTrace(); }
 
-                //todo unable to block funds code here?
-                try{
-                clients.get(agentAccountNumber).outputStream.writeObject(new Message(NAME,
-                                                                         MessageTypes.ACCOUNT_INFO,
-                                                                         accounts.get(agentAccountNumber)));
-                }catch(Exception e){ e.printStackTrace(); }
+                    System.out.println("here in block_funds");
 
-                System.out.println("here in block_funds");
+                    return new Message(NAME,MessageTypes.CONFIRMATION);
+                }
+                else{
+                    System.out.println("block failed");
+                    return new Message(NAME,MessageTypes.BLOCK_REJECTED);
+                }
 
-                return new Message(NAME,MessageTypes.CONFIRMATION);
+            default:
+                System.out.println("Message not covered: " + message);
+                return null;
 
-            default: return new Message(NAME,MessageTypes.THANKS);
         }
     }
 
@@ -224,19 +230,6 @@ public class Bank implements Runnable {
         }
     }
 
-//    /**
-//     * Creates an account and adds it to the accounts map.
-//     */
-//    public synchronized Account makeAccount(String name, double startingBalance, int accountNumber) {
-//        Account account = new Account(name,
-//                                      assignAccountNumber(accountNumber),
-//                                      startingBalance,
-//                                      startingBalance);
-//
-//        this.accounts.put(account.getAccountNumber(), account);
-//        return account;
-//    }
-
     /**
      * Adds an auction house to the map of auction houses.
      */
@@ -301,7 +294,7 @@ public class Bank implements Runnable {
         synchronized (houseAccount){
             synchronized (agentAccount){
                 
-                if(agentAccount.getPendingBalance() >= amount){
+                if(agentAccount.getBalance() >= amount){
                     //transfer funds from agent to auction house
                     //agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
                     agentAccount.setBalance(agentAccount.getBalance() - amount);
@@ -321,9 +314,13 @@ public class Bank implements Runnable {
      * @param agentAccountNumber
      * @param amount
      */
-    public synchronized void blockFunds(int agentAccountNumber, double amount){
+    public synchronized boolean blockFunds(int agentAccountNumber, double amount){
         Account agentAccount = accounts.get(agentAccountNumber);
-        agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
+        if(agentAccount.getPendingBalance() - amount >= 0){
+            agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
+            return true;
+        }
+        return false;
     }
 
     /**

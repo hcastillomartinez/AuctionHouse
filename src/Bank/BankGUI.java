@@ -59,29 +59,6 @@ public class BankGUI extends Application {
         initializeTitledPanes();
 
         mainPane.getChildren().addAll(agentsPane, housesPane);
-
-
-//        Task<Void> task = new Task<Void>() {
-//
-//            @Override protected Void call() throws Exception {
-//
-//                ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-//
-//                final Runnable refreshScreen = new Runnable() {
-//                    public void run() {
-//                        refreshAccountInformation();
-//                        //System.out.println("inside refreshScreen 182");
-//                    }
-//                };
-//                final ScheduledFuture<?> refreshHandle =
-//                        scheduler.scheduleAtFixedRate(refreshScreen, 1000, 1000, MILLISECONDS);
-//                return null;
-//            }
-//        };
-//
-//        Thread taskThread = new Thread(task);
-//        taskThread.run();
-
     }
 
     /**
@@ -194,49 +171,6 @@ public class BankGUI extends Application {
         primaryStage.setResizable(false);
         primaryStage.show();
 
-//        Task<Void> task = new Task<Void>() {
-//
-//            @Override protected Void call() throws Exception {
-//
-//                ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-//
-//                final Runnable refreshScreen = new Runnable() {
-//                    public void run() {
-//                        Platform.runLater(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                            gui.refreshAccountInformation();
-//
-//                            }
-//                        });
-//                        //System.out.println("inside refreshScreen 182");
-//                    }
-//                };
-//                final ScheduledFuture<?> refreshHandle =
-//                        scheduler.scheduleAtFixedRate(refreshScreen, 1000, 1000, MILLISECONDS);
-//                return null;
-//            }
-//        };
-//
-//        Thread taskThread = new Thread(task);
-//        taskThread.start();
-
-
-
-//        Thread refreshThread = new Thread(new Runnable() {
-//            @Override public void run() {
-//
-//                Platform.runLater(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        bar.setProgress(counter / 1000000.0);
-//                    }
-//                });
-//            }
-//        });
-//
-//        refreshThread.start();
-
 
         Timer timer = new Timer();
 
@@ -251,24 +185,5 @@ public class BankGUI extends Application {
                 });
             }
         }, 0, 1000);
-
-
-//        Task<Void> task = new Task<Void>() {
-//
-//            @Override
-//            protected Void call() throws Exception {
-//
-//                ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-//
-//                final Runnable refreshScreen = new Runnable() {
-//                    public void run() {
-//                        gui.refreshAccountInformation();
-//                    }
-//                };
-//                return null;
-//            };
-//        };
-//
-//        task.run();
     }
 }
