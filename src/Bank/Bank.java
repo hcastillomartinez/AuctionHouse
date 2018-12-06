@@ -176,11 +176,11 @@ public class Bank implements Runnable {
             case GET_HOUSES:
                 return new Message(NAME,MessageTypes.HOUSES,this.getAuctionHousesAsList());
                 
-            case GET_AGENT_ID_FOR_HOUSE:
-                return new Message(NAME,
-                                   MessageTypes.ID_FOR_HOUSE,
-                                   (AuctionInfo) message.getMessageList().get(2),
-                                   new Integer(keyForClient += 1));
+//            case GET_AGENT_ID_FOR_HOUSE:
+//                return new Message(NAME,
+//                                   MessageTypes.ID_FOR_HOUSE,
+//                                   (AuctionInfo) message.getMessageList().get(2),
+//                                   new Integer(keyForClient += 1));
 
             case UNBLOCK_FUNDS:
                 agentAccountNumber = (int) messageList.get(2);
