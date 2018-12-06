@@ -39,25 +39,36 @@ public class AgentGUI extends Application {
     private ChoiceBox<String> auctionHouses;
     private ListView<String> itemsFromHouse = new ListView<>();
     private ListView<String> bids = new ListView<>();
+    private ListView<String> wonItems = new ListView<>();
     
     // filler variables for the boxes
     private Label firName, lastName, acctBalance, pendingBalanceLabel,
-        ahLabel, idLabel, itemLabel, bidLabel;
+        ahLabel, idLabel, itemLabel, bidLabel, bidListLabel, itemListLabel;
     private TextField firNameField, lastNameField, acctBalanceField,
         pendingField, ahField, idField, itemField, bidField;
     private Button createAccountButton, placeBidButton, selectItemButton,
-        updateButton, chooseAuctionHouseButton;
+        updateButton, chooseAuctionHouseButton, updateWonItemsButton;
     
     // box variables
     private VBox accountBox, bidContainer, auctionContainer, appVertContainer;
     private HBox firstNameBox, lastNameBox, accountBalance, aucHouseHBox,
-        idBox, itemBox, bidBox, appFullContainer, pendingBalanceBox;
+        idBox, itemBox, bidBox, appFullContainer, pendingBalanceBox,
+        itemAndBidBox, labelItemAndBidBox, aucHBox, bidAndUpdateBox;
     
     // background fillers
     private final BackgroundFill BLUE
         = new BackgroundFill(Color.BLUE, null, null);
     private final BackgroundFill GREY
         = new BackgroundFill(Color.GREY, new CornerRadii(10), null);
+
+    // timer for updating the lists
+    TimerTask timerTask = new TimerTask() {
+        @Override
+        public void run() {
+            long past = System.currentTimeMillis();
+            while (System.currentTimeMillis() - past < 100) {}
+        }
+    };
     
     /**
      * Launching the application.
@@ -79,20 +90,21 @@ public class AgentGUI extends Application {
     }
     
     /*****************************************************************/
-        /*                                                               */
-        /*               Functions For Making the AH choice box          */
-        /*                                                               */
+    /*                                                               */
+    /*               Functions For Making the AH choice box          */
+    /*                                                               */
     /*****************************************************************/
     
     /**
      * Function to choose the auction house.
      */
     private boolean setAuctionHouseOnChoice() {
-        String aucName = auctionHouses.getValue();
+        String aucName = auctionHouses.getValue(), check;
         ArrayList<AuctionInfo> tempList = agent.getHouseList();
         
         for (AuctionInfo ai: tempList) {
-            if (ai.toString().equalsIgnoreCase(aucName)) {
+            check = ai.getName() + " " + ai.getPortNumber();
+            if (check.equalsIgnoreCase(aucName)) {
                 return agent.setAuctionHouse(ai);
             }
         }
@@ -106,11 +118,12 @@ public class AgentGUI extends Application {
         auctionHouses.getItems().clear();
         agent.getBank().sendAgentMessage(new Message(agent.getNAME(),
                                                      MessageTypes.GET_HOUSES));
+        timerTask.run();
         ArrayList<AuctionInfo> temp = agent.getHouseList();
         auctionHouses.getItems().add("Choose Auction House");
         auctionHouses.setValue("Choose Auction House");
         for (AuctionInfo s: temp) {
-            auctionHouses.getItems().add(s.toString());
+            auctionHouses.getItems().add(s.getName() + " " + s.getPortNumber());
         }
     }
     
@@ -152,9 +165,16 @@ public class AgentGUI extends Application {
         chooseAuctionHouseButton.setMinHeight(25);
         chooseAuctionHouseButton.setOnAction(e -> {
             if (setAuctionHouseOnChoice()) {
-                agent.getAHProxy(agent.getAuctionInfo())
-                     .sendMessage(new Message(agent.getNAME(),
-                                              MessageTypes.GET_ITEMS));
+                AuctionInfo ai = agent.getAuctionInfo();
+                agent.getAHProxy(ai).sendMessage(new Message(agent.getNAME(),
+                                                             MessageTypes.GET_ITEMS));
+                if (!agent.getAuctionHouseKeys()
+                          .containsKey(ai.getPortNumber())) {
+                    agent.getBank().sendAgentMessage(new Message(agent.getNAME(),
+                                                                 MessageTypes.GET_AGENT_ID_FOR_HOUSE,
+                                                                 ai));
+                }
+                timerTask.run();
                 itemsFromHouse.getItems().clear();
                 ArrayList<Item> list = agent.getItemList();
                 
@@ -167,9 +187,9 @@ public class AgentGUI extends Application {
     }
     
     /*****************************************************************/
-        /*                                                               */
-        /*       Functions For Making the Bid and Account Buttons        */
-        /*                                                               */
+    /*                                                               */
+    /*       Functions For Making the Bid and Account Buttons        */
+    /*                                                               */
     /*****************************************************************/
     
     /**
@@ -240,24 +260,14 @@ public class AgentGUI extends Application {
      */
     private void placeBid() {
         Bid bid = new Bid(agent.getItem(),
-                          agent.getKey(),
+                          agent.getKeyForHouse(),
                           Double.parseDouble(bidField.getText()));
         Message message = new Message(agent.getNAME(),
                                       MessageTypes.BID,
                                       bid);
         agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
-        agent.getBids().add(bid);
+//        agent.getBids().add(bid);
     }
-
-    TimerTask timerTask = new TimerTask() {
-        @Override
-        public void run() {
-            long past = System.currentTimeMillis();
-            while (System.currentTimeMillis() - past < 500) {
-            
-            }
-        }
-    };
     
     /**
      * Function to make the place bid button.
@@ -308,9 +318,9 @@ public class AgentGUI extends Application {
     }
     
     /*****************************************************************/
-        /*                                                               */
-        /*              Functions For Making the Fields and Labels       */
-        /*                                                               */
+    /*                                                               */
+    /*              Functions For Making the Fields and Labels       */
+    /*                                                               */
     /*****************************************************************/
     
     /**
@@ -325,6 +335,8 @@ public class AgentGUI extends Application {
         idLabel = new Label("ID: ");
         itemLabel = new Label("Item: ");
         bidLabel = new Label("Bid: ");
+        bidListLabel = new Label("Current Bids: ");
+        itemListLabel = new Label("Won Items: ");
     }
     
     /**
@@ -342,9 +354,9 @@ public class AgentGUI extends Application {
     }
     
     /*****************************************************************/
-        /*                                                               */
-        /*               Functions For Making New Account Box            */
-        /*                                                               */
+    /*                                                               */
+    /*               Functions For Making New Account Box            */
+    /*                                                               */
     /*****************************************************************/
     
     /**
@@ -407,9 +419,9 @@ public class AgentGUI extends Application {
     }
     
     /*****************************************************************/
-        /*                                                               */
-        /*          Functions For Making the Auction House VBox          */
-        /*                                                               */
+    /*                                                               */
+    /*          Functions For Making the Auction House VBox          */
+    /*                                                               */
     /*****************************************************************/
     
     /**
@@ -457,24 +469,84 @@ public class AgentGUI extends Application {
     }
     
     /**
+     * Function to build the label box for the lists
+     */
+    private void buildLabelItemAndBidBox() {
+        labelItemAndBidBox = new HBox();
+        labelItemAndBidBox.setSpacing(WIDTH * 0.135);
+        labelItemAndBidBox.setMaxWidth(WIDTH * 0.5);
+        labelItemAndBidBox.setMaxHeight(HEIGHT * 0.5 * 0.05);
+        labelItemAndBidBox.getChildren().addAll(bidListLabel, itemListLabel);
+    }
+    
+    /**
+     * Function to build the HBox containing the bid and item lists
+     */
+    private void buildItemAndBidBox() {
+        itemAndBidBox = new HBox();
+        itemAndBidBox.setMaxHeight(HEIGHT * 0.5 * 0.6);
+        itemAndBidBox.setMaxWidth(WIDTH * 0.5);
+        itemAndBidBox.setSpacing(5);
+        buildLabelItemAndBidBox();
+        itemAndBidBox.getChildren().addAll(bids, wonItems);
+    }
+    
+    /**
+     * Function to make the bid and update box
+     */
+    private void buildBidAndUpdateBox() {
+        bidAndUpdateBox = new HBox();
+        bidAndUpdateBox.setMaxHeight(28);
+        bidAndUpdateBox.setSpacing(10);
+        bidAndUpdateBox.setMaxWidth(WIDTH * 0.5);
+        bidAndUpdateBox.getChildren().addAll(placeBidButton,
+                                             updateWonItemsButton);
+    }
+    
+    /**
+     * Function to build the won items button update.
+     */
+    private void buildItemUpdateButton() {
+        updateWonItemsButton = new Button("Update Items Won");
+        updateWonItemsButton.setTextFill(Color.WHITE);
+        updateWonItemsButton.setMaxWidth(175);
+        updateWonItemsButton.setMaxHeight(25);
+        updateWonItemsButton.setBackground(new Background(GREY));
+        updateWonItemsButton.setOnAction(e -> {
+            ArrayList<Item> tempWin = agent.getWonItems();
+            wonItems.getItems().clear();
+            
+            for (Item item: tempWin) {
+                wonItems.getItems()
+                        .add(item.getItemName() + " " + item.getPrice());
+            }
+        });
+    }
+    
+    /**
      * Function to add fields to the bidBox container.
      */
     private void buildBidContainer() {
         bidContainer = new VBox();
         bidContainer.setMinWidth(WIDTH * 0.5);
         bidContainer.setMinHeight(HEIGHT * 0.5);
+        buildItemUpdateButton();
+        buildLabelItemAndBidBox();
+        buildItemAndBidBox();
+        buildBidAndUpdateBox();
         bidContainer.getChildren().addAll(aucHouseHBox,
                                           idBox,
                                           itemBox,
                                           bidBox,
-                                          placeBidButton,
-                                          bids);
+                                          bidAndUpdateBox,
+                                          labelItemAndBidBox,
+                                          itemAndBidBox);
     }
     
     /*****************************************************************/
-        /*                                                               */
-        /*          Functions For Making the Full GUI Containers         */
-        /*                                                               */
+    /*                                                               */
+    /*          Functions For Making the Full GUI Containers         */
+    /*                                                               */
     /*****************************************************************/
     
     /**
@@ -492,6 +564,19 @@ public class AgentGUI extends Application {
     }
     
     /**
+     * Function to build the horizontal box for the update and select
+     * buttons and the drop down box.
+     */
+    private void buildAucHBox() {
+        aucHBox = new HBox();
+        aucHBox.setSpacing(10);
+        aucHBox.setMaxWidth(WIDTH * 0.5);
+        aucHBox.setMaxHeight(HEIGHT * 0.85);
+        aucHBox.getChildren().addAll(auctionHouses,
+                                     chooseAuctionHouseButton);
+    }
+    
+    /**
      * Function to initialize the vertical boxes
      */
     private void buildAuctionBox() {
@@ -499,9 +584,12 @@ public class AgentGUI extends Application {
         auctionContainer.setMinWidth(WIDTH * 0.5);
         auctionContainer.setMinHeight(HEIGHT);
         auctionContainer.setSpacing(5);
+        buildAucHBox();
+        Label chooseAuctionHouseBox = new Label("Choose House from Dropdown " +
+                                                    "Box Below: ");
         auctionContainer.getChildren().addAll(updateButton,
-                                              auctionHouses,
-                                              chooseAuctionHouseButton,
+                                              chooseAuctionHouseBox,
+                                              aucHBox,
                                               itemsFromHouse,
                                               selectItemButton);
         // TODO:
