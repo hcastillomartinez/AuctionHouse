@@ -27,7 +27,7 @@ public class AuctionHouseProxy implements Runnable {
     private Socket client = null;
     private AuctionHouse house;
     private BlockingQueue<Message> messageQueue = new LinkedBlockingQueue<>();
-    
+
     /**
      * Constructor for the bank proxy.
      * Builds a reference to the bank for bank functionality
@@ -68,7 +68,7 @@ public class AuctionHouseProxy implements Runnable {
             io.printStackTrace();
         }
     }
-    
+
     /**
      * Adding a message to the banks input stream.
      */

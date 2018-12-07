@@ -624,7 +624,6 @@ public class AgentGUI extends Application {
             agent.setAccountChange(false);
         }
 
-//
 
         if (agent.isItemListChange()) {
             ArrayList<Item> list = agent.getItemList();
