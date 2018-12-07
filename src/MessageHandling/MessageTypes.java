@@ -8,6 +8,7 @@ package MessageHandling;
 public enum MessageTypes {
     
     BID("bid"),
+    CLOSE("close"),
     GET_HOUSES("get houses"),
     GET_ITEMS("get items"),
     GET_USERS("get users"),
