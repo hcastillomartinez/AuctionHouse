@@ -1,6 +1,8 @@
 package AuctionHouse;
 
 import Bank.Account;
+import MessageHandling.Message;
+import MessageHandling.MessageTypes;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -203,6 +205,8 @@ public class AuctionHouseGUI extends Application {
 
     @Override
     public void stop(){
+        auctionHouse.sendToAllClient(new Message("auction house",
+                MessageTypes.CLOSE,auctionHouse.getPort()));
         System.out.println("GUI closed");
         timeline.stop();
         System.exit(1);
