@@ -5,7 +5,6 @@ import Bank.Account;
 import Bank.AuctionInfo;
 import MessageHandling.Message;
 import MessageHandling.MessageTypes;
-import javafx.application.Application;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -45,9 +44,10 @@ public class AuctionHouse implements Runnable {
      * @param type An int
      */
     public  AuctionHouse(String type,String port,String serverName){
+        //.net netbug meetup.org
         agentCount = 0;
         auctionOpen = true;
-        safeToClose=false;
+        safeToClose=true;
         account=new Account(type,10,0,0);
         messageAnalyzer=new HouseMessageAnalyzer();
         makeItems = new MakeItems();
@@ -114,10 +114,19 @@ public class AuctionHouse implements Runnable {
         return auctions;
     }
 
+    /**
+     * Used to set the auction to be able to be closed by the GUI. Done when
+     * safe or not safe.
+     * @param safeToClose boolean that is state safe to close.
+     */
     public void setSafeToClose(boolean safeToClose) {
         this.safeToClose = safeToClose;
     }
 
+    /**
+     * Used to ask whether connection is safe to close.
+     * @return A boolean whether auction house can be closed.
+     */
     public boolean isSafeToClose() {
         return safeToClose;
     }
@@ -199,34 +208,39 @@ public class AuctionHouse implements Runnable {
         int action = messageAnalyzer.analyzeMessage(m);
         if(action == 1){
            int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
+            System.out.println("Receiving from Agent: " +m);
            sendToServer(id,new Message("auction house",
                    MessageTypes.GET_ITEMS,itemList));
         }else if(action == 2){
             int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
+            System.out.println("Receiving from Agent: " +m);
             tryBid((Bid) m.getMessageList().get(2),id);
         }else if(action == 3){
-            System.out.println("New: "+m.getMessageList().get(2));
-            System.out.println("OLD: "+getAccount());
+            System.out.println("Receiving from Bank: " +m);
             updateAccount((double) m.getMessageList().get(2),
                           (double) m.getMessageList().get(3),
                           (int) m.getMessageList().get(4));
             setUpdateGUI(true);
         }else if(action==4){
-            if(auctionHouseGUI!=null){
+            System.out.println("Message from Auction: "+m);
                setUpdateGUI(true);
-            }
         }else if(action==5){
+            System.out.println("Message from Auction: "+m);
             updateItemList((Item)m.getMessageList().get(2));
             setUpdateGUI(true);
+        }else if(action==6){
+            setSafeToClose(true);
+        }else if(action==7){
+            setSafeToClose(false);
         }
 
     }
 
     /**
      * Used to add money to the funds of house from bank.
-     * @param account double that is funds to be added
+     * @param acntNum double that is funds to be added
      */
-    private void updateAccount(double bal, double penBal, int acntNum) {
+    private synchronized void updateAccount(double bal, double penBal, int acntNum) {
         this.account.setBalance(bal);
         this.account.setPendingBalance(penBal);
         this.account.setAccountNumber(acntNum);
@@ -407,7 +421,6 @@ public class AuctionHouse implements Runnable {
                     Message m = (Message) in.readObject();
                     if(m != null){
                         addID(m);
-                        System.out.println("Receiving from "+ ID+" "+m);
                         auctionHouse.placeMessageForAnalyzing(m);
                     }
                 }catch(EOFException i){
@@ -446,7 +459,7 @@ public class AuctionHouse implements Runnable {
     public void sendToServer(int ID,Message m){
         for(Server server:serverThreads){
             if(ID==server.getID()){
-                System.out.println("Sending to Agent: "+m);
+//                System.out.println("Sending to Agent: "+m);
                 server.placeMessage(m);
             }
         }

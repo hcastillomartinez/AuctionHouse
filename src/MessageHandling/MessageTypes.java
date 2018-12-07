@@ -35,6 +35,8 @@ public enum MessageTypes {
     ITEMS("items"),
     UPDATE("update"),
     HOUSES("houses"),
+    SAFE_TO_CLOSE("safe to close"),
+    UNSAFE_TO_CLOSE("unsafe to close"),
     ID_FOR_HOUSE("id for house");
 
     private final String message;
