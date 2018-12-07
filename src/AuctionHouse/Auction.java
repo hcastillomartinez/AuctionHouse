@@ -175,7 +175,11 @@ public class Auction implements Runnable{
             auctionHouse.placeMessageForAnalyzing(new Message("auction"
                     ,MessageTypes.UPDATE_ITEM,item));
             bidToBeat = bid;
+
             System.out.println("current winner " + currentWinnerID);
+
+            auctionHouse.sendToAllClient(new Message("auction house",
+                    MessageTypes.GET_ITEMS,auctionHouse.getItemList()));
         }
         else{
             auctionHouse.sendToServer(currentClientID,new Message("auction " +
@@ -219,7 +223,7 @@ public class Auction implements Runnable{
 
     @Override
     public String toString(){
-        return "Auction Status: "+auctionActive+" Item: "+item+
+        return "Auction Status: "+auctionActive+" Item: "+item.getItemName()+
                 " Bid: "+bidToBeat;
     }
 
@@ -245,6 +249,9 @@ public class Auction implements Runnable{
 
         //removes item from its list
         System.out.println(auctionHouse.removeItem(item));
+
+        auctionHouse.sendToAllClient(new Message("auction house",
+                MessageTypes.GET_ITEMS,auctionHouse.getItemList()));
 
         auctionHouse.placeMessageForAnalyzing(new Message("auction",
                 MessageTypes.UPDATE));
