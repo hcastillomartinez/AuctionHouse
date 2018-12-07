@@ -266,10 +266,9 @@ public class AuctionHouse implements Runnable {
     private synchronized void createAuction(Bid b,int serverThreadID){
         if(!b.getItem().isInBid()){
             Auction a = new Auction(this,b.getItem(),b,serverThreadID);
-//            a.placeBid(b,serverThreadID);
             auctions.add(a);
+            System.out.println("creating new auction for: "+b.getItem().getItemName());
             setUpdateGUI(true);
-//            auctionHouseGUI.updateLists();
             Thread t = new Thread(a);
             t.start();
         }
