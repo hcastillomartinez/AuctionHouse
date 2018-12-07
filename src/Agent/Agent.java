@@ -404,10 +404,27 @@ public class Agent implements Runnable {
     /*****************************************************************/
 
     /**
+     * Updating the list of bids.
+     */
+    private void updateShowBidList(ArrayList<Object> messList) {
+        ArrayList<Bid> removeList = new ArrayList<>();
+        Bid b = (Bid) messList.get(2);
+        for (Bid b1: bids) {
+            if (b1.getItem().equals(b.getItem())) {
+                System.out.println("here");
+                removeList.add(b1);
+            }
+        }
+        for (Bid b2: removeList) {
+            bids.remove(b2);
+        }
+    }
+    
+    /**
      * Function to respond after message analysis
      */
     @SuppressWarnings("unchecked")
-    private synchronized void response(Message message,
+    private void response(Message message,
                                        MessageTypes type,
                                        int sender) {
         Message response;
@@ -421,8 +438,9 @@ public class Agent implements Runnable {
             case TRANSFER_ITEM:
                 Bid bid = (Bid) list.get(2);
                 Item bidItem = bid.getItem();
-
-                bids.remove(bid);
+                bidItem.updatePrice(bid.getAmount());
+                updateShowBidList(list);
+                
                 wonItems.add(bidItem);
                 break;
             case BANK_ACCOUNT:
@@ -442,17 +460,8 @@ public class Agent implements Runnable {
             case BID_REJECTED:
                 break;
             case BID_ACCEPTED:
-                ArrayList<Bid> removeList = new ArrayList<>();
+                updateShowBidList(list);
                 Bid b = (Bid) list.get(2);
-                for (Bid b1: bids) {
-                    if (b1.getItem().equals(b.getItem())) {
-                        System.out.println("here");
-                        removeList.add(b1);
-                    }
-                }
-                for (Bid b2: removeList) {
-                    bids.remove(b2);
-                }
                 bids.add(b);
                 break;
             case OUT_BID:
@@ -468,7 +477,6 @@ public class Agent implements Runnable {
                 int accntNum = (int) list.get(4);
                 account.setBalance(bal);
                 account.setPendingBalance(pend);
-//                account.setAccountNumber(accntNum);
                 System.out.println(account + " = after");
                 accountChange = true;
                 break;
