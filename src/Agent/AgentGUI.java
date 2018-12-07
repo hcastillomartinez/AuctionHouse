@@ -255,12 +255,12 @@ public class AgentGUI extends Application {
      */
     private void placeBid() {
         Bid bid = new Bid(agent.getItem(),
-                          agent.getAccountNumber(),// look here
+                          agent.getId(),// look here
                           Double.parseDouble(bidField.getText()));
         Message message = new Message(agent.getNAME(),
                                       MessageTypes.BID,
                                       bid,
-                                      agent.getAccountNumber());
+                                      agent.getId());
         agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
     }
     
@@ -505,6 +505,7 @@ public class AgentGUI extends Application {
                 wonItems.getItems()
                         .add(item.getItemName() + " " + item.getPrice());
             }
+            updateBidList();
         });
     }
     

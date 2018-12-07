@@ -305,7 +305,15 @@ public class Agent implements Runnable {
         }
         return null;
     }
-    
+
+    /**
+     * Setting the id to match the account number
+     * @param id int
+     */
+    private void setID(int id) {
+        this.id = id;
+    }
+
     /**
      * Returning the id of the Agent.
      * @return id of the agent.
@@ -347,7 +355,7 @@ public class Agent implements Runnable {
      */
     public void setConnected() { connected = !connected; }
     
-    /*****************************************************************/
+    /***********************************************************   updateShowBidList(list);******/
     /*                                                               */
     /*               Functions For Actions Based On Input            */
     /*                                                               */
@@ -401,7 +409,16 @@ public class Agent implements Runnable {
             bids.remove(b2);
         }
     }
-    
+
+    /**
+     * Updating the item list from the ah.
+     */
+    private void updateItemListForView() {
+        for (Item i: wonItems) {
+            itemList.remove(i);
+        }
+    }
+
     /**
      * Function to respond after message analysis
      */
@@ -419,6 +436,7 @@ public class Agent implements Runnable {
                 Item bidItem = bid.getItem();
                 bidItem.updatePrice(bid.getAmount());
                 updateShowBidList(list);
+                updateItemListForView();
                 wonItems.add(bidItem);
                 itemList.remove(bidItem);
                 itemListChange = true;
@@ -448,6 +466,7 @@ public class Agent implements Runnable {
                 ArrayList<Item> temp = (ArrayList<Item>) list.get(2);
                 itemList.clear();
                 itemList.addAll(temp);
+                updateItemListForView();
                 itemListChange = true;
                 break;
             case ACCOUNT_INFO:
@@ -456,6 +475,8 @@ public class Agent implements Runnable {
                 int accntNum = (int) list.get(4);
                 account.setBalance(bal);
                 account.setPendingBalance(pend);
+                account.setAccountNumber(accntNum);
+                setID(accntNum);
                 accountChange = true;
                 break;
             case UNBLOCK_FUNDS:
@@ -473,6 +494,7 @@ public class Agent implements Runnable {
                         i.updatePrice(newPrice);
                     }
                 }
+                updateItemListForView();
                 itemListChange = true;
                 break;
         }
