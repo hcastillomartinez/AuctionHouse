@@ -221,7 +221,7 @@ public class AgentGUI extends Application {
                                                      agent.getHostName(),
                                                      agent.getCurrentAuctionID(),
                                                      agent.getPortNumber(),
-                                                     agent.getId());
+                                                     agent.getAccountNumber()); //todo look here if there is an issue
                     agent.getBank().sendAgentMessage(new Message(agent.getNAME(),
                                                                  MessageTypes.CREATE_ACCOUNT,
                                                                  account,
