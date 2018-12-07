@@ -644,9 +644,12 @@ public class AgentGUI extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setOnCloseRequest(e -> {
-            agent.setConnected();
-            primaryStage.close();
-            System.exit(3);
+            e.consume();
+            if (agent.getBids().size() == 0) {
+                agent.setConnected();
+                primaryStage.close();
+                System.exit(3);
+            }
         });
         AgentGUI agui = new AgentGUI();
         setupNumbersAndAgent();

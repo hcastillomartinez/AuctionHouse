@@ -434,10 +434,10 @@ public class AuctionHouse implements Runnable {
                         addID(m);
                         auctionHouse.placeMessageForAnalyzing(m);
                     }
-                }catch (SocketException se) {
+                }catch (EOFException se) {
                     connected = !connected;
                     closeClient();
-                }catch(EOFException i){
+                }catch(SocketException i){
                     connected = !connected;
                     closeClient();
                     i.printStackTrace();
