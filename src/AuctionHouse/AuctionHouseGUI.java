@@ -53,15 +53,13 @@ public class AuctionHouseGUI extends Application {
      * Starts a thread that will be updating the item the item list until the
      * GUI is exited via red x.
      */
-    public void updateLists(){
+    private void updateLists(){
         auctionObservableList.setAll(auctionHouse.getAuctions());
-//        System.out.println(auctionHouse.getAuctions());
         itemObservableList.setAll(auctionHouse.getItemList());
-//        System.out.println(auctionHouse.getItemList());
     }
 
 
-   public void updateBankInfo(){
+   private void updateBankInfo(){
        auctionAccount=auctionHouse.getAccount();
        accLabel.setText(""+auctionAccount.getAccountNumber());
        balance=auctionAccount.getBalance();
@@ -166,7 +164,6 @@ public class AuctionHouseGUI extends Application {
                 timeline=new Timeline(new KeyFrame(Duration.millis(1),
                         event -> {
                     if(auctionHouse.isUpdateGUI()){
-                        System.out.println("updating GUI");
                         updateLists();
                         updateBankInfo();
                         auctionHouse.setUpdateGUI(false);
