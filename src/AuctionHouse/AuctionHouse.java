@@ -355,7 +355,7 @@ public class AuctionHouse implements Runnable {
         private Socket client;
         private int ID;
         private AuctionHouse auctionHouse;
-        private BufferedReader stdIn;
+        private boolean connected;
         private ObjectInputStream in;
         private ObjectOutputStream out;
 
@@ -363,6 +363,7 @@ public class AuctionHouse implements Runnable {
                       int id
                 ,AuctionHouse a) throws IOException {
             this.client = client;
+            connected=true;
             auctionHouse = a;
             this.ID = id;
             out = new ObjectOutputStream(client.getOutputStream());
@@ -391,6 +392,9 @@ public class AuctionHouse implements Runnable {
             m.getMessageList().add(ID);
         }
 
+        public boolean isConnected(){
+            return connected;
+        }
         /**
          * Gets the ID of the server thread.
          * @return ID of the serve thread.
@@ -398,7 +402,6 @@ public class AuctionHouse implements Runnable {
         public int getID() {
             return ID;
         }
-
 
         /**
          * Goes through all socket connection and closes them.
@@ -415,7 +418,7 @@ public class AuctionHouse implements Runnable {
 
         @Override
         public void run()  {
-            boolean connected = true;
+//            boolean connected = true;
             while(connected){
                 try{
                     Message m = (Message) in.readObject();
@@ -461,6 +464,15 @@ public class AuctionHouse implements Runnable {
             if(ID==server.getID()){
 //                System.out.println("Sending to Agent: "+m);
                 server.placeMessage(m);
+            }
+        }
+    }
+
+
+    public void sendToAllClient(Message m){
+        for(Server s: serverThreads){
+            if(s.isConnected()){
+                s.placeMessage(m);
             }
         }
     }
