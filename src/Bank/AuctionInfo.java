@@ -12,6 +12,7 @@ public class AuctionInfo implements Serializable{
     private String name; //name of the auction house
     private String IPAddress; //the IPAddress of the house
     private int accountNumber, portNumber, auctionID; //it's account number, port number and id
+    private boolean isOpen;
 
     /**
      * Constructor for AuctionInfo
@@ -20,6 +21,7 @@ public class AuctionInfo implements Serializable{
                        String IPAddress,
                        int accountNumber,
                        int portNumber) {
+        isOpen=true;
         this.name = name;
         this.IPAddress = IPAddress;
         this.accountNumber = accountNumber;
@@ -32,6 +34,15 @@ public class AuctionInfo implements Serializable{
      */
     public String getName() {
         return name;
+    }
+
+
+    public void setOpen(boolean bool){
+        isOpen=bool;
+    }
+
+    public boolean isOpen(){
+        return isOpen;
     }
 
     /**
