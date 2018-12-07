@@ -284,7 +284,7 @@ public class AuctionHouse implements Runnable {
      */
     private synchronized void tryBid(Bid b,int serverThreadID){
         for(Auction a: auctions){
-            if(a.getItem().equals(b.getItem())){
+            if(a.getItem().getItemName().equals(b.getItem().getItemName())){
                 a.placeBid(b,serverThreadID);
                 setUpdateGUI(true);
 //                auctionHouseGUI.updateLists();
