@@ -9,6 +9,7 @@ import MessageHandling.MessageTypes;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -424,12 +425,17 @@ public class AuctionHouse implements Runnable {
         public void run()  {
 //            boolean connected = true;
             while(connected){
-                try{
+                try
+                {
                     Message m = (Message) in.readObject();
-                    if(m != null){
+                    if (m != null)
+                    {
                         addID(m);
                         auctionHouse.placeMessageForAnalyzing(m);
                     }
+                }catch (SocketException se) {
+                    connected = !connected;
+                    closeClient();
                 }catch(EOFException i){
                     connected = !connected;
                     closeClient();
@@ -466,7 +472,7 @@ public class AuctionHouse implements Runnable {
     public void sendToServer(int ID,Message m){
         for(Server server:serverThreads){
             if(ID==server.getID()){
-//                System.out.println("Sending to Agent: "+m);
+                System.out.println("Sending to Agent: "+m);
                 server.placeMessage(m);
             }
         }

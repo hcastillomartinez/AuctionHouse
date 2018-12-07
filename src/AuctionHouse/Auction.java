@@ -269,3 +269,106 @@ public class Auction implements Runnable{
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ //     * Function to respond after message analysis
+ //     */
+//    @SuppressWarnings("unchecked")
+//    private void response(Message message,
+//                          MessageTypes type,
+//                          int sender) {
+//        Message response;
+//        ArrayList<Object> list = message.getMessageList();
+//
+//        switch (type) {
+//            case CONFIRMATION:
+//                response = new Message(NAME, MessageTypes.THANKS);
+//                respondToSender(sender, response, getAHProxy(auctionInfo));
+//                break;
+//            case TRANSFER_ITEM:
+//                System.out.println(wonItems + " = first");
+//                Bid bid = (Bid) list.get(2);
+//                Item bidItem = bid.getItem();
+//                bidItem.updatePrice(bid.getAmount());
+//                updateShowBidList(bidItem, bid.getAmount());
+//                wonItems.add(bidItem);
+//                System.out.println(wonItems + " = second");
+//                break;
+//            case BANK_ACCOUNT:
+//                accountNumber = (int) list.get(2);
+//                break;
+//            case ID_FOR_HOUSE:
+//                AuctionInfo ai = (AuctionInfo) message.getMessageList().get(2);
+//                int keyForHouse = (int) message.getMessageList().get(3);
+//                if (!auctionHouseKeys.containsKey(ai)) {
+//                    auctionHouseKeys.put(ai.getPortNumber(),
+//                                         keyForHouse);
+//                }
+//                break;
+//            case HOUSES:
+//                houseList = (ArrayList<AuctionInfo>) list.get(2);
+//                break;
+//            case BID_REJECTED:
+//                break;
+//            case BID_ACCEPTED:
+//                Bid b = (Bid) list.get(2);
+//                bids.add(b);
+//                break;
+//            case OUT_BID:
+//                Bid bid1 = (Bid) list.get(2);
+//                updateShowBidList(bid1.getItem(), bid1.getAmount());
+//                break;
+//            case GET_ITEMS:
+//                ArrayList<Item> temp = (ArrayList<Item>) list.get(2);
+//                itemList.clear();
+//                itemList.addAll(temp);
+//                itemChange = true;
+//                break;
+//            case ACCOUNT_INFO:
+//                double bal = (double) list.get(2);
+//                double pend = (double) list.get(3);
+//                int accntNum = (int) list.get(4);
+//                account.setBalance(bal);
+//                account.setAccountNumber(accntNum);
+//                account.setPendingBalance(pend);
+//                account.setAccountNumber(accountNumber);
+//                accountChange = true;
+//                break;
+//            case UNBLOCK_FUNDS:
+//                double price = (double) list.get(3);
+//                bank.sendAgentMessage(new Message(NAME,
+//                                                  MessageTypes.TRANSFER_FUNDS,
+//                                                  auctionInfo.getAccountNumber(),
+//                                                  price));
+//                break;
+//            case UPDATE_ITEM:
+//                ArrayList<Item> holder = (ArrayList<Item>) list.get(2);
+//                itemList.clear();
+//                itemList.addAll(holder);
+//                itemChange = true;
+//                break;
+//        }
+//    }

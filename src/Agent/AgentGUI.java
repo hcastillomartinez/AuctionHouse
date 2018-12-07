@@ -66,7 +66,7 @@ public class AgentGUI extends Application {
         = new BackgroundFill(Color.BLUE, null, null);
     private final BackgroundFill GREY
         = new BackgroundFill(Color.GREY, new CornerRadii(10), null);
-
+    
     // timer for updating the lists
     static TimerTask timerTask = new TimerTask() {
         @Override
@@ -96,9 +96,9 @@ public class AgentGUI extends Application {
     }
     
     /*****************************************************************/
-    /*                                                               */
-    /*               Functions For Making the AH choice box          */
-    /*                                                               */
+        /*                                                               */
+        /*               Functions For Making the AH choice box          */
+        /*                                                               */
     /*****************************************************************/
     
     /**
@@ -186,9 +186,9 @@ public class AgentGUI extends Application {
     }
     
     /*****************************************************************/
-    /*                                                               */
-    /*       Functions For Making the Bid and Account Buttons        */
-    /*                                                               */
+        /*                                                               */
+        /*       Functions For Making the Bid and Account Buttons        */
+        /*                                                               */
     /*****************************************************************/
     
     /**
@@ -263,7 +263,8 @@ public class AgentGUI extends Application {
                           Double.parseDouble(bidField.getText()));
         Message message = new Message(agent.getNAME(),
                                       MessageTypes.BID,
-                                      bid);
+                                      bid,
+                                      agent.getAccount());
         agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
     }
     
@@ -301,25 +302,25 @@ public class AgentGUI extends Application {
         selectItemButton.setMaxHeight(25);
         selectItemButton.setBackground(new Background(GREY));
         selectItemButton.setOnAction(e -> {
-//            boolean set = false;
-//            Item temp = itemsFromHouse.getSelectionModel().getSelectedItem();
-//            ArrayList<Item> items = agent.getItemList();
-//
-//            for (Item i: items) {
-//                if (i.toString().equalsIgnoreCase(items.toString()) && !set) {
-//                    agent.setItem(i);
-//                    set = true;
-//                }
-//            }
+    //            boolean set = false;
+    //            Item temp = itemsFromHouse.getSelectionModel().getSelectedItem();
+    //            ArrayList<Item> items = agent.getItemList();
+    //
+    //            for (Item i: items) {
+    //                if (i.toString().equalsIgnoreCase(items.toString()) && !set) {
+    //                    agent.setItem(i);
+    //                    set = true;
+    //                }
+    //            }
             agent.setItem(itemsFromHouse.getSelectionModel().getSelectedItem());
             addValuesToAucGui();
         });
     }
     
     /*****************************************************************/
-    /*                                                               */
-    /*              Functions For Making the Fields and Labels       */
-    /*                                                               */
+        /*                                                               */
+        /*              Functions For Making the Fields and Labels       */
+        /*                                                               */
     /*****************************************************************/
     
     /**
@@ -353,9 +354,9 @@ public class AgentGUI extends Application {
     }
     
     /*****************************************************************/
-    /*                                                               */
-    /*               Functions For Making New Account Box            */
-    /*                                                               */
+        /*                                                               */
+        /*               Functions For Making New Account Box            */
+        /*                                                               */
     /*****************************************************************/
     
     /**
@@ -418,9 +419,9 @@ public class AgentGUI extends Application {
     }
     
     /*****************************************************************/
-    /*                                                               */
-    /*          Functions For Making the Auction House VBox          */
-    /*                                                               */
+        /*                                                               */
+        /*          Functions For Making the Auction House VBox          */
+        /*                                                               */
     /*****************************************************************/
     
     /**
@@ -512,7 +513,7 @@ public class AgentGUI extends Application {
         updateWonItemsButton.setMaxHeight(25);
         updateWonItemsButton.setBackground(new Background(GREY));
         updateWonItemsButton.setOnAction(e -> {
-//            System.out.println("here in the update items");
+    //            System.out.println("here in the update items");
             ArrayList<Item> tempWin = agent.getWonItems();
             wonItems.getItems().clear();
             
@@ -544,9 +545,9 @@ public class AgentGUI extends Application {
     }
     
     /*****************************************************************/
-    /*                                                               */
-    /*          Functions For Making the Full GUI Containers         */
-    /*                                                               */
+        /*                                                               */
+        /*          Functions For Making the Full GUI Containers         */
+        /*                                                               */
     /*****************************************************************/
     
     /**
@@ -627,7 +628,7 @@ public class AgentGUI extends Application {
         appFullContainer.setSpacing(5);
         appFullContainer.getChildren().addAll(appVertContainer, auctionContainer);
     }
-
+    
     /*
      *
      */
@@ -636,7 +637,7 @@ public class AgentGUI extends Application {
             updateAccountFields();
             agent.setAccountChange(false);
         }
-
+        
         if (agent.getAuctionInfo() != null) {
             Message message  = new Message(agent.getNAME(),
                                            MessageTypes.GET_ITEMS);
@@ -675,13 +676,13 @@ public class AgentGUI extends Application {
         buildBidContainer();
         buildAccountContainer();
         fillContainers();
-
+        
         primaryStage.setTitle("Agent " + agent.getAccountNumber());
         Scene scene = new Scene(appFullContainer);
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
-
+        
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -696,4 +697,3 @@ public class AgentGUI extends Application {
         }, 0, 1000);
     }
 }
-

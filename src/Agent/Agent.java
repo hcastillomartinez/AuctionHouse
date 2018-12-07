@@ -20,7 +20,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Agent implements Runnable {
 
     private final String NAME = "agent";
-
+    
     private int id, key, accountNumber;
     private Account account = null;
     private AuctionHouseProxy aHProxy;
@@ -39,14 +39,14 @@ public class Agent implements Runnable {
     private String hostName;
     private int portNumber;
     private boolean itemListChange = false, aucHouseChange = false,
-            bidChange = false, itemsWonChange = false;
-
+        bidChange = false, itemsWonChange = false;
+    
     // tester value for the auction house info
     private HashMap<AuctionHouseProxy, ArrayList<Item>> auctionHouseItems;
     private AuctionInfo auctionInfo;
     private boolean accountChange = false;
-
-
+    
+    
     /**
      * Constructor for the Agent.
      */
@@ -60,12 +60,12 @@ public class Agent implements Runnable {
         auctionHouseItems = new HashMap<>();
         auctionHouseKeys = new HashMap<>();
         bids = new ArrayList<>();
-
+        
         this.bank = new BankProxy(hostName,
                                   portNumber,
                                   this);
     }
-
+    
     /**
      * Getting account change.
      * @return account change
@@ -73,7 +73,7 @@ public class Agent implements Runnable {
     public boolean getAccountChange() {
         return accountChange;
     }
-
+    
     /**
      * Setting account change.
      * @param accountChange change
@@ -81,13 +81,13 @@ public class Agent implements Runnable {
     public void setAccountChange(boolean accountChange){
         this.accountChange = accountChange;
     }
-
+    
     /**
      * Getting the auction info that holds the status of the house.
      * @return auctionInfo object
      */
     public AuctionInfo getAuctionInfo() { return auctionInfo; }
-
+    
     /**
      * Getting if there has been a change in the item list.
      * @return true if change, false otherwise
@@ -95,7 +95,7 @@ public class Agent implements Runnable {
     public boolean isItemListChange() {
         return itemListChange;
     }
-
+    
     /**
      * Setting if there has been a change in the item list.
      * @param itemListChange, setting to false
@@ -103,7 +103,7 @@ public class Agent implements Runnable {
     public void setItemListChange(boolean itemListChange) {
         this.itemListChange = itemListChange;
     }
-
+    
     /**
      * Getting the auction house info keys
      * @return auctionHouseKeys
@@ -111,7 +111,7 @@ public class Agent implements Runnable {
     public HashMap<Integer, Integer> getAuctionHouseKeys() {
         return auctionHouseKeys;
     }
-
+    
     /**
      * Getting if there has been a change in the auction house list.
      * @return true if change, false otherwise
@@ -119,7 +119,7 @@ public class Agent implements Runnable {
     public boolean isAucHouseChange() {
         return aucHouseChange;
     }
-
+    
     /**
      * Getting if there has been a change in the auction house list.
      * @param aucHouseChange, setting change to false
@@ -127,14 +127,14 @@ public class Agent implements Runnable {
     public void setAucHouseChange(boolean aucHouseChange) {
         this.aucHouseChange = aucHouseChange;
     }
-
+    
     /**
      * Getting the account number for sending to the bank.
      */
     public int getAccountNumber() {
         return accountNumber;
     }
-
+    
     /**
      * Getting if there has been a change in the item list.
      * @return true if change, false otherwise
@@ -142,7 +142,7 @@ public class Agent implements Runnable {
     public boolean isBidChange() {
         return bidChange;
     }
-
+    
     /**
      * Setting if there has been a change in the bid list.
      * @param bidChange, setting bid change to false
@@ -150,7 +150,7 @@ public class Agent implements Runnable {
     public void setBidChange(boolean bidChange) {
         this.bidChange = bidChange;
     }
-
+    
     /**
      * Getting if there has been a change in the items won list.
      * @return true if change, false otherwise
@@ -158,7 +158,7 @@ public class Agent implements Runnable {
     public boolean isItemsWonChange() {
         return itemsWonChange;
     }
-
+    
     /**
      * Setting if there has been a change in the items won list.
      * @param itemsWonChange, changing to no change
@@ -166,13 +166,13 @@ public class Agent implements Runnable {
     public void setItemsWonChange(boolean itemsWonChange) {
         this.itemsWonChange = itemsWonChange;
     }
-
+    
     /**
      * Getting the current item.
      * @return currentItem selected.
      */
     public Item getItem() { return item; }
-
+    
     /**
      * Setting the item for the agent.
      * @param item for the agent
@@ -180,7 +180,7 @@ public class Agent implements Runnable {
     public void setItem(Item item) {
         this.item = item;
     }
-
+    
     /**
      * Getting the item list for the specific auction house.
      * @return itemList for the ah
@@ -188,7 +188,7 @@ public class Agent implements Runnable {
     private ArrayList<Item> getItemList(AuctionInfo ai) {
         return auctionHouseItems.get(houseProxyMap.get(ai));
     }
-
+    
     /**
      * Getting the item list for the specific auction house.
      * @return itemList for the ah
@@ -196,7 +196,7 @@ public class Agent implements Runnable {
     public ArrayList<Item> getItemList() {
         return itemList;
     }
-
+    
     /**
      * Getting the item list for the specific auction house.
      * @return itemList for the ah
@@ -204,7 +204,7 @@ public class Agent implements Runnable {
     public ArrayList<Item> getWonItems() {
         return wonItems;
     }
-
+    
     /**
      * Getting the correct auction house proxy to send the message.
      * @param info of the auction house
@@ -213,13 +213,13 @@ public class Agent implements Runnable {
     public AuctionHouseProxy getAHProxy(AuctionInfo info) {
         return houseProxyMap.get(info);
     }
-
+    
     /**
      * Getting the port number.
      * @return portNumber for the client
      */
     public int getPortNumber() { return portNumber; }
-
+    
     /**
      * Function to get the pending balance of the agent account.
      * @return pending balance
@@ -229,7 +229,7 @@ public class Agent implements Runnable {
             return account.getPendingBalance();
         }
     }
-
+    
     /**
      * Function to return the agent account.
      * @return account for the agent.
@@ -237,7 +237,7 @@ public class Agent implements Runnable {
     public Account getAccount() {
         return account;
     }
-
+    
     /**
      * Function to get the bids.
      */
@@ -246,13 +246,13 @@ public class Agent implements Runnable {
             return bids;
         }
     }
-
+    
     /**
      * Getting the host name.
      * @return host name for the client.
      */
     public String getHostName() { return hostName; }
-
+    
     /**
      * Taking in messages until the item list message has been returned.
      */
@@ -260,7 +260,7 @@ public class Agent implements Runnable {
         Message in;
         MessageAnalyzer analyzer = new MessageAnalyzer();
         while (!MessageTypes.GET_ITEMS.getMessage()
-                .equalsIgnoreCase("get items")) {
+                                      .equalsIgnoreCase("get items")) {
             try {
                 in = messageQueue.take();
                 response(in,
@@ -271,7 +271,7 @@ public class Agent implements Runnable {
             }
         }
     }
-
+    
     /**
      * Setting the auction house for the agent.
      * @param auctionInfo house for functionality
@@ -279,9 +279,9 @@ public class Agent implements Runnable {
     public synchronized boolean setAuctionHouse(AuctionInfo auctionInfo) {
         if (!houseProxyMap.containsKey(auctionInfo)) {
             AuctionHouseProxy proxy = new AuctionHouseProxy(auctionInfo
-                                                                    .getIPAddress(),
+                                                                .getIPAddress(),
                                                             auctionInfo
-                                                                    .getPortNumber(),
+                                                                .getPortNumber(),
                                                             this);
             houseProxyMap.put(auctionInfo, proxy);
             auctionHouseItems.put(proxy, new ArrayList<Item>());
@@ -289,10 +289,10 @@ public class Agent implements Runnable {
         this.auctionInfo = auctionInfo;
         aHProxy = houseProxyMap.get(auctionInfo);
         aHProxy.sendMessage(new Message(NAME, MessageTypes.GET_ITEMS));
-//        searchForItemResponse();
+    //        searchForItemResponse();
         return true;
     }
-
+    
     /**
      * Getting the house list from the agent.
      * @return list of the houses
@@ -300,13 +300,13 @@ public class Agent implements Runnable {
     public synchronized ArrayList<AuctionInfo> getHouseList() {
         return houseList;
     }
-
+    
     /**
      * Returning the name of the class for messages.
      * @return NAME of the class object
      */
     public String getNAME() { return NAME; }
-
+    
     /**
      * Returning the bank from the Agent.
      * @return bank to send messages to
@@ -314,7 +314,7 @@ public class Agent implements Runnable {
     public BankProxy getBank() {
         return bank;
     }
-
+    
     /**
      * Returning the list of auction house info.
      * @return list of the auction house info
@@ -325,13 +325,13 @@ public class Agent implements Runnable {
         }
         return null;
     }
-
+    
     /**
      * Returning the id of the Agent.
      * @return id of the agent.
      */
     public int getId() { return id; }
-
+    
     /**
      * Returning the key of the Agent.
      * @return key of the agent at the specific house.
@@ -339,15 +339,15 @@ public class Agent implements Runnable {
     public Integer getKeyForHouse() {
         return auctionHouseKeys.get(this.auctionInfo.getPortNumber());
     }
-
+    
     /**
      * Get items from the auction house that can be bid on.
      */
     @SuppressWarnings("unchecked")
     private void getItems() {
-//        itemList = (ArrayList) aHProxy.getItemList();
+    //        itemList = (ArrayList) aHProxy.getItemList();
     }
-
+    
     /**
      * Setting the account of the agent.
      * @param account for the agent
@@ -361,18 +361,18 @@ public class Agent implements Runnable {
             return false;
         }
     }
-
+    
     /**
      * Setting the connected status to not connected.
      */
     public void setConnected() { connected = !connected; }
-
+    
     /*****************************************************************/
     /*                                                               */
     /*               Functions For Actions Based On Input            */
     /*                                                               */
     /*****************************************************************/
-
+    
     /**
      * Function to add to the list of messageQueue.
      */
@@ -383,7 +383,7 @@ public class Agent implements Runnable {
             ie.printStackTrace();
         }
     }
-
+    
     /**
      * Responding to the sender of the message.
      */
@@ -396,13 +396,13 @@ public class Agent implements Runnable {
             bank.sendAgentMessage(outMessage);
         }
     }
-
+    
     /*****************************************************************/
     /*                                                               */
     /*          Analyzing Feedback and User Input Functions          */
     /*                                                               */
     /*****************************************************************/
-
+    
     /**
      * Updating the list of bids.
      */
@@ -410,7 +410,7 @@ public class Agent implements Runnable {
         ArrayList<Bid> removeList = new ArrayList<>();
         Bid b = (Bid) messList.get(2);
         for (Bid b1: bids) {
-            if (b1.getItem().equals(b.getItem())) {
+            if (b1.getItem().getItemName().equals(b.getItem().getItemName())) {
                 removeList.add(b1);
             }
         }
@@ -424,11 +424,11 @@ public class Agent implements Runnable {
      */
     @SuppressWarnings("unchecked")
     private void response(Message message,
-                                       MessageTypes type,
-                                       int sender) {
+                          MessageTypes type,
+                          int sender) {
         Message response;
         ArrayList<Object> list = message.getMessageList();
-
+        
         switch (type) {
             case CONFIRMATION:
                 response = new Message(NAME, MessageTypes.THANKS);
@@ -464,7 +464,7 @@ public class Agent implements Runnable {
                 bids.add(b);
                 break;
             case OUT_BID:
-                bids.remove((Bid) list.get(2));
+                updateShowBidList(list);
                 break;
             case GET_ITEMS:
                 ArrayList<Item> temp = (ArrayList<Item>) list.get(2);
@@ -488,21 +488,21 @@ public class Agent implements Runnable {
                                                   price));
                 break;
             case UPDATE_ITEM:
-//                System.out.println("update item");
-//                String itemName = (String) list.get(2);
-//                double itemPrice = (double) list.get(3);
-//                for (Item i: itemList) {
-//                    if (i.getItemName().equalsIgnoreCase(itemName)) {
-//                        i.updatePrice(itemPrice);
-//                    }
-//                }
-//                System.out.println("firstList = " + itemList);
-//                itemList = (ArrayList<Item>) list.get(2);
-//                System.out.println("secondList = " + itemList);
+    //                System.out.println("update item");
+    //                String itemName = (String) list.get(2);
+    //                double itemPrice = (double) list.get(3);
+    //                for (Item i: itemList) {
+    //                    if (i.getItemName().equalsIgnoreCase(itemName)) {
+    //                        i.updatePrice(itemPrice);
+    //                    }
+    //                }
+    //                System.out.println("firstList = " + itemList);
+    //                itemList = (ArrayList<Item>) list.get(2);
+    //                System.out.println("secondList = " + itemList);
                 break;
         }
     }
-
+    
     /**
      * Function to send messages to get updates for the auction houses and the
      * bank account information.
@@ -515,20 +515,20 @@ public class Agent implements Runnable {
                                             MessageTypes.GET_ITEMS));
         }
     }
-
+    
     /**
      * Function to close the connection.
      */
     public void closeApplicationConnection() {
         connected = !connected;
     }
-
+    
     /*****************************************************************/
     /*                                                               */
     /*                         Override Functions                    */
     /*                                                               */
     /*****************************************************************/
-
+    
     /**
      * Overriding toString() to print out the class.
      * @return string for the class
@@ -536,14 +536,14 @@ public class Agent implements Runnable {
     @Override
     public String toString() {
         return "Agent{" + "NAME='" + NAME +
-               '\'' +
-               ", id=" + id +
-               ", accountNumber=" + accountNumber +
-               ", account=" + account +
-               ", aHProxy=" + aHProxy +
-               ", bank=" + bank + '}';
+            '\'' +
+            ", id=" + id +
+            ", accountNumber=" + accountNumber +
+            ", account=" + account +
+            ", aHProxy=" + aHProxy +
+            ", bank=" + bank + '}';
     }
-
+    
     /**
      * Overrides run to perform specific tasks.
      */
@@ -552,7 +552,7 @@ public class Agent implements Runnable {
         Message in;
         MessageAnalyzer analyzer = new MessageAnalyzer();
         long pastTime = System.currentTimeMillis(), presentTime;
-
+        
         try {
             while (connected) {
                 in = messageQueue.take();
@@ -568,7 +568,7 @@ public class Agent implements Runnable {
         }
         bank.closeConnections();
     }
-
+    
     /**
      * Main method to start the program for the user/agent.
      */
@@ -586,17 +586,3 @@ b146-34
 b146-22
 b146-19
 */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
