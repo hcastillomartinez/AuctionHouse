@@ -179,7 +179,6 @@ public class AgentGUI extends Application {
                     agent.getBank().sendAgentMessage(new Message(agent.getNAME(),
                                                                  MessageTypes.GET_AGENT_ID_FOR_HOUSE,
                                                                  ai));
-                    updateGUI();
                 }
             }
         });
@@ -246,6 +245,7 @@ public class AgentGUI extends Application {
      * Function for updating the list view to contain the current bids.
      */
     private void updateBidList() {
+        timerTask.run();
         ArrayList<Bid> bidList = agent.getBids();
         bids.getItems().clear();
         
@@ -285,7 +285,6 @@ public class AgentGUI extends Application {
                     placeBid();
                     bidField.setText("");
                     itemField.setText("");
-                    timerTask.run();
                     updateBidList();
                 }
             }
@@ -639,9 +638,9 @@ public class AgentGUI extends Application {
         }
         
         if (agent.getAuctionInfo() != null) {
-            Message message  = new Message(agent.getNAME(),
-                                           MessageTypes.GET_ITEMS);
-            agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
+//            Message message  = new Message(agent.getNAME(),
+//                                           MessageTypes.GET_ITEMS);
+//            agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
             timerTask.run();
             updateItems.setAll(agent.getItemList());
             itemsFromHouse.setItems(updateItems);

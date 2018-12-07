@@ -254,25 +254,6 @@ public class Agent implements Runnable {
     public String getHostName() { return hostName; }
     
     /**
-     * Taking in messages until the item list message has been returned.
-     */
-    private synchronized void searchForItemResponse() {
-        Message in;
-        MessageAnalyzer analyzer = new MessageAnalyzer();
-        while (!MessageTypes.GET_ITEMS.getMessage()
-                                      .equalsIgnoreCase("get items")) {
-            try {
-                in = messageQueue.take();
-                response(in,
-                         (MessageTypes) in.getMessageList().get(1),
-                         analyzer.analyze(in));
-            } catch (InterruptedException ie) {
-                ie.printStackTrace();
-            }
-        }
-    }
-    
-    /**
      * Setting the auction house for the agent.
      * @param auctionInfo house for functionality
      */
@@ -288,8 +269,7 @@ public class Agent implements Runnable {
         }
         this.auctionInfo = auctionInfo;
         aHProxy = houseProxyMap.get(auctionInfo);
-        aHProxy.sendMessage(new Message(NAME, MessageTypes.GET_ITEMS));
-    //        searchForItemResponse();
+//        aHProxy.sendMessage(new Message(NAME, MessageTypes.GET_ITEMS));
         return true;
     }
     
@@ -459,9 +439,11 @@ public class Agent implements Runnable {
             case BID_REJECTED:
                 break;
             case BID_ACCEPTED:
+                System.out.println(bids);
                 updateShowBidList(list);
                 Bid b = (Bid) list.get(2);
                 bids.add(b);
+                System.out.println(bids);
                 break;
             case OUT_BID:
                 updateShowBidList(list);
@@ -488,17 +470,13 @@ public class Agent implements Runnable {
                                                   price));
                 break;
             case UPDATE_ITEM:
-    //                System.out.println("update item");
-    //                String itemName = (String) list.get(2);
-    //                double itemPrice = (double) list.get(3);
-    //                for (Item i: itemList) {
-    //                    if (i.getItemName().equalsIgnoreCase(itemName)) {
-    //                        i.updatePrice(itemPrice);
-    //                    }
-    //                }
-    //                System.out.println("firstList = " + itemList);
-    //                itemList = (ArrayList<Item>) list.get(2);
-    //                System.out.println("secondList = " + itemList);
+                String nameOfItem = (String) list.get(2);
+                double newPrice = (double) list.get(3);
+                for (Item i: itemList) {
+                    if (i.getItemName().equalsIgnoreCase(nameOfItem)) {
+                        i.updatePrice(newPrice);
+                    }
+                }
                 break;
         }
     }
