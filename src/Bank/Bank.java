@@ -355,6 +355,7 @@ public class Bank implements Runnable {
     public synchronized boolean blockFunds(int agentAccountNumber, double amount){
         Account agentAccount = accounts.get(agentAccountNumber);
         if(agentAccount.getPendingBalance() - amount >= 0){
+            agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
             return true;
         }
         return false;
@@ -365,7 +366,7 @@ public class Bank implements Runnable {
      */
     public synchronized  void unblockFunds(int agentAccountNumber, double amount){
         Account agentAccount = accounts.get(agentAccountNumber);
-        agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
+        agentAccount.setPendingBalance(agentAccount.getPendingBalance() + amount);
     }
 
     /**

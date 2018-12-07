@@ -185,5 +185,15 @@ public class BankGUI extends Application {
                 });
             }
         }, 0, 1000);
+
+    }
+
+    /**
+     * Stops the program.
+     */
+    @Override
+    public void stop(){
+        System.out.println("GUI closed");
+        System.exit(1);
     }
 }
