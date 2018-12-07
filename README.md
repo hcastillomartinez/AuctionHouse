@@ -30,14 +30,8 @@ State things that work.
 ### Known Issues
 If there are things that don't work put them here. It will save the graders time and keep them in a good mood.
 
-## Testing and Debugging
-If you have tests, then explain how they work and how to use them.
-
 
 ## Daniel's Todo's
-Deal with closing of accounts. New message type?
-Issue with unsynchronized bidding and blocking of funds:
-    Solutions: Agent blocks funds in its copy of account after every bid
     
     Comments Completed:
         All
