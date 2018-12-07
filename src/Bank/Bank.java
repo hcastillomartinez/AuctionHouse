@@ -152,7 +152,6 @@ public class Bank implements Runnable {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public synchronized Message responseToAgent(int clientID, Message message,
                                          MessageTypes type) {
         ArrayList<Object> messageList = message.getMessageList();
@@ -181,8 +180,7 @@ public class Bank implements Runnable {
 
             //return list of HouseInfo objects
             case GET_HOUSES:
-                ArrayList<AuctionInfo> temp = (ArrayList<AuctionInfo>) getAccountsAsList().clone();
-                return new Message(NAME,MessageTypes.HOUSES,temp);
+                return new Message(NAME,MessageTypes.HOUSES,this.getAuctionHousesAsList());
 
             case UNBLOCK_FUNDS:
                 agentAccountNumber = (int) messageList.get(2);
