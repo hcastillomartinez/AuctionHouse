@@ -411,7 +411,6 @@ public class Agent implements Runnable {
         Bid b = (Bid) messList.get(2);
         for (Bid b1: bids) {
             if (b1.getItem().equals(b.getItem())) {
-                System.out.println("here");
                 removeList.add(b1);
             }
         }
@@ -469,6 +468,7 @@ public class Agent implements Runnable {
                 break;
             case GET_ITEMS:
                 ArrayList<Item> temp = (ArrayList<Item>) list.get(2);
+                itemList.clear();
                 itemList.addAll(temp);
                 break;
             case ACCOUNT_INFO:
@@ -495,8 +495,9 @@ public class Agent implements Runnable {
 //                        i.updatePrice(itemPrice);
 //                    }
 //                }
-//                System.out.println(itemList);
-                itemList = (ArrayList<Item>) list.get(2);
+//                System.out.println("firstList = " + itemList);
+//                itemList = (ArrayList<Item>) list.get(2);
+//                System.out.println("secondList = " + itemList);
                 break;
         }
     }

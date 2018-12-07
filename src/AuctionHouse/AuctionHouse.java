@@ -377,7 +377,7 @@ public class AuctionHouse implements Runnable {
         public synchronized void placeMessage(Message m){
             try{
                 out.writeObject(m);
-                out.flush();
+                out.reset();
             }catch(IOException i){
                 i.printStackTrace();
             }

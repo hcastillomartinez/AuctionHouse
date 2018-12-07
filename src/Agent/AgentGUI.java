@@ -505,7 +505,7 @@ public class AgentGUI extends Application {
         updateWonItemsButton.setMaxHeight(25);
         updateWonItemsButton.setBackground(new Background(GREY));
         updateWonItemsButton.setOnAction(e -> {
-            System.out.println("here in the update items");
+//            System.out.println("here in the update items");
             ArrayList<Item> tempWin = agent.getWonItems();
             wonItems.getItems().clear();
             
@@ -639,7 +639,6 @@ public class AgentGUI extends Application {
             ArrayList<Item> list = agent.getItemList();
             
             for (Item i: list) {
-                System.out.println(i.toString());
                 itemsFromHouse.getItems().add(i.toString());
             }
             addValuesToAucGui();
