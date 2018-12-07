@@ -62,7 +62,7 @@ public class AuctionHouse implements Runnable {
         this.port = Integer.parseInt(port);
         this.serverName = serverName;
         try {
-            bankClient=new Socket(this.serverName,4444);
+            bankClient=new Socket(serverName,4444);
             objectOutputStream=
                     new ObjectOutputStream(bankClient.getOutputStream());
             objectInputStream=
@@ -210,25 +210,20 @@ public class AuctionHouse implements Runnable {
         int action = messageAnalyzer.analyzeMessage(m);
         if(action == 1){
            int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
-//            System.out.println("Receiving from Agent: " +m);
            sendToServer(id,new Message("auction house",
                    MessageTypes.GET_ITEMS,itemList));
         }else if(action == 2){
             int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
-            System.out.println("Receiving from Agent: " +m);
             tryBid((Bid) m.getMessageList().get(2),id,
                     (int)m.getMessageList().get(3));
         }else if(action == 3){
-            System.out.println("Receiving from Bank: " +m);
             updateAccount((double) m.getMessageList().get(2),
                           (double) m.getMessageList().get(3),
                           (int) m.getMessageList().get(4));
             setUpdateGUI(true);
         }else if(action==4){
-            System.out.println("Message from Auction: "+m);
                setUpdateGUI(true);
         }else if(action==5){
-            System.out.println("Message from Auction: "+m);
             updateItemList((Item)m.getMessageList().get(2));
             setUpdateGUI(true);
         }else if(action==6){
@@ -271,8 +266,6 @@ public class AuctionHouse implements Runnable {
         if(!b.getItem().isInBid()){
             Auction a = new Auction(this,b.getItem(),b,serverThreadID,accountNumber);
             auctions.add(a);
-            System.out.println("creating new auction for: "+b.getItem().getItemName());
-            System.out.println("NUmber of auctions: "+auctions.size());
             setUpdateGUI(true);
             Thread t = new Thread(a);
             t.start();
@@ -293,7 +286,6 @@ public class AuctionHouse implements Runnable {
             if(a.getItem().getItemName().equals(b.getItem().getItemName())){
                 a.placeBid(b,serverThreadID,accountNumber);
                 setUpdateGUI(true);
-//                auctionHouseGUI.updateLists();
                 return;
             }
         }
@@ -320,7 +312,6 @@ public class AuctionHouse implements Runnable {
             public void run() {
                 while(true) {
                     try {
-//                        System.out.println("waiting for message");
                         doAction(messages.take());
                     } catch (InterruptedException i) {
                         i.printStackTrace();
@@ -373,7 +364,6 @@ public class AuctionHouse implements Runnable {
             this.ID = id;
             out = new ObjectOutputStream(client.getOutputStream());
             in = new ObjectInputStream(client.getInputStream());
-            System.out.println("connected to "+ID);
         }
 
         /**
@@ -424,7 +414,6 @@ public class AuctionHouse implements Runnable {
 
         @Override
         public void run()  {
-//            boolean connected = true;
             while(connected){
                 try
                 {
@@ -447,7 +436,6 @@ public class AuctionHouse implements Runnable {
                     System.out.println(i);
                 }
             }
-//            System.out.println("exit");
         }
     }
 
@@ -473,7 +461,6 @@ public class AuctionHouse implements Runnable {
     public void sendToServer(int ID,Message m){
         for(Server server:serverThreads){
             if(ID==server.getID()){
-                System.out.println("Sending to Agent: "+m);
                 server.placeMessage(m);
             }
         }
@@ -497,7 +484,6 @@ public class AuctionHouse implements Runnable {
                     while(connected) {
                         Message m = (Message) objectInputStream.readObject();
                         if (m != null) {
-                            System.out.println("Message from Bank: " + m);
                             placeMessageForAnalyzing(m);
                         }
                     }
@@ -520,7 +506,6 @@ public class AuctionHouse implements Runnable {
      */
     public synchronized void sendToBank(Object m){
         try{
-            System.out.println("Sending to bank: "+m);
             objectOutputStream.writeObject(m);
         }catch(IOException i){
             i.printStackTrace();
@@ -533,9 +518,7 @@ public class AuctionHouse implements Runnable {
         messageWait();
         while(auctionOpen){
             try {
-                System.out.println("waiting for agents");
                 Socket agent = serverSocket.accept();
-//                System.out.println("AGENT: "+agentCount);
                 agentCount++;
                 Server server = new Server(agent,agentCount,this);
                 serverThreads.add(server);

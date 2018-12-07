@@ -75,7 +75,6 @@ public class Auction implements Runnable{
             public void run() {
                 if(time>= DURATION){
                     auctionActive = false;
-//                    System.out.println(time);
                     t.cancel();
                     placeBid(new Bid(null,9,0),1,10);
                 }
@@ -117,15 +116,13 @@ public class Auction implements Runnable{
     //todo rethink this auction methods
     private synchronized void analyzeBid(double bid){
         if(!auctionActive){
-            System.out.println("Auction Over");
             return;
         }
-        System.out.println(currentBidderID+" tries "+bid);
+
         if(bidProtocol.processBid(bid)!=0){
             //bid is accepted
             if(winningClientID==-1){
                 //first bid that passes threshold
-                System.out.println("first bid ");
                 auctionHouse.sendToServer(currentClientID,new Message(
                         "auction house", MessageTypes.BID_ACCEPTED,
                         currentBid));
@@ -134,7 +131,6 @@ public class Auction implements Runnable{
                 bidMaps.put(currentBidderID,bid);
             }
             else {
-                System.out.println("overtaking old winner");
                 auctionHouse.sendToServer(currentClientID,new Message(
                         "auction house",MessageTypes.BID_ACCEPTED,
                         currentBid));
@@ -169,8 +165,6 @@ public class Auction implements Runnable{
 
                 bidMaps.put(currentBidderID,bid);
 
-//                auctionHouse.sendToBank(new Message("auction house",
-//                        MessageTypes.UNBLOCK_FUNDS,currentWinnerID,bidToBeat));
             }
             winningClientID = currentClientID;
             currentWinnerID = currentBidderID;
@@ -180,12 +174,9 @@ public class Auction implements Runnable{
                     ,MessageTypes.UPDATE_ITEM,item));
             bidToBeat = bid;
 
-            System.out.println("current winner " + currentWinnerID);
 
             auctionHouse.sendToAllClient(new Message("auction house",
                     MessageTypes.UPDATE_ITEM,item.getItemName(),bidToBeat));
-//            auctionHouse.sendToAllClient(new Message("auction house",
-//                    MessageTypes.UPDATE_ITEM,auctionHouse.getItemList()));
         }
         else{
             auctionHouse.sendToServer(currentClientID,new Message("auction " +
@@ -203,7 +194,6 @@ public class Auction implements Runnable{
             if(b.getItem()!=null) breakDownBid(b);
             this.currentClientID=currentClientID;
             this.currentBidderID=accountNumber;
-//            breakDownBid(b);
             bids.put(b);
         }catch(InterruptedException i){
             i.printStackTrace();
@@ -256,17 +246,14 @@ public class Auction implements Runnable{
                 MessageTypes.TRANSFER_ITEM, winningBid));
 
         //removes item from its list
-        System.out.println(auctionHouse.removeItem(item));
+        auctionHouse.removeItem(item);
 
-//        auctionHouse.sendToAllClient(new Message("auction house",
-//                MessageTypes.UPDATE_ITEM,item.getItemName(),winningBid));
 
         auctionHouse.placeMessageForAnalyzing(new Message("auction",
                 MessageTypes.UPDATE));
         auctionHouse.placeMessageForAnalyzing(new Message("auction",
                 MessageTypes.SAFE_TO_CLOSE));
 
-        System.out.println("Agent winner: "+ currentWinnerID);
     }
 
 }
