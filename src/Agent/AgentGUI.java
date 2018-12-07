@@ -254,7 +254,7 @@ public class AgentGUI extends Application {
      */
     private void placeBid() {
         Bid bid = new Bid(agent.getItem(),
-                          agent.getId(),// look here
+                          agent.getAccountNumber(),// look here
                           Double.parseDouble(bidField.getText()));
         Message message = new Message(agent.getNAME(),
                                       MessageTypes.BID,
@@ -637,10 +637,14 @@ public class AgentGUI extends Application {
             timerTask.run();
             itemsFromHouse.getItems().clear();
             ArrayList<Item> list = agent.getItemList();
-            
+    
+            System.out.println("list from gui = [");
             for (Item i: list) {
                 itemsFromHouse.getItems().add(i.toString());
+                System.out.println(i.toString());
             }
+            System.out.println();
+            
             addValuesToAucGui();
         }
     }
