@@ -228,10 +228,13 @@ public class Auction implements Runnable{
      */
     @Override
     public void run(){
+        auctionHouse.placeMessageForAnalyzing(new Message("auction",
+                MessageTypes.UNSAFE_TO_CLOSE));
         while(auctionActive){
             getBid();
             if(time==0)setTime();
         }
+
         auctionHouse.sendToServer(winningClientID,
                 new Message("auction house",MessageTypes.UNBLOCK_FUNDS,
                         currentWinnerID,item.getPrice()));
@@ -241,26 +244,14 @@ public class Auction implements Runnable{
                 MessageTypes.TRANSFER_ITEM, winningBid));
 
         //removes item from its list
-//        System.out.println(auctionHouse.getItemList().remove(item));
         System.out.println(auctionHouse.removeItem(item));
 
         auctionHouse.placeMessageForAnalyzing(new Message("auction",
                 MessageTypes.UPDATE));
+        auctionHouse.placeMessageForAnalyzing(new Message("auction",
+                MessageTypes.SAFE_TO_CLOSE));
 
         System.out.println("Agent winner: "+ currentWinnerID);
     }
 
-//    public static void main(String[] args)throws Exception {
-//        Furniture f = Furniture.desk;
-//        Auction bidCoord=new Auction(new Bid(new Item("desk",20,f.getIDType()),new Agent(1),20));
-//        Thread t=new Thread(bidCoord);
-//        t.start();
-//        BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));
-//        String i;
-//        while(!(i=bf.readLine()).equals("44")){
-//            System.out.println("enter "+i);
-//            bidCoord.placeBid(new Bid(new Item("desk",20,f.getIDType()),new Agent(Integer.parseInt(i)),Double.parseDouble(i)));
-//        }
-//        System.out.println("No longer taking input");
-//    }
 }

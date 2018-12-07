@@ -43,6 +43,10 @@ public class HouseMessageAnalyzer {
                 return 4;
             }else if(type.equals(MessageTypes.UPDATE_ITEM)){
                 return 5;
+            }else if(type.equals(MessageTypes.SAFE_TO_CLOSE)){
+                return 6;
+            }else if(type.equals(MessageTypes.UNSAFE_TO_CLOSE)){
+                return 7;
             }
         }
         return 0;

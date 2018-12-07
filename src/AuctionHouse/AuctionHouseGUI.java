@@ -184,15 +184,18 @@ public class AuctionHouseGUI extends Application {
             }
         });
 
-//        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-//            @Override
-//            public void handle(WindowEvent windowEvent) {
-//                Alert alert=new Alert(Alert.AlertType.INFORMATION);
-//                alert.setTitle("Not Safe To Close");
-//                alert.setHeaderText("Processes Still Running");
-//                alert.show();
-//            }
-//        });
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent windowEvent) {
+                if(!auctionHouse.isSafeToClose()){
+                    Alert alert=new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Not Safe To Close");
+                    alert.setHeaderText("Processes Still Running");
+                    alert.show();
+                    windowEvent.consume();
+                }
+            }
+        });
         Scene scene = new Scene(pane);
         nestStage.setTitle("Auction Info");
         nestStage.setScene(scene);
@@ -202,15 +205,9 @@ public class AuctionHouseGUI extends Application {
 
     @Override
     public void stop(){
-//        auctionHouse.sendToBank("close");
-//        if(!auctionHouse.isSafeToClose()){
-//
-//
-//        }
         System.out.println("GUI closed");
         timeline.stop();
         System.exit(1);
-//        timer.cancel();
         auctionOpen=false;
     }
 }
