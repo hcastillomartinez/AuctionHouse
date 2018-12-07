@@ -132,8 +132,7 @@ public class Bank implements Runnable {
 
                 if(blockFunds(agentAccountNumber, amount)){
                     try{
-                        Account account1 = accounts.get(agentAccountNumber);
-                        account1.setPendingBalance(account1.getPendingBalance() - amount);
+                        //todo make sure these lines weren't here
                         clients.get(agentAccountNumber)
                                 .outputStream
                                 .writeObject(new Message(NAME,
@@ -144,7 +143,6 @@ public class Bank implements Runnable {
                         System.out.println("here in block_funds");
                         return new Message(NAME,MessageTypes.CONFIRMATION);
                     }catch(Exception e){ e.printStackTrace(); }
-
                 }
                 else{
                     System.out.println("block failed");
@@ -256,7 +254,9 @@ public class Bank implements Runnable {
 
                 }catch(Exception e){ e.printStackTrace();}
 
-                accounts.get(agentAccountNumber).setBalance(accounts.get(agentAccountNumber).getBalance() - amount);
+
+                //todo make sure this isn't still here
+                //accounts.get(agentAccountNumber).setBalance(accounts.get(agentAccountNumber).getBalance() - amount);
 
                 return new Message(NAME,
                                    MessageTypes.ACCOUNT_INFO,
@@ -335,7 +335,7 @@ public class Bank implements Runnable {
                 if(agentAccount.getBalance() >= amount){
                     //transfer funds from agent to auction house
                     //agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
-//                    agentAccount.setBalance(agentAccount.getBalance() - amount);
+                    agentAccount.setBalance(agentAccount.getBalance() - amount);
                     houseAccount.setBalance(houseAccount.getBalance() + amount);
                     houseAccount.setPendingBalance(houseAccount.getPendingBalance() + amount);
                     return true;
