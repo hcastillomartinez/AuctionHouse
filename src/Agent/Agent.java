@@ -355,7 +355,7 @@ public class Agent implements Runnable {
      */
     public void setConnected() { connected = !connected; }
     
-    /***********************************************************   updateShowBidList(list);******/
+    /*****************************************************************/
     /*                                                               */
     /*               Functions For Actions Based On Input            */
     /*                                                               */
