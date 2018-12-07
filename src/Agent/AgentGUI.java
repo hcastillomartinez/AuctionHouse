@@ -631,7 +631,6 @@ public class AgentGUI extends Application {
             itemsFromHouse.getItems().clear();
             updateItems.setAll(list);
             itemsFromHouse.setItems(updateItems);
-            System.out.println("new items = " + itemsFromHouse.getItems());
             agent.setItemListChange(false);
             addValuesToAucGui();
         }
