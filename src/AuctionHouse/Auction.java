@@ -150,6 +150,9 @@ public class Auction implements Runnable{
                     else{
                         auctionHouse.sendToBank(new Message("auction house",
                                 MessageTypes.BLOCK_FUNDS,currentBidderID,bid));
+                        auctionHouse.sendToBank(new Message("auction house"
+                                ,MessageTypes.UNBLOCK_FUNDS,currentWinnerID,
+                                bidToBeat));
                         auctionHouse.sendToServer(winningClientID,new Message(
                                 "auction house",MessageTypes.OUT_BID,
                                 winningBid));
