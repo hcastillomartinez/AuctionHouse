@@ -114,6 +114,7 @@ public class AuctionHouseProxy implements Runnable {
             while (connected) {
                 try {
                     out.writeObject(messageQueue.take());
+                    out.flush();
         
                     response = (Message) in.readObject();
                     if (agent != null) {

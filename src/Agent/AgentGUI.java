@@ -637,8 +637,9 @@ public class AgentGUI extends Application {
             timerTask.run();
             itemsFromHouse.getItems().clear();
             ArrayList<Item> list = agent.getItemList();
-
+            
             for (Item i: list) {
+                System.out.println(i.toString());
                 itemsFromHouse.getItems().add(i.toString());
             }
             addValuesToAucGui();

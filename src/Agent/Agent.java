@@ -487,13 +487,16 @@ public class Agent implements Runnable {
                                                   price));
                 break;
             case UPDATE_ITEM:
-                String itemName = (String) list.get(2);
-                double itemPrice = (double) list.get(3);
-                for (Item i: itemList) {
-                    if (i.getItemName().equalsIgnoreCase(itemName)) {
-                        i.updatePrice(itemPrice);
-                    }
-                }
+//                System.out.println("update item");
+//                String itemName = (String) list.get(2);
+//                double itemPrice = (double) list.get(3);
+//                for (Item i: itemList) {
+//                    if (i.getItemName().equalsIgnoreCase(itemName)) {
+//                        i.updatePrice(itemPrice);
+//                    }
+//                }
+//                System.out.println(itemList);
+                itemList = (ArrayList<Item>) list.get(2);
                 break;
         }
     }
