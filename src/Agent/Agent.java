@@ -481,9 +481,10 @@ public class Agent implements Runnable {
                 break;
             case UNBLOCK_FUNDS:
                 double price = (double) list.get(3);
+                int aucId = (int) list.get(4);
                 bank.sendAgentMessage(new Message(NAME,
                                                   MessageTypes.TRANSFER_FUNDS,
-                                                  auctionInfo.getAccountNumber(),
+                                                  aucId,
                                                   price));
                 break;
             case UPDATE_ITEM:
