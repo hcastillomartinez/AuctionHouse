@@ -476,6 +476,7 @@ public class Agent implements Runnable {
                 double pend = (double) list.get(3);
                 int accntNum = (int) list.get(4);
                 account.setBalance(bal);
+                account.setAccountNumber(accntNum);
                 account.setPendingBalance(pend);
                 accountChange = true;
                 break;
