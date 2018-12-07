@@ -44,7 +44,8 @@ public class AuctionHouse implements Runnable {
      * and any other number for car.
      * @param type An int
      */
-    public  AuctionHouse(String type,String port,String serverName){
+    public  AuctionHouse(String type,String port,String serverName,
+                         String myServerName){
         //.net netbug meetup.org
         agentCount = 0;
         auctionOpen = true;
@@ -68,7 +69,7 @@ public class AuctionHouse implements Runnable {
                     new ObjectInputStream(bankClient.getInputStream());
             sendToBank(new Message("auction house",
                     MessageTypes.CREATE_ACCOUNT,new AuctionInfo(this.type,
-                    serverName,0,Integer.parseInt(port))));
+                    myServerName,0,Integer.parseInt(port))));
             handleMessagesFromBank();
             serverSocket = new ServerSocket(this.port);
         }catch(IOException i){
@@ -549,6 +550,6 @@ public class AuctionHouse implements Runnable {
 
 
     public static void main(String[] args){
-        AuctionHouseGUI.launch();
+        AuctionHouseGUI.launch(args);
     }
 }

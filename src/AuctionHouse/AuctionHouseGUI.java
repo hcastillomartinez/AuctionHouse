@@ -38,12 +38,13 @@ public class AuctionHouseGUI extends Application {
     private boolean auctionOpen;
     private Text itemsText,auctionsText;
     private Label accountNumberLabel,balanceLabel,accLabel,balLabel;
-
+    private static String myServername;
 
     /**
      * Used to launch the GUI from another class.
      */
-    public static void launch(){
+    public static void launch(String[] args){
+        myServername=args[0];
         AuctionHouseGUI.launch(AuctionHouseGUI.class);
     }
 
@@ -154,7 +155,7 @@ public class AuctionHouseGUI extends Application {
                     && !serverNam.getText().equals("") ) {
 
                 auctionHouse=new AuctionHouse(typeT.getText(),portT.getText() ,
-                        serverNam.getText());
+                        serverNam.getText(),myServername);
                 Thread t=new Thread(auctionHouse);
                 t.start();
                 createGUI();
