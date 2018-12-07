@@ -181,8 +181,10 @@ public class Auction implements Runnable{
 
             System.out.println("current winner " + currentWinnerID);
 
+//            auctionHouse.sendToAllClient(new Message("auction house",
+//                    MessageTypes.UPDATE_ITEM,item.getItemName(),bidToBeat));
             auctionHouse.sendToAllClient(new Message("auction house",
-                    MessageTypes.UPDATE_ITEM,item.getItemName(),bidToBeat));
+                    MessageTypes.UPDATE_ITEM,auctionHouse.getItemList()));
         }
         else{
             auctionHouse.sendToServer(currentClientID,new Message("auction " +
