@@ -468,16 +468,15 @@ public class Agent implements Runnable {
                 bids.remove((Bid) list.get(2));
                 break;
             case GET_ITEMS:
-                itemList = (ArrayList<Item>) list.get(2);
+                ArrayList<Item> temp = (ArrayList<Item>) list.get(2);
+                itemList.addAll(temp);
                 break;
             case ACCOUNT_INFO:
-                System.out.println(account + " = before");
                 double bal = (double) list.get(2);
                 double pend = (double) list.get(3);
                 int accntNum = (int) list.get(4);
                 account.setBalance(bal);
                 account.setPendingBalance(pend);
-                System.out.println(account + " = after");
                 accountChange = true;
                 break;
             case UNBLOCK_FUNDS:
@@ -486,6 +485,15 @@ public class Agent implements Runnable {
                                                   MessageTypes.TRANSFER_FUNDS,
                                                   auctionInfo.getAccountNumber(),
                                                   price));
+                break;
+            case UPDATE_ITEM:
+                String itemName = (String) list.get(2);
+                double itemPrice = (double) list.get(3);
+                for (Item i: itemList) {
+                    if (i.getItemName().equalsIgnoreCase(itemName)) {
+                        i.updatePrice(itemPrice);
+                    }
+                }
                 break;
         }
     }
