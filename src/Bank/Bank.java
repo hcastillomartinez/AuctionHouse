@@ -75,7 +75,6 @@ public class Bank implements Runnable {
             while (true) {
 
                 Socket client = server.accept();
-                //System.out.println("accepting a new socket connection");
                 ServerThread bankClient = new ServerThread(client,clientNumber,this);
                 clientNumber++;
                 getClients().put(bankClient.idNumber,bankClient);
@@ -140,17 +139,14 @@ public class Bank implements Runnable {
                                                          accounts.get(agentAccountNumber).getBalance(),
                                                          accounts.get(agentAccountNumber).getPendingBalance(),
                                                          accounts.get(agentAccountNumber).getAccountNumber()));
-                        System.out.println("here in block_funds");
                         return new Message(NAME,MessageTypes.CONFIRMATION);
                     }catch(Exception e){ e.printStackTrace(); }
                 }
                 else{
-                    System.out.println("block failed");
                     return new Message(NAME,MessageTypes.BLOCK_REJECTED);
                 }
 
             default:
-                System.out.println("Message not covered: " + message);
                 return null;
 
         }
@@ -172,14 +168,11 @@ public class Bank implements Runnable {
                 account.setAccountNumber(clientID);
                 accounts.put(account.getAccountNumber(),account);
 
-                //System.out.println(accounts);
-
 
                 AgentInfo agent = (AgentInfo) messageList.get(3);
                 agent.setAccountNumber(account.getAccountNumber());
                 addAgent(agent,account);
 
-                //System.out.println(this.accounts);
                 return new Message(NAME,MessageTypes.ACCOUNT_INFO,
                                    accounts.get(agent.getAccountNumber()).getBalance(),
                                    accounts.get(agent.getAccountNumber()).getPendingBalance(),
@@ -188,12 +181,6 @@ public class Bank implements Runnable {
             //return list of HouseInfo objects
             case GET_HOUSES:
                 return new Message(NAME,MessageTypes.HOUSES,this.getAuctionHousesAsList());
-                
-//            case GET_AGENT_ID_FOR_HOUSE:
-//                return new Message(NAME,
-//                                   MessageTypes.ID_FOR_HOUSE,
-//                                   (AuctionInfo) message.getMessageList().get(2),
-//                                   new Integer(keyForClient += 1));
 
             case UNBLOCK_FUNDS:
                 agentAccountNumber = (int) messageList.get(2);
@@ -216,9 +203,6 @@ public class Bank implements Runnable {
             case TRANSFER_FUNDS:
                 agentAccountNumber = clientID;
                 auctionHouseAccountNumber = (int) messageList.get(2);
-
-                //System.out.println("inside TRANSFER_FUNDS");
-                //System.out.println("Agent account: " + agentAccountNumber + ". Auction account: " + auctionHouseAccountNumber);
                 amount = (double) messageList.get(3);
                 boolean success = transferFunds(auctionHouseAccountNumber,agentAccountNumber,amount);
 
@@ -240,9 +224,6 @@ public class Bank implements Runnable {
                             .outputStream
                             .writeObject(new Message(NAME,
                                                      MessageTypes.CONFIRMATION));
-
-                    //System.out.println("AuctionHouse account number is " +auctionHouseAccountNumber);
-                    //System.out.println("AH account is: " +accounts.get(auctionHouseAccountNumber));
                     clients.get(auctionHouseAccountNumber)
                             .outputStream
                             .writeObject(new Message(NAME,
@@ -250,13 +231,8 @@ public class Bank implements Runnable {
                                                      accounts.get(auctionHouseAccountNumber).getBalance(),
                                                      accounts.get(auctionHouseAccountNumber).getPendingBalance(),
                                                      accounts.get(auctionHouseAccountNumber).getAccountNumber()));
-                    //System.out.println("AH account is: after sending: " +accounts.get(auctionHouseAccountNumber));
 
                 }catch(Exception e){ e.printStackTrace();}
-
-
-                //todo make sure this isn't still here
-                //accounts.get(agentAccountNumber).setBalance(accounts.get(agentAccountNumber).getBalance() - amount);
 
                 return new Message(NAME,
                                    MessageTypes.ACCOUNT_INFO,
@@ -440,7 +416,6 @@ public class Bank implements Runnable {
                     Message msg = (Message) inputStream.readObject();
                     messages.add(msg);
                     Message message = messages.take();
-                    //System.out.println(message);
 
                     //close account here
                     Message response;
@@ -469,7 +444,6 @@ public class Bank implements Runnable {
                 }
             }
             closeClient();
-            //System.out.println("removing account: " + bank.getAccounts().get(idNumber));
             bank.getAccounts().remove(idNumber);
         }
     }

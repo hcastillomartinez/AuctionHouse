@@ -50,8 +50,6 @@ public class AuctionHouseProxy implements Runnable {
                 out = new ObjectOutputStream(client.getOutputStream());
                 out.flush();
                 in = new ObjectInputStream(client.getInputStream());
-            } else {
-                System.out.println("Client has not been connected");
             }
         } catch (IOException ie) {
             ie.printStackTrace();

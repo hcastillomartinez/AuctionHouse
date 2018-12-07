@@ -405,7 +405,6 @@ public class Agent implements Runnable {
             }
         }
         for (Bid b2: removeList) {
-            System.out.println(b2.getItem());
             bids.remove(b2);
         }
     }
@@ -426,7 +425,6 @@ public class Agent implements Runnable {
     private void response(Message message,
                           MessageTypes type,
                           int sender) {
-        System.out.println(message + " = message");
         Message response;
         ArrayList<Object> list = message.getMessageList();
         
@@ -559,13 +557,3 @@ public class Agent implements Runnable {
         AgentGUI.launch(args);
     }
 }
-
-
-
-
-/*
-computers for checking offline
-b146-34
-b146-22
-b146-19
-*/

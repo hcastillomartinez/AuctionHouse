@@ -146,7 +146,6 @@ public class BankGUI extends Application {
              portNumber = Integer.parseInt(args[1]);
         }
         else{
-            System.out.println("Error: Invalid program arguments.");
             return;
         }
 
@@ -193,7 +192,6 @@ public class BankGUI extends Application {
      */
     @Override
     public void stop(){
-        System.out.println("GUI closed");
         System.exit(1);
     }
 }
