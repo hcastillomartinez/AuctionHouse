@@ -8,6 +8,8 @@ import MessageHandling.Message;
 import MessageHandling.MessageTypes;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -38,7 +40,10 @@ public class AgentGUI extends Application {
     // worker fields
     private static Agent agent;
     private ChoiceBox<String> auctionHouses;
-    private ListView<String> itemsFromHouse = new ListView<>();
+    private ObservableList<Item> updateItems
+        = FXCollections.observableArrayList();
+    
+    private ListView<Item> itemsFromHouse = new ListView<>(updateItems);
     private ListView<String> bids = new ListView<>();
     private ListView<String> wonItems = new ListView<>();
     
@@ -221,7 +226,7 @@ public class AgentGUI extends Application {
                                                      agent.getHostName(),
                                                      agent.getCurrentAuctionID(),
                                                      agent.getPortNumber(),
-                                                     agent.getId());
+                                                     agent.getAccountNumber()); //todo look here if there is an issue
                     agent.getBank().sendAgentMessage(new Message(agent.getNAME(),
                                                                  MessageTypes.CREATE_ACCOUNT,
                                                                  account,
@@ -296,15 +301,17 @@ public class AgentGUI extends Application {
         selectItemButton.setMaxHeight(25);
         selectItemButton.setBackground(new Background(GREY));
         selectItemButton.setOnAction(e -> {
-            boolean set = false;
-            String temp = itemsFromHouse.getSelectionModel().getSelectedItem();
-            ArrayList<Item> items = agent.getItemList();
-            for (Item i: items) {
-                if (i.toString().equalsIgnoreCase(temp) && !set) {
-                    agent.setItem(i);
-                    set = true;
-                }
-            }
+//            boolean set = false;
+//            Item temp = itemsFromHouse.getSelectionModel().getSelectedItem();
+//            ArrayList<Item> items = agent.getItemList();
+//
+//            for (Item i: items) {
+//                if (i.toString().equalsIgnoreCase(items.toString()) && !set) {
+//                    agent.setItem(i);
+//                    set = true;
+//                }
+//            }
+            agent.setItem(itemsFromHouse.getSelectionModel().getSelectedItem());
             addValuesToAucGui();
         });
     }
@@ -635,16 +642,9 @@ public class AgentGUI extends Application {
                                            MessageTypes.GET_ITEMS);
             agent.getAHProxy(agent.getAuctionInfo()).sendMessage(message);
             timerTask.run();
-            itemsFromHouse.getItems().clear();
-            ArrayList<Item> list = agent.getItemList();
-    
-            System.out.println("list from gui = [");
-            for (Item i: list) {
-                itemsFromHouse.getItems().add(i.toString());
-                System.out.println(i.toString());
-            }
-            System.out.println();
-            
+            updateItems.setAll(agent.getItemList());
+            itemsFromHouse.setItems(updateItems);
+            System.out.println(updateItems);
             addValuesToAucGui();
         }
     }

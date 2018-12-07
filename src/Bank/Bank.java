@@ -255,7 +255,7 @@ public class Bank implements Runnable {
                 }catch(Exception e){ e.printStackTrace();}
 
 
-                //todo make sure this isn't still here
+                //todo make sure this isn't stil here
                 //accounts.get(agentAccountNumber).setBalance(accounts.get(agentAccountNumber).getBalance() - amount);
 
                 return new Message(NAME,
@@ -455,6 +455,7 @@ public class Bank implements Runnable {
                     }
 
                     outputStream.writeObject(response);
+                    outputStream.flush();
 
                 }catch(InterruptedException e){
                     e.printStackTrace();
