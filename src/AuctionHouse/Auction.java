@@ -38,8 +38,10 @@ public class Auction implements Runnable{
      * item.
      * @param a An Item
      */
-    public Auction(AuctionHouse a,Item i, Bid currentBid,int currentClientID){
+    public Auction(AuctionHouse a,Item i, Bid currentBid,int currentClientID,
+                   int accountNumber){
         this.currentClientID=currentClientID;
+        currentBidderID=accountNumber;
         bidMaps=new HashMap<>();
         winningClientID=-1;
         winningBid=null;
@@ -54,7 +56,7 @@ public class Auction implements Runnable{
         auctionActive = true;
         bidToBeat = item.getPrice();
         t = new Timer();
-        placeBid(currentBid,currentClientID);
+        placeBid(currentBid,currentClientID,accountNumber);
     }
 
     /**
@@ -62,7 +64,6 @@ public class Auction implements Runnable{
      */
     private void breakDownBid(Bid b){
         bidAmount = b.getAmount();
-        currentBidderID = b.getBidder();
     }
 
     /**
@@ -76,7 +77,7 @@ public class Auction implements Runnable{
                     auctionActive = false;
 //                    System.out.println(time);
                     t.cancel();
-                    placeBid(new Bid(null,9,0),1);
+                    placeBid(new Bid(null,9,0),1,10);
                 }
                 else {
                     time++;
@@ -197,10 +198,11 @@ public class Auction implements Runnable{
      * Puts bid onto queue.
      * @param b An int
      */
-    public void placeBid(Bid b,int currentClientID){
+    public void placeBid(Bid b,int currentClientID,int accountNumber){
         try {
             if(b.getItem()!=null) breakDownBid(b);
             this.currentClientID=currentClientID;
+            this.currentBidderID=accountNumber;
 //            breakDownBid(b);
             bids.put(b);
         }catch(InterruptedException i){

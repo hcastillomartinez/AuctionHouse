@@ -208,13 +208,14 @@ public class AuctionHouse implements Runnable {
         int action = messageAnalyzer.analyzeMessage(m);
         if(action == 1){
            int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
-            System.out.println("Receiving from Agent: " +m);
+//            System.out.println("Receiving from Agent: " +m);
            sendToServer(id,new Message("auction house",
                    MessageTypes.GET_ITEMS,itemList));
         }else if(action == 2){
             int id= (int)m.getMessageList().get(m.getMessageList().size()-1);
             System.out.println("Receiving from Agent: " +m);
-            tryBid((Bid) m.getMessageList().get(2),id);
+            tryBid((Bid) m.getMessageList().get(2),id,
+                    (int)m.getMessageList().get(3));
         }else if(action == 3){
             System.out.println("Receiving from Bank: " +m);
             updateAccount((double) m.getMessageList().get(2),
@@ -263,11 +264,13 @@ public class AuctionHouse implements Runnable {
      * exist.
      * @param b, A Bid
      */
-    private synchronized void createAuction(Bid b,int serverThreadID){
+    private synchronized void createAuction(Bid b,int serverThreadID,
+                                            int accountNumber){
         if(!b.getItem().isInBid()){
-            Auction a = new Auction(this,b.getItem(),b,serverThreadID);
+            Auction a = new Auction(this,b.getItem(),b,serverThreadID,accountNumber);
             auctions.add(a);
             System.out.println("creating new auction for: "+b.getItem().getItemName());
+            System.out.println("NUmber of auctions: "+auctions.size());
             setUpdateGUI(true);
             Thread t = new Thread(a);
             t.start();
@@ -282,13 +285,14 @@ public class AuctionHouse implements Runnable {
      * one is created for the item they are trying to bid on.
      * @param b, A Bid
      */
-    private synchronized void tryBid(Bid b,int serverThreadID){
+    private synchronized void tryBid(Bid b,int serverThreadID,
+                                     int accountNumber){
         for(Auction a: auctions){
             if(a.getItem().getItemName().equals(b.getItem().getItemName())){
-                a.placeBid(b,serverThreadID);
+                a.placeBid(b,serverThreadID,accountNumber);
                 setUpdateGUI(true);
 //                auctionHouseGUI.updateLists();
-                break;
+                return;
             }
         }
         if(b.getItem().getPrice()>b.getAmount()){
@@ -296,7 +300,7 @@ public class AuctionHouse implements Runnable {
                     MessageTypes.BID_REJECTED,b));
             return;
         }
-        else createAuction(b,serverThreadID);
+        else createAuction(b,serverThreadID,accountNumber);
     }
 
     /******************************************************************/
@@ -481,15 +485,19 @@ public class AuctionHouse implements Runnable {
         Thread t=new Thread(new Runnable() {
             @Override
             public void run() {
+                boolean connected =true;
                 try {
-                    while(true) {
+                    while(connected) {
                         Message m = (Message) objectInputStream.readObject();
                         if (m != null) {
                             System.out.println("Message from Bank: " + m);
                             placeMessageForAnalyzing(m);
                         }
                     }
-                }catch(IOException i){
+                }catch(EOFException i){
+                    connected=false;
+                    i.printStackTrace();
+                } catch(IOException i){
                     i.printStackTrace();
                 }catch(ClassNotFoundException i){
                     i.printStackTrace();
@@ -520,7 +528,7 @@ public class AuctionHouse implements Runnable {
             try {
                 System.out.println("waiting for agents");
                 Socket agent = serverSocket.accept();
-                System.out.println("AGENT: "+agentCount);
+//                System.out.println("AGENT: "+agentCount);
                 agentCount++;
                 Server server = new Server(agent,agentCount,this);
                 serverThreads.add(server);
