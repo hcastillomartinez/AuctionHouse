@@ -85,6 +85,28 @@ public class BankProxy implements Runnable {
     }
 
     /**
+     * Taking messages and writing them in response.
+     */
+    private void analyzeMessages() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (connected) {
+                    try {
+                        out.writeObject((Message) messageQueue.take());
+                        out.reset();
+                    } catch (InterruptedException ie) {
+                        ie.printStackTrace();
+                    } catch (IOException io) {
+                        io.printStackTrace();
+                    }
+                }
+            }
+        });
+        thread.start();
+    }
+
+    /**
      * Adding a message to the banks input stream.
      */
     public void sendAgentMessage(Message inMessage) {
@@ -102,16 +124,10 @@ public class BankProxy implements Runnable {
     @SuppressWarnings("unchecked")
     public void run() {
         try {
-            Message response = null, messageInput = null;
-
+            Message response = null;
+            analyzeMessages();
             while (connected) {
                 try {
-                    messageInput = messageQueue.take();
-                    if (messageInput != null) {
-                        out.writeObject(messageInput);
-                        out.flush();
-                    }
-        
                     response = (Message) in.readObject();
                     if (agent != null) {
                         if (response != null) {
@@ -123,8 +139,6 @@ public class BankProxy implements Runnable {
                     break;
                 } catch (ClassNotFoundException cnf) {
                     cnf.printStackTrace();
-                } catch (InterruptedException ie) {
-                    ie.printStackTrace();
                 }
             }
             closeSocket();

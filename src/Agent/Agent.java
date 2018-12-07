@@ -391,10 +391,13 @@ public class Agent implements Runnable {
         Bid b = (Bid) messList.get(2);
         for (Bid b1: bids) {
             if (b1.getItem().getItemName().equals(b.getItem().getItemName())) {
-                removeList.add(b1);
+                if (b1.getAmount() == b.getAmount()) {
+                    removeList.add(b1);
+                }
             }
         }
         for (Bid b2: removeList) {
+            System.out.println(b2.getItem());
             bids.remove(b2);
         }
     }
@@ -406,24 +409,19 @@ public class Agent implements Runnable {
     private void response(Message message,
                           MessageTypes type,
                           int sender) {
+        System.out.println(message + " = message");
         Message response;
         ArrayList<Object> list = message.getMessageList();
         
         switch (type) {
-            case CONFIRMATION:
-                response = new Message(NAME, MessageTypes.THANKS);
-                respondToSender(sender, response, getAHProxy(auctionInfo));
-                break;
             case TRANSFER_ITEM:
                 Bid bid = (Bid) list.get(2);
                 Item bidItem = bid.getItem();
                 bidItem.updatePrice(bid.getAmount());
                 updateShowBidList(list);
-                
                 wonItems.add(bidItem);
-                break;
-            case BANK_ACCOUNT:
-                accountNumber = (int) list.get(2);
+                itemList.remove(bidItem);
+                itemListChange = true;
                 break;
             case ID_FOR_HOUSE:
                 AuctionInfo ai = (AuctionInfo) message.getMessageList().get(2);
@@ -439,11 +437,9 @@ public class Agent implements Runnable {
             case BID_REJECTED:
                 break;
             case BID_ACCEPTED:
-                System.out.println(bids);
                 updateShowBidList(list);
                 Bid b = (Bid) list.get(2);
                 bids.add(b);
-                System.out.println(bids);
                 break;
             case OUT_BID:
                 updateShowBidList(list);
@@ -452,13 +448,13 @@ public class Agent implements Runnable {
                 ArrayList<Item> temp = (ArrayList<Item>) list.get(2);
                 itemList.clear();
                 itemList.addAll(temp);
+                itemListChange = true;
                 break;
             case ACCOUNT_INFO:
                 double bal = (double) list.get(2);
                 double pend = (double) list.get(3);
                 int accntNum = (int) list.get(4);
                 account.setBalance(bal);
-                account.setAccountNumber(accntNum);
                 account.setPendingBalance(pend);
                 accountChange = true;
                 break;
@@ -477,20 +473,8 @@ public class Agent implements Runnable {
                         i.updatePrice(newPrice);
                     }
                 }
+                itemListChange = true;
                 break;
-        }
-    }
-    
-    /**
-     * Function to send messages to get updates for the auction houses and the
-     * bank account information.
-     */
-    public void sendMessageForUpdates() {
-        bank.sendAgentMessage(new Message(NAME,
-                                          MessageTypes.GET_HOUSES));
-        if (aHProxy != null) {
-            aHProxy.sendMessage(new Message(NAME,
-                                            MessageTypes.GET_ITEMS));
         }
     }
     
@@ -534,12 +518,10 @@ public class Agent implements Runnable {
         try {
             while (connected) {
                 in = messageQueue.take();
-                if (in != null) {
-                    response(in,
-                             (MessageTypes) in.getMessageList().get(1),
-                             analyzer.analyze(in));
-                }
-                in = null;
+                response(in,
+                         (MessageTypes) in.getMessageList().get(1),
+                         analyzer.analyze(in));
+
             }
         } catch (InterruptedException ie) {
             ie.printStackTrace();

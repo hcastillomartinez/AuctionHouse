@@ -101,6 +101,28 @@ public class AuctionHouseProxy implements Runnable {
             ie.printStackTrace();
         }
     }
+
+    /**
+     * Taking messages and writing them in response.
+     */
+    private void analyzeMessages() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (connected) {
+                    try {
+                        out.writeObject((Message) messageQueue.take());
+                        out.reset();
+                    } catch (InterruptedException ie) {
+                        ie.printStackTrace();
+                    } catch (IOException io) {
+                        io.printStackTrace();
+                    }
+                }
+            }
+        });
+        thread.start();
+    }
     
     /**
      * Overriding the run method to perform specialized tasks.
@@ -110,12 +132,9 @@ public class AuctionHouseProxy implements Runnable {
     public void run() {
         try {
             Message response = null, messageInput = null;
-            
+            analyzeMessages();
             while (connected) {
                 try {
-                    out.writeObject(messageQueue.take());
-                    out.reset();
-        
                     response = (Message) in.readObject();
                     if (agent != null) {
                         if (response != null) {
@@ -127,8 +146,6 @@ public class AuctionHouseProxy implements Runnable {
                     break;
                 } catch (ClassNotFoundException cnf) {
                     cnf.printStackTrace();
-                } catch (InterruptedException ie) {
-                    ie.printStackTrace();
                 }
             }
             closeSocket();
