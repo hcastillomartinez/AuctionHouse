@@ -248,7 +248,8 @@ public class Auction implements Runnable{
 
         auctionHouse.sendToServer(winningClientID,
                 new Message("auction house",MessageTypes.UNBLOCK_FUNDS,
-                        currentWinnerID,item.getPrice()));
+                        currentWinnerID,item.getPrice(),
+                auctionHouse.getAccount().getAccountNumber()));
         //wait for conformation
 
         auctionHouse.sendToServer(winningClientID,new Message("auction house",
