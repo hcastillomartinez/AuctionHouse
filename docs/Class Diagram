@@ -1,10 +1,7 @@
 # Project: Auction House/Dynamic Programming
 ## Agent Class
 ### Description: 
-This is the class that handles the bidding of the agent clients. 
-They are able to make and win bids. The agent is also responsible for providing 
-initial account information to the Bank when an agent is created. 
-This provides the funds for the user so that they can make bids with their money.
+#### This is the class that handles the bidding of the agent clients. They are able to make and win bids. The agent is also responsible for providing initial account information to the Bank when an agent is created. This provides the funds for the user so that they can make bids with their money.
 ### Methods: 
 #### public boolean getAccountChange() 
 #### public void setAccountChange(boolean accountChange)
