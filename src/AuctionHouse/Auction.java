@@ -37,11 +37,14 @@ public class Auction implements Runnable{
     private Bid currentBid;
 
 
-
     /**
      * Creates auction with the item and places the bid if passes through the
-     * threshold in place. Last two args are for the sake of messaging.
-     * @param a An Item
+     *  threshold in place. Last two args are for the sake of messaging.
+     * @param a An AuctionHouse
+     * @param i An Item
+     * @param currentBid double bid amount
+     * @param currentClientID int server id
+     * @param accountNumber int what bank uses to route money from and to.
      */
     public Auction(AuctionHouse a,Item i, Bid currentBid,int currentClientID,
                    int accountNumber){

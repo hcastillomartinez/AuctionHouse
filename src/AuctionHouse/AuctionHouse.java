@@ -47,7 +47,10 @@ public class AuctionHouse implements Runnable {
      * Expects an int that represents what type
      * auction house will be. 1 for furniture, 2 for tech
      * and any other number for car.
-     * @param type An int
+     * @param type String that is type of AH
+     * @param port String port of the AH
+     * @param serverName String ip of the bank
+     * @param myServerName String ip of own computer
      */
     public  AuctionHouse(String type,String port,String serverName,
                          String myServerName){

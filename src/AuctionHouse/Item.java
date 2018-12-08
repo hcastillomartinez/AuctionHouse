@@ -81,7 +81,7 @@ public class Item implements Serializable {
 
     /**
      * Way for item to be printed.
-     * @return
+     * @return String of how item is printed.
      */
     @Override
     public String toString(){

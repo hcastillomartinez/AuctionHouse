@@ -49,6 +49,7 @@ public class AuctionHouseGUI extends Application {
 
     /**
      * Used to launch the GUI from another class.
+     * @param args String, arguments from command line.
      */
     public static void launch(String[] args){
         myServername=args[0];
@@ -136,7 +137,7 @@ public class AuctionHouseGUI extends Application {
      * Launches initial window and once correct info placed will launch the
      * main
      * auction house window.
-     * @param primaryStage
+     * @param primaryStage Stage, main GUI.
      */
     @Override
     public void start(Stage primaryStage) {

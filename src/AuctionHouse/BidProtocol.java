@@ -10,7 +10,7 @@ public class BidProtocol {
 
     /**
      * Begins initial bid to beat as the price of the actual item
-     * @param price
+     * @param price double of initial price.
      */
     public BidProtocol(double price){
         lastBid=0;
