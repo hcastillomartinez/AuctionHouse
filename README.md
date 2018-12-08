@@ -5,7 +5,7 @@
 Generally describe the project/problem you are solving.
 
 ## Contributions
-Danan worked on the Agent package, the Proxies package and the TestPackage package. 
+Danan worked on the Agent package and the Proxies package. 
 Daniel worked worked on the Bank package.
 
 ## Usage
@@ -15,6 +15,8 @@ To begin using Agent.java there need to be command line arguments when running t
 The second argument is the port that the agent connects to. When the application is running the first thing that needs to be performed is the creation of the account.
 To create the account the user must enter their first name, last name and their starting balance in their respective fields. Once this has been completed
 the user must click on the "New Account" button. This will populate the pending balance to mirror the account balance as no bids have yet been placed.
+
+    java -jar Agent.java IPAdress portNumber
 
 If the user chooses to make a bid on an item they must first choose an Auction House to connect to. This can be achieved by clicking on the "Update" button and then 
 viewing all of the options in the "Choose Auction House" drop down. When the user chooses an Auction House from the drop down they are then able to click the 
