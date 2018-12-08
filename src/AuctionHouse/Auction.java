@@ -12,8 +12,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 
 /**
- * Used by Auction House and is created dynamically for placing bids on items
- * . It runs for 30 seconds.
+ * Used by the AuctionHouse and are created dynamically by the AH if an item
+ * isn't already in an auction. Can be treated as a thread and when done so it
+ * runs for 30 seconds and relays necessary messages to the bank and winner.
  */
 public class Auction implements Runnable{
 
@@ -38,8 +39,8 @@ public class Auction implements Runnable{
 
 
     /**
-     * Takes an item and sets auction up for the
-     * item.
+     * Creates auction with the item and places the bid if passes through the
+     * threshold in place. Last two args are for the sake of messaging.
      * @param a An Item
      */
     public Auction(AuctionHouse a,Item i, Bid currentBid,int currentClientID,
@@ -181,7 +182,8 @@ public class Auction implements Runnable{
     }
 
     /**
-     * Puts bid onto queue.
+     * Places bid onto queue, before that the current bidder is set to incoming
+     * bidder.
      * @param b An int
      */
     public void placeBid(Bid b,int currentClientID,int accountNumber){

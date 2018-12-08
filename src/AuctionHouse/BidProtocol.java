@@ -8,6 +8,10 @@ public class BidProtocol {
     private double lastBid;
     private double price;
 
+    /**
+     * Begins initial bid to beat as the price of the actual item
+     * @param price
+     */
     public BidProtocol(double price){
         lastBid=0;
         this.price=price;

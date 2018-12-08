@@ -22,8 +22,12 @@ import javafx.util.Duration;
 import java.util.Timer;
 
 /**
- * GUI for the auction house, initial window is for the type of auction
- * house,its port it will exist on, and the banks ip address.
+ * GUI for the auction house, initial window is for the type of auction house,
+ * its port it will exist on, and the bank's ip address. Once those are placed it
+ *  will launch the main window of the AH. Will not allow window to close if
+ *  there is active auction going on and will cause alert to pop up, this event
+ *  will consume the close request. Its updated in real time with no delay to
+ *  the internals of the AH i.e. item is removed once sold, balance updated etc.
  */
 public class AuctionHouseGUI extends Application {
 
@@ -128,7 +132,12 @@ public class AuctionHouseGUI extends Application {
     }
 
 
-
+    /**
+     * Launches initial window and once correct info placed will launch the
+     * main
+     * auction house window.
+     * @param primaryStage
+     */
     @Override
     public void start(Stage primaryStage) {
         final Stage nestStage=new Stage();
@@ -208,6 +217,11 @@ public class AuctionHouseGUI extends Application {
 
     }
 
+    /**
+     * If there is no open auction this method is run and will close the
+     * connections then System.exit to close some blockingqueue threads that
+     * remain running.
+     */
     @Override
     public void stop(){
         auctionHouse.sendToAllClient(new Message("auction house",

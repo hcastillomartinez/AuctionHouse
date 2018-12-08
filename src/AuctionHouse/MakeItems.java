@@ -11,13 +11,10 @@ import java.util.Random;
  * from a fixed interval.
  */
 public class MakeItems {
-    private List<Item> items;
+    private List<Item> items=new ArrayList<>();
     private String[] colors={"black","red","blue","orange"};
     private String[] condition={"used","new","like-new","worn"};
 
-    public MakeItems(){
-        items=new ArrayList<>();
-    }
 
     /**
      *Returns a list based on the parameter. One

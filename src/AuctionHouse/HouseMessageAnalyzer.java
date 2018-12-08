@@ -10,9 +10,10 @@ import MessageHandling.MessageTypes;
 public class HouseMessageAnalyzer {
 
     /**
-     * Breaks down the incoming message, decides what to do
-     * based on the first parts of the message and returns and int once it
-     * sees what needs to be done.
+     *Breaks down the incoming message, decides what to do based on the first
+     * parts of the message and returns and int once it sees what needs to be done.
+     * 1 to 2 if response to agent, 3 if response to bank, and 4 to 7 if
+     * response to auction.
      * @param message A Message
      * @return An int based on the message passed in.
      */
