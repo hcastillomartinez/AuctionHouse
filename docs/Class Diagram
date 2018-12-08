@@ -106,7 +106,53 @@ public double getAmount()
 
 @Override public String toString() 
 
+## Message Class 
+### Description:
+This class is the container for the messages being sent to the servers and sockets.
+### Methods: 
+public ArrayList<Object> getMessageList()
 
+@Override public String toString()
+
+## MessageAnalyzer Class
+ 
+### Description:
+This class is used to get the senders and receivers the type of object that sent
+the message. 
+### Methods: 
+public int analyze(Message message)
+
+## MessageTypes Enum
+ 
+### Description:
+This contains the different message types that are being sent between the 
+different servers and sockets in the program. 
+### Methods: 
+public String getMessage()
+
+## AuctionHouseProxy Class
+ 
+### Description:
+This class provides a proxy between an agent and an auction house. It handles 
+messages from the agent and sends them to the auction house. It also handles the
+messages from the auction house and sends them to the agent. 
+### Methods: 
+public void sendMessage(Message inMessage)
+
+@Override public void run()
+
+## BankProxy Class
+ 
+### Description:
+This class provides a proxy between an agent and a bank. It handles 
+messages from the agent and sends them to the bank. It also handles the
+messages from the bank and sends them to the agent. 
+### Methods: 
+public void sendMessage(Message inMessage)
+
+public void closeConnections()
+
+@Override public void run()
 
 
 
