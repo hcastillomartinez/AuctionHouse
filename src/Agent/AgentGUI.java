@@ -68,7 +68,7 @@ public class AgentGUI extends Application {
         = new BackgroundFill(Color.GREY, new CornerRadii(10), null);
     
     // timer for updating the lists
-    static TimerTask timerTask = new TimerTask() {
+    private static TimerTask timerTask = new TimerTask() {
         @Override
         public void run() {
             long past = System.currentTimeMillis();
@@ -618,7 +618,7 @@ public class AgentGUI extends Application {
     /*
      *
      */
-    public void updateGUI() {
+    private void updateGUI() {
         if (agent.getAccountChange() && agent.getAccount() != null) {
             updateAccountFields();
             agent.setAccountChange(false);

@@ -1,7 +1,10 @@
 # Project: Auction House/Dynamic Programming
 ## Agent Class
 ### Description: 
- This is the class that handles the bidding of the agent clients. They are able to make and win bids. The agent is also responsible for providing initial account information to the Bank when an agent is created. This provides the funds for the user so that they can make bids with their money.
+ This is the class that handles the bidding of the agent clients. 
+ They are able to make and win bids. The agent is also responsible for providing
+  initial account information to the Bank when an agent is created.
+   This provides the funds for the user so that they can make bids with their money.
 ### Methods: 
  public boolean getAccountChange() 
 
@@ -80,9 +83,28 @@
  public static void main(String[] args) throws IOException
 
 
+## AgentGUI Class 
+### Description: 
+This class displays the agent information and allows for the agent to interact
+with the program. The can create an account, place bids and choose items and 
+auction houses.
+### Methods: 
+public static void launch(String...args)
 
+@Override public void start(Stage primaryStage) throws Exception
 
+## Bid Class
+### Description: 
+This class is the container for the information that is contained within a user's
+bid. It contains the bidder, the amount and the item being bid on.
+### Methods:
+public Item getItem()
 
+public int getBidder()
+
+public double getAmount()
+
+@Override public String toString() 
 
 
 
