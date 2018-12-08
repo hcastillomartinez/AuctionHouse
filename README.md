@@ -4,7 +4,25 @@
 ## Introduction
 Distributed auction system with one static Bank, k number of Auction Houses 
 that are dynamically created, and i number of Agents that are also 
-dynamically created. 
+dynamically created.
+
+### Auction House
+AH has a list of items and hosts the status of each auction. It 
+should be able to relay at any point the items it has for sale at their most 
+current state. AH cannot be closed if there is an active auction if it is 
+closed it must be done graciously. When closed it should de-register with the
+ bank. 
+#### Rules of the auction:
+Upon receiving a bid it will acknowledge with a reject or accept message.
+
+When bid is accepted it will notify bank to block funds of the bid amount and
+pass notification is sent to agent that is outbid along with an unblock 
+funds to bank when it is necessary.
+ 
+Auction runs for 30 seconds and upon finishing will send to winner that it 
+has won and it is complete once the funds have been transferred into the AH's
+account.  
+   
 
 ## Contributions
 Danan worked on the Agent package and the Proxies package. 
@@ -106,16 +124,34 @@ and the schematic of the design.
 ### Implemented Features
 State things that work.
 
-
 The bank blocks and unblocks funds correctly during bidding. After a bid is one, funds are transferred to the correct auction house.
 Accounts are closed properly when a connection with an agent/auction house is ended. Unique accounts are created for each connection made with the bank.
-The list of auction houses is successfully shared with agents. 
+The list of auction houses is successfully shared with agents.
+
+Auction House can be dynamically created and keeps track of all active, also 
+inactive, auctions and its own items. When asked for items it will send the 
+list to the agent. Upon creation it will send message to create the account 
+with the bank along with the info it needs to be able to show the auction 
+houses info to the agent. When there is no active auctions it can be closed, 
+otherwise will not be able to. Can disconnect from the bank and bank handles 
+de-registering. If bid is accepted it will send response to agent that it has
+ accepted the bid and also when the bid is rejected. On pass of bid, AH will 
+ tell bank to block funds of the bid amount and also tells bank to unblock 
+ funds from agent that was passed, as well as sending the agent that was out 
+ bid a message stating so. Auction runs for 30 seconds then tell the 
+ agent it has won and then money is transferred into the auction houses 
+ account. When closing it will relay message to agent that it has closed to 
+ handle closing of connection on its end and on closing will close all of its
+ own active connections to sockets. Updating GUI is in real time, meaning it
+ always displays the most current information.
 
 ### Known Issues
 There are some bugs with gui updating in AgentGUI.java. When a bid is completed the current bid list does not always
 update to have removed the finished bid. There is also an issue in the "Choose Auction House" drop down button that does not update 
 to show when an Auction House has left. The button still shows the Auction Houses as choices when that should not occur. The item list also 
-does not remove items that have been won for an extended period of time.
+does not remove items that have been won for an extended period of time. 
+Synchronization in auction where not always unblocking the correct amount 
+from the agent if bids come in simultaneously as one is passed.
 
         
     
