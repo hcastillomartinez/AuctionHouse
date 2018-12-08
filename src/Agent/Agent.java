@@ -49,6 +49,8 @@ public class Agent implements Runnable {
     
     /**
      * Constructor for the Agent.
+     * @param hostName name of the ip address for the host computer
+     * @param portNumber port number to connect to
      */
     public Agent(String hostName, int portNumber) {
         itemList = new ArrayList<>();
@@ -130,6 +132,7 @@ public class Agent implements Runnable {
     
     /**
      * Getting the account number for sending to the bank.
+     * @return accountNumber for the agent
      */
     public int getAccountNumber() {
         return accountNumber;
@@ -240,6 +243,7 @@ public class Agent implements Runnable {
     
     /**
      * Function to get the bids.
+     * @return bids from the agent
      */
     public ArrayList<Bid> getBids() {
         synchronized (bids) {
@@ -256,6 +260,7 @@ public class Agent implements Runnable {
     /**
      * Setting the auction house for the agent.
      * @param auctionInfo house for functionality
+     * @return true if house has been set
      */
     public synchronized boolean setAuctionHouse(AuctionInfo auctionInfo) {
         if (!houseProxyMap.containsKey(auctionInfo)) {
@@ -339,6 +344,7 @@ public class Agent implements Runnable {
     /**
      * Setting the account of the agent.
      * @param account for the agent
+     * @return true if set and false otherwise
      */
     public boolean setAccount(Account account) {
         synchronized(account) {
@@ -363,6 +369,7 @@ public class Agent implements Runnable {
     
     /**
      * Function to add to the list of messageQueue.
+     * @param message to add for the queue
      */
     public void addMessage(Message message) {
         try {
@@ -552,6 +559,8 @@ public class Agent implements Runnable {
     
     /**
      * Main method to start the program for the user/agent.
+     * @throws java.io.IOException
+     * @param args from the command line
      */
     public static void main(String[] args) throws IOException {
         AgentGUI.launch(args);

@@ -30,6 +30,9 @@ public class BankProxy implements Runnable {
     /**
      * Constructor for the bank proxy.
      * Builds a reference to the bank for bank functionality
+     * @param port to connect to
+     * @param host of the server
+     * @param agent to pass the message through
      */
     public BankProxy(String host, int port, Agent agent) {
         this.host = host;
@@ -108,6 +111,7 @@ public class BankProxy implements Runnable {
 
     /**
      * Adding a message to the banks input stream.
+     * @param inMessage message to place in the queue
      */
     public void sendAgentMessage(Message inMessage) {
         try {

@@ -31,6 +31,9 @@ public class AuctionHouseProxy implements Runnable {
     /**
      * Constructor for the bank proxy.
      * Builds a reference to the bank for bank functionality
+     * @param agent agent to associate with the gui
+     * @param host name for the ip address
+     * @param port to connect to
      */
     public AuctionHouseProxy(String host,
                              int port,
@@ -71,6 +74,7 @@ public class AuctionHouseProxy implements Runnable {
 
     /**
      * Adding a message to the banks input stream.
+     * @param inMessage to place in the queue
      */
     @SuppressWarnings("unchecked")
     public void sendMessage(Message inMessage) {

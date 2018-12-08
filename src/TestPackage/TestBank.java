@@ -27,29 +27,12 @@ public class TestBank implements Runnable {
     private int currentAccountNumber = 0;
     static private String address;
     static private int portNumber;
-    
+
     /**
-     It is static and at a known address (IP address and port number)
-     It hosts
-     a list of agent accounts
-     a list of auction house accounts
-     It shares the list of auction houses with agents having bank accounts
-     It provides agents with secret keys for use in the bidding process
-     It transfers funds from agent to auction accounts, under agent control
-     It blocks and unblocks funds in agent accounts, at the request of action houses
-     
-     
-     Will have a proxy
-     
-     Some sort of pending balance:
-     every time you make a bid on a new item
-     subtract that amount from pending balance
-     
-     
-     
-     we need to create the bank first
+     * Method to run the program.
+     * @param args
+     * @throws Exception
      */
-    
     public static void main(String[] args) throws Exception {
         if (args.length >= 1) {
             portNumber = Integer.parseInt(args[0]);
@@ -64,7 +47,8 @@ public class TestBank implements Runnable {
     
     /**
      * Constructor for Bank
-     *
+     * @param portNumber port number to connect to
+     * @param address to host the server
      */
     public TestBank(String address, int portNumber){
         agents = new ArrayList<Agent>();
@@ -92,6 +76,9 @@ public class TestBank implements Runnable {
     
     /**
      * Creates and returns an account.
+     * @param name of the account
+     * @param startingBalance of the account
+     * @return the new account
      */
     public Account makeAccount(String name, double startingBalance) {
         Account account = new Account(name,
@@ -108,6 +95,7 @@ public class TestBank implements Runnable {
     
     /**
      * Adds an auction house to the list of auction houses.
+     * @param house to add
      */
     public void addAuctionHouse(AuctionHouse house){
 //        this.auctionHouses.add(house);
@@ -123,8 +111,8 @@ public class TestBank implements Runnable {
     }
     
     /**
-     * Gets the list of bank accounts
-     * @return
+     * Gets the list of bank accounts.
+     * @return accounts for the bank
      */
     public ArrayList<Account> getAccounts(){
         return accounts;
@@ -139,14 +127,19 @@ public class TestBank implements Runnable {
     
     /**
      * Gets list of auction houses for a agent.
+     * @return auctionHouses list containing the auction houses
      */
     public ArrayList<AuctionInfo> getAuctionHouses() {
         return auctionHouses;
     }
-    
-    
+
+
     /**
-     * Transfers funds from an Agent account to an AuctionHouse account.
+     * Transferring the funds.
+     * @param auctionHouseAccountNumber account of the auction house
+     * @param agentAccountNumber agents account number
+     * @param amount amount to start the account
+     * @throws Exception
      */
     public synchronized void transferFunds(int auctionHouseAccountNumber,
                                            int agentAccountNumber,
@@ -171,9 +164,6 @@ public class TestBank implements Runnable {
             }
         }
     }
-    
-    
-    
     
     // private sub class
     private static class ServerThread implements Runnable {
