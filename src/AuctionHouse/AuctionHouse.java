@@ -114,6 +114,14 @@ public class AuctionHouse implements Runnable {
     }
 
     /**
+     * Sets the auction house to be closed.
+     * @param bool a boolean.
+     */
+    public void setAuctionStatus(boolean bool){
+        auctionOpen=bool;
+    }
+
+    /**
      * Gets the auctions created
      * @return A list of auctions
      */

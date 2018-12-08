@@ -214,7 +214,7 @@ public class AuctionHouseGUI extends Application {
                 MessageTypes.CLOSE,auctionHouse.getPort()));
         System.out.println("GUI closed");
         timeline.stop();
+        auctionHouse.setAuctionStatus(false);
         System.exit(1);
-        auctionOpen=false;
     }
 }
