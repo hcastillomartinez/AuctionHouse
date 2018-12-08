@@ -2,12 +2,14 @@
 ## Student(s): Danan High, Hector Castillo-Martinez, Daniel Miller
 
 ## Introduction
-Generally describe the project/problem you are solving.
+Distributed auction system with one static Bank, k number of Auction Houses 
+that are dynamically created, and i number of Agents that are also 
+dynamically created. 
 
 ## Contributions
 Danan worked on the Agent package and the Proxies package. 
 Daniel worked worked on the Bank package.
-
+Hector worked on the AuctionHouse package.
 ## Usage
 Give details about how to use the program. (Imagine making it easy for someone that you don't know to run and use your project.)
 ### Agent
@@ -45,7 +47,8 @@ IPAddress is the address of the machine bank will run on and portNumber is the p
 
 After the jar file is running the GUI will pop up and display empty lists of agent and auction house accounts.
 Accounts hold the owner's name, account number, balance, and pending balance. The pending balance represents how much of their money that 
-hasn't already been used to bid. This ensures that an Agent can't win two bids simultaneously while only having enough money for one bid.
+has not already been used to bid. This ensures that an Agent can't win two bids 
+simultaneously while only having enough money for one bid.
 
 The Bank thread is constantly searching for and establishing socket connections. Once connected, accounts are created and displayed to the GUI.
 After connections are ended, the corresponding account is deleted and removed from the screen.
@@ -53,10 +56,41 @@ After connections are ended, the corresponding account is deleted and removed fr
 No user input is required in the Bank GUI.     
 To close the program the user will click the default red exit button to close the window. 
 
+### Auction House
+The jar expects one command line argument to run and it should be the ip 
+address of the computer AH will be run on.
+
+    java -jar AuctionHouse.jar IPAddress
+ Once program is launched a small window will pop up which will have three text fields. The first text field 
+is for is for the type of AH of which there are 3; car, furniture, and tech. 
+The second text field is for the port of which AH will listen for connections
+ on. The third is for the ip address of the bank which should be known, it 
+ also expects the bank to always run on port 4444 for simplicity.
+
+ Once the launch button is pressed the main GUI of the auction house will be 
+ launched once the connection to the bank is established. After this launch 
+ no more user input is taken and the GUI updates on its own as things occur 
+ internally with the passing of messages from the bank and the agents.
+ 
+ The left window is for all the items that is currently for sale and the 
+ price of them. The right window shows the current and previous auctions with 
+ the status of an auction, the item for sale, and the current winning bid on 
+ it. Once an item is sold it is then removed from the left window (Item list)
+ and the funds are then updated to the amount payed for the item. The 
+ auction houses own account number is also displayed above the balance of 
+ the auction house. 
+ 
+ Window will remain open until the user chooser to close, although it will 
+ prevent the user from closing it if there are any active auctions by throwing 
+ an alert every time the close button is pressed. Once there are no 
+ underlying processes blocking the closing, the GUI will simply close.
+
 ## Project Assumptions
 In the project we assume that all of the Agents are unique even if they have the same name. 
 The bank will only be closed last after all accounts have been closed.
-
+Once an auction house runs out of items it can simply continue
+ to run forever or just be closed as their should not be any processes 
+ preventing the closing. 
 ## Versions
 Jar files are located in the top level directory.
 ### V1
