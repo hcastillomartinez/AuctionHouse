@@ -5,7 +5,7 @@
 Generally describe the project/problem you are solving.
 
 ## Contributions
-Danan worked on the entire Agent package, the Proxies package and the TestPackage package. 
+Danan worked on the Agent package, the Proxies package and the TestPackage package. 
 
 ## Usage
 Give details about how to use the program. (Imagine making it easy for someone that you don't know to run and use your project.)
