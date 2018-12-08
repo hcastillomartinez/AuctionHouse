@@ -16,6 +16,11 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * When created it takes in one IP address, which should be the one it will
+ * exist on, and initially does nothing until agents connect to it and start
+ * placing bids.
+ */
 public class AuctionHouse implements Runnable {
     private int agentCount;
     private String type;
@@ -46,7 +51,7 @@ public class AuctionHouse implements Runnable {
      */
     public  AuctionHouse(String type,String port,String serverName,
                          String myServerName){
-        //.net netbug meetup.org
+
         agentCount = 0;
         auctionOpen = true;
         safeToClose=true;
@@ -166,6 +171,12 @@ public class AuctionHouse implements Runnable {
         return port;
     }
 
+    /**
+     * Used to remove a specific item from its item list if match with item
+     * name is found. Then begins process to update the GUI.
+     * @param item Item to be removed
+     * @return boolean to whether or not item was removed.
+     */
     public boolean removeItem(Item item){
         for(Item i:itemList){
             if(item.getItemName().equals(i.getItemName())){
@@ -388,9 +399,15 @@ public class AuctionHouse implements Runnable {
             m.getMessageList().add(ID);
         }
 
+        /**
+         * Used for closing cleanly, used to check if client is still connected.
+         * @return boolean whether still connected or not.
+         */
         public boolean isConnected(){
             return connected;
         }
+
+
         /**
          * Gets the ID of the server thread.
          * @return ID of the serve thread.
@@ -439,10 +456,12 @@ public class AuctionHouse implements Runnable {
         }
     }
 
+
+
     /**
      * Closes all the server thread's clients and also the server socket.
      */
-    public void closeAllSockets(){
+    private void closeAllSockets(){
         for(Server s: serverThreads){
             s.closeClient();
         }
@@ -466,7 +485,11 @@ public class AuctionHouse implements Runnable {
         }
     }
 
-
+    /**
+     * Message passed through will send be sent to all agents currently
+     * connected.
+     * @param m Message that will be relayed to all agents connected.
+     */
     public void sendToAllClient(Message m){
         for(Server s: serverThreads){
             if(s.isConnected()){
@@ -475,6 +498,10 @@ public class AuctionHouse implements Runnable {
         }
     }
 
+    /**
+     * Thread that listens for incoming messages from the bank, these
+     * messages are then placed into queue to be analyzed.
+     */
     private void handleMessagesFromBank(){
         Thread t=new Thread(new Runnable() {
             @Override
@@ -513,6 +540,10 @@ public class AuctionHouse implements Runnable {
     }
 
 
+    /**
+     * Listens for incoming socket connections and places them into threads
+     * to handle each one separately  while connected.
+     */
     @Override
     public void run(){
         messageWait();

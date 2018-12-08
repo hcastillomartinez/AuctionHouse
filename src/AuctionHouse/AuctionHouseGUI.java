@@ -22,7 +22,8 @@ import javafx.util.Duration;
 import java.util.Timer;
 
 /**
- * GUI for the auction house, testing currently.
+ * GUI for the auction house, initial window is for the type of auction
+ * house,its port it will exist on, and the banks ip address.
  */
 public class AuctionHouseGUI extends Application {
 
@@ -60,7 +61,9 @@ public class AuctionHouseGUI extends Application {
         itemObservableList.setAll(auctionHouse.getItemList());
     }
 
-
+    /**
+     * Used to update the bank info on the screen .
+     */
    private void updateBankInfo(){
        auctionAccount=auctionHouse.getAccount();
        accLabel.setText(""+auctionAccount.getAccountNumber());
@@ -68,6 +71,9 @@ public class AuctionHouseGUI extends Application {
        balLabel.setText(""+balance);
     }
 
+    /**
+     * Builds the GUI once connection established with bank.
+     */
     private void createGUI(){
         root.setStyle("-fx-background-color: lightblue");
         timeline=new Timeline();
@@ -119,7 +125,6 @@ public class AuctionHouseGUI extends Application {
         auctionListView.setLayoutY(30);
         auctionListView.setLayoutX(300);
         auctionListView.setPrefSize(300,250);
-//        displayItems.getItems().addAll(auctionItems);
     }
 
 

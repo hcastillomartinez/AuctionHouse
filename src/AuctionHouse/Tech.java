@@ -1,5 +1,8 @@
 package AuctionHouse;
 
+/**
+ * possible tech items.
+ */
 public enum Tech {
     phone,laptop,desktop,keyboard,monitor,processor,GPU;
 

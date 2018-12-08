@@ -5,12 +5,16 @@ import MessageHandling.Message;
 import MessageHandling.MessageTypes;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+
+/**
+ * Used by Auction House and is created dynamically for placing bids on items
+ * . It runs for 30 seconds.
+ */
 public class Auction implements Runnable{
 
     private final int DURATION=30;
@@ -85,15 +89,6 @@ public class Auction implements Runnable{
         },0,1000);
     }
 
-
-    /**
-     * If money does not go through will reset timer.
-     * dont think will need
-     */
-    private void resetTime(){
-        auctionActive=true;
-        time=0;
-    }
 
     /**
      * Takes from queue and passes it to be
@@ -200,15 +195,6 @@ public class Auction implements Runnable{
         }
     }
 
-
-
-    /**
-     * Gets the current winner of the auction
-     * @return An int that is key of bidder that is winning.
-     */
-    public int getCurrentWinnerID(){
-        return currentBidderID;
-    }
 
     /**
      * Gets the item in the auction.

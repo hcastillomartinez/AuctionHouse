@@ -6,6 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Used by AH, creates items based on a type and sets prices for those items
+ * from a fixed interval.
+ */
 public class MakeItems {
     private List<Item> items;
     private String[] colors={"black","red","blue","orange"};
@@ -18,8 +22,8 @@ public class MakeItems {
     /**
      *Returns a list based on the parameter. One
      * of three type of item list are created with
-     * each call. 1 for furniture,2 for tech, and anything
-     * else for cars.
+     * each call. "furniture" for furniture, "tech" for
+     * technology, other wise defaults to car.
      * @param typeID An int
      * @return A List
      */

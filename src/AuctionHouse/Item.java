@@ -3,6 +3,9 @@ package AuctionHouse;
 
 import java.io.Serializable;
 
+/**
+ * These are created only once and with values determined in MakeItems.
+ */
 public class Item implements Serializable {
     
     private static final long serialVersionUID = 7L;
@@ -33,9 +36,6 @@ public class Item implements Serializable {
         this.inBid = inBid;
     }
 
-    public void updateItemPrice(double price){
-        this.price=price;
-    }
 
     /**
      * Updates the price of item according to the current bid
@@ -53,7 +53,6 @@ public class Item implements Serializable {
     public boolean isInBid() {
         return inBid;
     }
-
 
 
     /**
