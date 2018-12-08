@@ -6,6 +6,7 @@ Generally describe the project/problem you are solving.
 
 ## Contributions
 Danan worked on the Agent package, the Proxies package and the TestPackage package. 
+Daniel worked worked on the Bank package.
 
 ## Usage
 Give details about how to use the program. (Imagine making it easy for someone that you don't know to run and use your project.)
@@ -20,31 +21,48 @@ viewing all of the options in the "Choose Auction House" drop down. When the use
 "Choose House" button. This causes the item list to be populated from which the user can choose an item to bid on. 
 Selecting the item happens when the user chooses an item from the list and the clicks the "Select Item" button. 
 
-When an Auction House has been choosen the Auction House field will be populated with they type of Auction House has been choosed, and the ID will be populated
+When an Auction House has been chosen the Auction House field will be populated with they type of Auction House has been chosen, and the ID will be populated
 with the id number of the Auction House. Once an item has been selected the Item field will set to the name of the item. It is then up to the user 
 to determine if they want to make a bid by inputting an amount into the Bid field. If the user is satisfied with their choice they will click on the 
 "Place Bid" button to make the bid. The Current Bids list will populate with the current bids that the user has made. 
-When a bid has been placed the Pending Balance field will update to reflect the usere's balance - the amount that they have placed on bids.
+When a bid has been placed the Pending Balance field will update to reflect the user's balance - the amount that they have placed on bids.
 When a bid has concluded the user will either have funds removed from their account balance, or they will have their 
 pending balance updated back to it's status before the bid.
 
 To view if they have won an item the user must click the "Update Items Won" button and then the list will populate with items that they have won.
 
 To close the program the user will click the default red exit button to close the window. If a bid is in process the user will not be able to exit the program
-until the conclustion of the bid process.
+until the conclusion of the bid process.
+
+### Bank
+The Bank application is run with the Bank.jar file from the command line with the following:
+
+    java -jar Bank.java IPAddress portNumber
+    
+IPAddress is the address of the machine bank will run on and portNumber is the port that Bank will run on.
+
+After the jar file is running the GUI will pop up and display empty lists of agent and auction house accounts.
+Accounts hold the owner's name, account number, balance, and pending balance. The pending balance represents how much of their money that 
+hasn't already been used to bid. This ensures that an Agent can't win two bids simultaneously while only having enough money for one bid.
+
+The Bank thread is constantly searching for and establishing socket connections. Once connected, accounts are created and displayed to the GUI.
+After connections are ended, the corresponding account is deleted and removed from the screen.
+
+No user input is required in the Bank GUI.     
+To close the program the user will click the default red exit button to close the window. 
 
 ## Project Assumptions
 In the project we assume that all of the Agents are unique even if they have the same name. 
+The bank will only be closed last after all accounts have been closed.
 
 ## Versions
-Where are the .jar files?
+Jar files are located in the top level directory.
 ### V1
 explain about how version 1 works
 ### V2
 explain about how version 2 works etc...
 
 ## Docs
-What folder is your documentation (diagram and class diagram) in?
 The folder containing the documentation is in the docs folder. This contains the class diagrams and the 
 and the schematic of the design.
 
@@ -52,23 +70,16 @@ and the schematic of the design.
 ### Implemented Features
 State things that work.
 
+
+The bank blocks and unblocks funds correctly during bidding. After a bid is one, funds are transferred to the correct auction house.
+Accounts are closed properly when a connection with an agent/auction house is ended. Unique accounts are created for each connection made with the bank.
+The list of auction houses is successfully shared with agents. 
+
 ### Known Issues
 There are some bugs with gui updating in AgentGUI.java. When a bid is completed the current bid list does not always
 update to have removed the finished bid. There is also an issue in the "Choose Auction House" drop down button that does not update 
 to show when an Auction House has left. The button still shows the Auction Houses as choices when that should not occur. The item list also 
 does not remove items that have been won for an extended period of time.
 
-
-## Daniel's Todo's
-    
-    Comments Completed:
-        All
-        
-    Class Diagrams todo:
-        Bank
-        BankGUI
-        Account
-        AgentInfo
-        AuctionInfo    
         
     
