@@ -662,7 +662,7 @@ public String getTypeID() :
 ### Description:
 Possible items of type furniture
 ### Methods:
-public String getIDType()
+public String getIDType() :
 
     Enum type is displayed as "furniture".
 
@@ -670,7 +670,7 @@ public String getIDType()
 ### Description:
 Possible items of type tech
 ### Methods:
-public String getIDType()
+public String getIDType() :
 
     Enum type is displayed as "tech".
 
@@ -678,7 +678,7 @@ public String getIDType()
 ### Description:
 Possible items of type movie
 ### Methods:
-public String getIDType()
+public String getIDType() :
 
     Enum type is displayed as "movie".
 
