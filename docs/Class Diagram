@@ -1,80 +1,98 @@
 # Project: Auction House/Dynamic Programming
 ## Agent Class
 ### Description: 
-#### This is the class that handles the bidding of the agent clients. They are able to make and win bids. The agent is also responsible for providing initial account information to the Bank when an agent is created. This provides the funds for the user so that they can make bids with their money.
+ This is the class that handles the bidding of the agent clients. They are able to make and win bids. The agent is also responsible for providing initial account information to the Bank when an agent is created. This provides the funds for the user so that they can make bids with their money.
 ### Methods: 
-#### public boolean getAccountChange() 
-#### public void setAccountChange(boolean accountChange)
-#### public boolean isItemListChange()
-#### public void setItemListChange()
-#### public HashMap<Integer, Integer> getAuctionHouseKeys()
-#### public boolean isAuctionHouseChange()
-#### public void setAucHouseChange(boolean aucHouseChange)
-#### public int getAccountNumber()
-#### public boolean isBidChange()
-#### public void setBidChange(boolean bidChange)
-#### public boolean isItemsWonChange()
-#### public void setItemsWonChange(boolean itemsWonChange)
-#### public Item getItem()
-#### public void setItem(Item item) 
-#### public ArrayList<Item> getItemList(AuctionInfo ai)
-#### public ArrayList<Item> getItemList()
-#### public ArrayList<Item> getWonItems()
-#### public AuctionHouseProxy getAHProxy(AuctionInfo info)
-#### public int getPortNumber()
-#### public Double getPendingBalance()
-#### public Account getAccount()
-#### public ArrayList<Bid> getBids()
-#### public String getHostName()
-#### public synchronized boolean setAuctionHouse(AuctionInfo auctionInfo)
-#### public synchronized ArrayList<AuctionInfo> getHouseList()
-#### public String getNAME()
-#### public BankProxy getBank()
-#### public Integer getCurrentAuctionID()
-#### public int getId()
-#### public int setID(int id)
-#### public Integer getKeyForHouse()
-#### public boolean setAccount(Account account)
-#### public void setConnected()
-#### public void addMessage(Message message)
-#### public void closeApplicationConnection()
-#### @Override public String toString()
-#### @Override public void run() 
-#### public static void main(String[] args) throws IOException
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
-#### 
+ public boolean getAccountChange() 
+
+ public void setAccountChange(boolean accountChange)
+
+ public boolean isItemListChange()
+
+ public void setItemListChange()
+
+ public HashMap<Integer, Integer> getAuctionHouseKeys()
+
+ public boolean isAuctionHouseChange()
+
+ public void setAucHouseChange(boolean aucHouseChange)
+
+ public int getAccountNumber()
+
+ public boolean isBidChange()
+
+ public void setBidChange(boolean bidChange)
+ 
+ public boolean isItemsWonChange()
+ 
+ public void setItemsWonChange(boolean itemsWonChange)
+ 
+ public Item getItem()
+ 
+ public void setItem(Item item) 
+ 
+ public ArrayList<Item> getItemList(AuctionInfo ai)
+
+ public ArrayList<Item> getItemList()
+
+ public ArrayList<Item> getWonItems()
+
+ public AuctionHouseProxy getAHProxy(AuctionInfo info)
+
+ public int getPortNumber()
+
+ public Double getPendingBalance()
+
+ public Account getAccount()
+
+ public ArrayList<Bid> getBids()
+
+ public String getHostName()
+
+ public synchronized boolean setAuctionHouse(AuctionInfo auctionInfo)
+
+ public synchronized ArrayList<AuctionInfo> getHouseList()
+
+ public String getNAME()
+
+ public BankProxy getBank()
+
+ public Integer getCurrentAuctionID()
+
+ public int getId()
+
+ public int setID(int id)
+
+ public Integer getKeyForHouse()
+
+ public boolean setAccount(Account account)
+
+ public void setConnected()
+
+ public void addMessage(Message message)
+
+ public void closeApplicationConnection()
+
+ @Override public String toString()
+
+ @Override public void run() 
+
+ public static void main(String[] args) throws IOException
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
