@@ -6,81 +6,157 @@
   initial account information to the Bank when an agent is created.
    This provides the funds for the user so that they can make bids with their money.
 ### Methods: 
- public boolean getAccountChange() 
-
- public void setAccountChange(boolean accountChange)
-
- public boolean isItemListChange()
-
- public void setItemListChange()
-
- public HashMap<Integer, Integer> getAuctionHouseKeys()
-
- public boolean isAuctionHouseChange()
-
- public void setAucHouseChange(boolean aucHouseChange)
-
- public int getAccountNumber()
-
- public boolean isBidChange()
-
- public void setBidChange(boolean bidChange)
+ public boolean getAccountChange() :
  
- public boolean isItemsWonChange()
+    gets if account info has changed.
+
+ public void setAccountChange(boolean accountChange) :
+         
+    sets the account change.
+
+ public boolean isItemListChange() :
  
- public void setItemsWonChange(boolean itemsWonChange)
+    gets if the item list has changed.
+
+ public void setItemListChange() :
+    
+    sets the item list change info.
+
+ public HashMap<Integer, Integer> getAuctionHouseKeys() :
  
- public Item getItem()
+    gets the keys for the integer auction house map.
+
+ public boolean isAuctionHouseChange() :
+    
+    gets if there has been an auction house change.
+
+ public void setAucHouseChange(boolean aucHouseChange) :
  
- public void setItem(Item item) 
+    sets the auction house change.
+
+ public int getAccountNumber() :
  
- public ArrayList<Item> getItemList(AuctionInfo ai)
+    gets the account number.
 
- public ArrayList<Item> getItemList()
+ public boolean isBidChange() :
+    
+    gets if there has been a bid change.
 
- public ArrayList<Item> getWonItems()
+ public void setBidChange(boolean bidChange) :
+  
+    sets the bid change status.
+ 
+ public boolean isItemsWonChange() :
+    
+    gets if there has been a winning item.
+ 
+ public void setItemsWonChange(boolean itemsWonChange) :
+ 
+    sets winning item status.
+ 
+ public Item getItem() :
+  
+    gets an item.
+ 
+ public void setItem(Item item) :
+  
+    sets an item in the agent. 
+ 
+ public ArrayList<Item> getItemList(AuctionInfo ai) :
+  
+    gets the item list based on the auction house.
 
- public AuctionHouseProxy getAHProxy(AuctionInfo info)
+ public ArrayList<Item> getItemList() : 
+ 
+    gets the general item list in the agent.
 
- public int getPortNumber()
+ public ArrayList<Item> getWonItems() : 
+ 
+    gets the items that the agent has won.
 
- public Double getPendingBalance()
+ public AuctionHouseProxy getAHProxy(AuctionInfo info) : 
+ 
+    changes the proxy to send messages to the correct auction house.
 
- public Account getAccount()
+ public int getPortNumber() : 
+ 
+    gets the port number of the agent.
 
- public ArrayList<Bid> getBids()
+ public Double getPendingBalance() : 
+ 
+    gets the pending balance of the agent's account
 
- public String getHostName()
+ public Account getAccount() : 
+ 
+    gets the agent's account.
 
- public synchronized boolean setAuctionHouse(AuctionInfo auctionInfo)
+ public ArrayList<Bid> getBids() : 
+ 
+    gets the current bids that the agent has made.
 
- public synchronized ArrayList<AuctionInfo> getHouseList()
+ public String getHostName() : 
+ 
+    gets the host name of the agent.
 
- public String getNAME()
+ public synchronized boolean setAuctionHouse(AuctionInfo auctionInfo) :
+  
+    makes a new proxy for the new auction house connection.
 
- public BankProxy getBank()
+ public synchronized ArrayList<AuctionInfo> getHouseList() : 
+ 
+    gets the list of the auction houses.
 
- public Integer getCurrentAuctionID()
+ public String getNAME() : 
+ 
+    gets the name of the sender, the current class.
 
- public int getId()
+ public BankProxy getBank() :
+ 
+    gets the bank proxy.
 
- public int setID(int id)
+ public Integer getCurrentAuctionID() :
+ 
+    gets the current auction house id for proxy choosing.
 
- public Integer getKeyForHouse()
+ public int getId() : 
+ 
+    gets the agents id.
 
- public boolean setAccount(Account account)
+ public int setID(int id) : 
+ 
+    sets the id of the agent.
 
- public void setConnected()
+ public Integer getKeyForHouse() : 
+ 
+    gets the integer key for the auction house.
 
- public void addMessage(Message message)
+ public boolean setAccount(Account account) : 
+ 
+    sets the agent account to be the one passed in.
 
- public void closeApplicationConnection()
+ public void setConnected() : 
+ 
+    setting the connection status of the agent.
 
- @Override public String toString()
+ public void addMessage(Message message) : 
+ 
+    adding a message to the agents queue for analysis later.
 
- @Override public void run() 
+ public void closeApplicationConnection() : 
+  
+    closing the agents connection.
 
- public static void main(String[] args) throws IOException
+ @Override public String toString() :
+        
+    printing out the string representation of the class.
+
+ @Override public void run() :
+    
+    running certain tasks in the agent.
+
+ public static void main(String[] args) throws IOException :
+ 
+    beginning the program.
 
 
 ## AgentGUI Class 
@@ -89,30 +165,46 @@ This class displays the agent information and allows for the agent to interact
 with the program. The can create an account, place bids and choose items and 
 auction houses.
 ### Methods: 
-public static void launch(String...args)
+public static void launch(String...args) : 
 
-@Override public void start(Stage primaryStage) throws Exception
+    launching the gui.
+
+@Override public void start(Stage primaryStage) throws Exception : 
+
+    starting the process of showing the gui.
 
 ## Bid Class
 ### Description: 
 This class is the container for the information that is contained within a user's
 bid. It contains the bidder, the amount and the item being bid on.
 ### Methods:
-public Item getItem()
+public Item getItem() : 
 
-public int getBidder()
+    getting the item from the bid.
 
-public double getAmount()
+public int getBidder() : 
 
-@Override public String toString() 
+    getting the bidder from the bid.
+
+public double getAmount() : 
+
+    getting the amount bid.
+
+@Override public String toString() : 
+
+    string rep of the class.
 
 ## Message Class 
 ### Description:
 This class is the container for the messages being sent to the servers and sockets.
 ### Methods: 
-public ArrayList<Object> getMessageList()
+public ArrayList<Object> getMessageList() :
 
-@Override public String toString()
+    getting the list of objects that was passed into the constructor.
+
+@Override public String toString() : 
+
+    string rep of the class.
 
 ## MessageAnalyzer Class
  
@@ -120,7 +212,9 @@ public ArrayList<Object> getMessageList()
 This class is used to get the senders and receivers the type of object that sent
 the message. 
 ### Methods: 
-public int analyze(Message message)
+public int analyze(Message message) : 
+
+    analyzing the message passed in to get the sender.
 
 ## MessageTypes Enum
  
@@ -128,7 +222,9 @@ public int analyze(Message message)
 This contains the different message types that are being sent between the 
 different servers and sockets in the program. 
 ### Methods: 
-public String getMessage()
+public String getMessage() : 
+
+    getting the message type from the message.
 
 ## AuctionHouseProxy Class
  
@@ -137,9 +233,13 @@ This class provides a proxy between an agent and an auction house. It handles
 messages from the agent and sends them to the auction house. It also handles the
 messages from the auction house and sends them to the agent. 
 ### Methods: 
-public void sendMessage(Message inMessage)
+public void sendMessage(Message inMessage) : 
 
-@Override public void run()
+    placing a message in the auction house proxy queue to send to the auction house server.
+
+@Override public void run() : 
+
+    running specialized tasks to send messages to the agent.
 
 ## BankProxy Class
  
@@ -148,11 +248,18 @@ This class provides a proxy between an agent and a bank. It handles
 messages from the agent and sends them to the bank. It also handles the
 messages from the bank and sends them to the agent. 
 ### Methods: 
-public void sendMessage(Message inMessage)
+public void sendMessage(Message inMessage) : 
 
-public void closeConnections()
+    placing a message in the bank proxy queue to send to the auction house server.
 
-@Override public void run()
+
+public void closeConnections() :
+
+    closing all of the connections in the bank proxy.
+
+@Override public void run() : 
+    
+    running specialized tasks to send messages to the agent.
 
 
 
