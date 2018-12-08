@@ -64,7 +64,7 @@ public class BankGUI extends Application {
     /**
      * Updates the observable lists to contain the most recent account information
      */
-    void refreshAccountInformation(){
+    private void refreshAccountInformation(){
         agentAccountList.setAll(getAgentAccounts());
         auctionHouseAccountList.setAll(getHouseAccounts());
     }

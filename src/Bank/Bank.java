@@ -93,7 +93,7 @@ public class Bank implements Runnable {
      * @param type the type of the message
      * @return
      */
-    public synchronized  Message responseToAuctionHouse(int clientID,Message message,
+    private synchronized  Message responseToAuctionHouse(int clientID,Message message,
                                                         MessageTypes type){
         ArrayList<Object> messageList = message.getMessageList();
         int agentAccountNumber;
@@ -152,7 +152,7 @@ public class Bank implements Runnable {
         }
     }
 
-    public synchronized Message responseToAgent(int clientID, Message message,
+    private synchronized Message responseToAgent(int clientID, Message message,
                                          MessageTypes type) {
         ArrayList<Object> messageList = message.getMessageList();
         int agentAccountNumber;
@@ -247,14 +247,14 @@ public class Bank implements Runnable {
     /**
      * Adds an auction house to the map of auction houses.
      */
-    public synchronized void addAuctionHouse(AuctionInfo house,Account account){
+    private synchronized void addAuctionHouse(AuctionInfo house,Account account){
         this.auctionHouses.put(account.getAccountNumber(),house);
     }
 
     /**
      * Adds an agent to the mapping of agents
      */
-    public synchronized  void addAgent(AgentInfo agent, Account account){
+    private synchronized  void addAgent(AgentInfo agent, Account account){
         this.agents.put(account.getAccountNumber(),agent);
     }
 
@@ -269,7 +269,7 @@ public class Bank implements Runnable {
      * Gets the list of bank accounts
      * @return
      */
-    public synchronized ArrayList<Account> getAccountsAsList(){
+    synchronized ArrayList<Account> getAccountsAsList(){
         return new ArrayList<Account>(accounts.values());
     }
 
@@ -277,14 +277,14 @@ public class Bank implements Runnable {
      * Gets the map of integer id's to clients.
      * @return
      */
-    public synchronized HashMap<Integer, ServerThread> getClients() {
+    private synchronized HashMap<Integer, ServerThread> getClients() {
         return clients;
     }
 
     /**
      * Gets list of auction houses.
      */
-    public synchronized ArrayList<AuctionInfo> getAuctionHousesAsList() {
+    private synchronized ArrayList<AuctionInfo> getAuctionHousesAsList() {
         return new ArrayList<AuctionInfo>(auctionHouses.values());
     }
 
@@ -298,7 +298,7 @@ public class Bank implements Runnable {
     /**
      * Transfers funds from an Agent account to an AuctionHouse account.
      */
-    public synchronized boolean transferFunds(int auctionHouseAccountNumber,
+    private synchronized boolean transferFunds(int auctionHouseAccountNumber,
                                            int agentAccountNumber,
                                            double amount){
         
@@ -328,7 +328,7 @@ public class Bank implements Runnable {
      * @param agentAccountNumber
      * @param amount
      */
-    public synchronized boolean blockFunds(int agentAccountNumber, double amount){
+    private synchronized boolean blockFunds(int agentAccountNumber, double amount){
         Account agentAccount = accounts.get(agentAccountNumber);
         if(agentAccount.getPendingBalance() - amount >= 0){
             agentAccount.setPendingBalance(agentAccount.getPendingBalance() - amount);
@@ -340,7 +340,7 @@ public class Bank implements Runnable {
     /**
      * Unblocks funds in an agent account by adding them back to the pending balance.
      */
-    public synchronized  void unblockFunds(int agentAccountNumber, double amount){
+    private synchronized  void unblockFunds(int agentAccountNumber, double amount){
         Account agentAccount = accounts.get(agentAccountNumber);
         agentAccount.setPendingBalance(agentAccount.getPendingBalance() + amount);
     }
@@ -348,7 +348,7 @@ public class Bank implements Runnable {
     /**
      * Gets the accounts hashmap
      */
-    public HashMap<Integer,Account> getAccounts(){
+    private HashMap<Integer,Account> getAccounts(){
         return accounts;
     }
 
@@ -373,7 +373,7 @@ public class Bank implements Runnable {
          * @param idNumber unique id indicating when it was created
          * @param bank a reference to the static bank
          */
-        public ServerThread(Socket client, int idNumber, Bank bank) {
+        ServerThread(Socket client, int idNumber, Bank bank) {
             this.bank = bank;
             this.client = client;
             this.idNumber = idNumber;

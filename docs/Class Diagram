@@ -262,6 +262,209 @@ public void closeConnections() :
     running specialized tasks to send messages to the agent.
 
 
+# Bank Package
+
+## Bank Class
+
+### Description
+
+It is static and at a known address (IP address and port number)
+   * It hosts
+      * a list of agent accounts
+      * a list of auction house accounts
+It shares the list of auction houses with agents having bank accounts
+It provides agents with secret keys for use in the bidding process
+It transfers funds from agent to auction accounts, under agent control
+It blocks and unblocks funds in agent accounts, at the request of action houses
+It analyzes messages sent from Auction Houses and Agents and calls methods accordingly
+
+### Methods
+
+public static void main(String[] args) throws Exception : 
+
+    starting point of the bank application
+    
+public Bank(String address, int portNumber) :
+
+    Constructor for Bank
+    
+@Override public void run() :
+
+    Thread method that does heavy lifting for bank application
+    
+public synchronized ArrayList<AgentInfo> getAgentsAsList() :
+    
+    Gets a list of agents
+    
+## BankGUI class
+
+### Description
+
+The GUI for the Bank application
+
+### Methods
+
+public BankGUI() :
+
+    Constructor for BankGUI
+    
+public static void launch(String...args) :
+
+    Launches the bank application and GUI
+    
+@Override public void start(Stage primaryStage) throws Exception :
+
+    Inherited from Application and used to help start the GUI.
+    
+@Override public void stop() :
+
+    Stops the program after the GUI is exited
+
+## AuctionInfo class
+
+### Description
+
+    A dummy class that holds auction house information that is pertinent to the bank.
+
+### Methods
+
+public AuctionInfo(String name, String IPAddress, int accountNumber, int portNumber) :
+    
+    Constructor for AuctionInfo
+    
+public String getName() :
+
+    Gets the name of the Auction House
+    
+public void setOpen(boolean bool) :
+        
+    Sets the isOpen boolean
+    
+public boolean isOpen() :
+    
+    Gets the isOpen boolean
+    
+public int getAccountNumber() :
+    
+    Gets the accountNumber
+    
+public int setAccountNumber() :
+    
+    Sets the accountNumber
+    
+public int getAuctionID() :
+
+    Gets the auctionID
+    
+public String getIPAddress() :
+
+    Gets the IP Address of the Auction House
+    
+public int getPortNumber() :
+    
+    Gets the port of the Auction House
+
+## AgentInfo class
+
+### Description
+
+    A dummy class that holds agent information that is pertinent to the bank.
+
+### Methods
+
+public AgentInfo(String name, String IPAddress, int accountNumber, int portNumber) :
+    
+    Constructor for AgentInfo
+    
+public String getName() :
+
+    Gets the name of the Agent
+    
+public int getAccountNumber() :
+    
+    Gets the accountNumber
+    
+public int setAccountNumber() :
+    
+    Sets the accountNumber
+    
+public int getAuctionID() :
+
+    Gets the auctionID
+    
+public String getIPAddress() :
+
+    Gets the IP Address of the Agent
+    
+public int getPortNumber() :
+    
+    Gets the port of the Agent
+
+## Account class
+
+### Description
+
+    Representation of a bank account
+    
+### Methods
+
+public Account(String name, int accountNumber, double balance, double pendingBalance) :
+
+    Constructor for Account
+    
+public Account(String name, int accountNumber, double balance, double pendingBalance, boolean isAgent) :
+
+    Constructor for Account
+    
+public double getBalance() :
+
+    Gets the balance of the account
+    
+public synchronized void setBalance(double balance) :
+    
+    Sets the balance of the account
+    
+public double getPendingBalance() :
+        
+    Gets the pending balance of an account
+        
+public synchronized void setPendingBalance(double pendingBalance) :
+
+    Sets the pending balance of an account
+    
+public Integer getAccountNumber() :
+
+    Gets the account number of an account
+    
+public synchronized void setAccountNumber(int number) :
+    
+    Sets the account number of an account
+    
+public String getName() :
+    
+    Gets the name of an account
+    
+public boolean isAgent() :
+
+    Gets the isAgent boolean
+    
+public void setAgent(boolean agent) :
+    
+    Sets the isAgent boolean
+    
+@Override public String toString() :
+
+    Overriddent toString for debugging and display purposes
+    
+
+
+
+
+
+
+
+
+
 
 
 
