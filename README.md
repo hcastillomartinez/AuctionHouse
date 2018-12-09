@@ -6,6 +6,14 @@ Distributed auction system with one static Bank, k number of Auction Houses
 that are dynamically created, and i number of Agents that are also 
 dynamically created.
 
+### Bank
+Only one ever exists and is at a known address. It hosts a list of agent 
+accounts and a list of auction houses. Upon request it will give the list of 
+auction houses connected to the agent. Gives agents a secret key which they 
+use in the bidding process. Transfers funds from the agent to the auction 
+house upon request of the agent. The bank will block and unblock funds in the
+ agent accounts upon request of the auction house.
+
 ### Auction House
 AH has a list of items and hosts the status of each auction. It 
 should be able to relay at any point the items it has for sale at their most 
@@ -22,7 +30,19 @@ funds to bank when it is necessary.
 Auction runs for 30 seconds and upon finishing will send to winner that it 
 has won and it is complete once the funds have been transferred into the AH's
 account.  
-   
+
+### Agent
+Agents are dynamically created. Creates a bank account by first providing its
+ name and then the balance it will have initially. This account will have a 
+ unique account number. It can ask the bank for the list of active auctions. 
+ Once connected to an auction house it can request the list of items it has 
+ for sale and their prices. Interacts with the auction house using it's 
+ secret key that it received from the bank. Upon making a bid it will receive
+  either an acceptance response, a rejection response, a passed, or a won 
+  response. Once it has received the message that it has one it will then 
+  tell the bank to transfer the funds to the auction house. It can only be 
+  closed when their is no active bid going on and upon closing the window it 
+  will be de-registered from the bank.
 
 ## Contributions
 Danan worked on the Agent package and the Proxies package. 
@@ -112,10 +132,11 @@ Once an auction house runs out of items it can simply continue
 ## Versions
 Jar files are located in the top level directory.
 ### V1
-explain about how version 1 works
+The first version of all jars do what are specified in the implemented 
+features and are shown how to be used in the usage.
 ### V2
-explain about how version 2 works etc...
-
+AuctionHouse2 has some attempted fix to synchronization issue in Auction.java
+ and is used just like the first version.
 ## Docs
 The folder containing the documentation is in the docs folder. This contains the class diagrams and the 
 and the schematic of the design.
