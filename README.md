@@ -1,5 +1,5 @@
 # Project: Auction House
-## Student(s): Danan High, Hector Castillo-Martinez, Daniel Miller
+## Collaborators: Danan High, Hector Castillo-Martinez, Daniel Miller
 
 ## Introduction
 Distributed auction system with one static Bank, k number of Auction Houses 
