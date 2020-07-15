@@ -143,7 +143,6 @@ and the schematic of the design.
 
 ## Status
 ### Implemented Features
-State things that work.
 
 The bank blocks and unblocks funds correctly during bidding. After a bid is one, funds are transferred to the correct auction house.
 Accounts are closed properly when a connection with an agent/auction house is ended. Unique accounts are created for each connection made with the bank.
@@ -168,11 +167,7 @@ de-registering. If bid is accepted it will send response to agent that it has
 
 ### Known Issues
 There are some bugs with gui updating in AgentGUI.java. When a bid is completed the current bid list does not always
-update to have removed the finished bid. There is also an issue in the "Choose Auction House" drop down button that does not update 
-to show when an Auction House has left. The button still shows the Auction Houses as choices when that should not occur. The item list also 
-does not remove items that have been won for an extended period of time. 
-Synchronization in auction where not always unblocking the correct amount 
-from the agent if bids come in simultaneously as one is passed.
+update to have removed the finished bid.
 
         
     
